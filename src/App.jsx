@@ -328,13 +328,30 @@ export default function App() {
         input,select,textarea{outline:none}
         .tag{display:inline-block;background:#f0e4cc;color:#7a5012;padding:2px 10px;border-radius:30px;font-size:.7rem;font-weight:600;letter-spacing:.04em}
         .slide-in{animation:up .4s cubic-bezier(.25,.8,.25,1) both}
+        @media(max-width:768px){
+          .mobile-grid{grid-template-columns:repeat(2,1fr)!important}
+          .mobile-hide{display:none!important}
+          .mobile-full{grid-column:1/-1!important}
+          .mobile-pad{padding:16px 12px!important}
+          .mobile-hero{min-height:60vh!important;padding:40px 16px!important}
+          .mobile-h1{font-size:2.2rem!important}
+          .mobile-cats{grid-template-columns:repeat(3,1fr)!important;gap:10px!important}
+          .admin-grid{grid-template-columns:repeat(2,1fr)!important}
+          .detail-grid{grid-template-columns:1fr!important}
+        }
+        @media(max-width:480px){
+          .mobile-grid{grid-template-columns:1fr 1fr!important}
+          .mobile-cats{grid-template-columns:repeat(2,1fr)!important}
+          .mobile-h1{font-size:1.8rem!important}
+          .admin-grid{grid-template-columns:1fr 1fr!important}
+        }
       `}</style>
 
       {notif&&<div style={{position:"fixed",top:20,left:"50%",zIndex:9999,background:notif.err?"#7f1d1d":"#1a3a1f",color:"#fff",padding:"11px 28px",borderRadius:40,fontSize:".85rem",fontFamily:F,boxShadow:"0 8px 30px rgba(0,0,0,.2)",animation:"toast .3s ease",whiteSpace:"nowrap",transform:"translate(-50%,0)"}}>{notif.msg}</div>}
 
       {/* ── HEADER ── */}
       <header style={{background:"rgba(255,252,248,.96)",backdropFilter:"blur(12px)",borderBottom:"1px solid #ede5d8",position:"sticky",top:0,zIndex:100,boxShadow:"0 2px 20px rgba(0,0,0,.04)"}}>
-        <div style={{maxWidth:1300,margin:"0 auto",padding:"0 24px",display:"flex",alignItems:"center",justifyContent:"space-between",height:66}}>
+        <div style={{maxWidth:1300,margin:"0 auto",padding:"0 12px",display:"flex",alignItems:"center",justifyContent:"space-between",height:60}}>
           <div style={{display:"flex",gap:2,alignItems:"center"}}>
             <button className="nav-link" onClick={()=>setView("home")} style={{fontFamily:F,fontSize:isAr?".88rem":".75rem",color:view==="home"?"#8B6914":"#aaa",borderBottom:view==="home"?"2px solid #8B6914":"2px solid transparent",padding:"8px 12px"}}>{t.store}</button>
             <button className="nav-link" onClick={()=>{setView("wishlist");}} style={{fontFamily:F,fontSize:isAr?".88rem":".75rem",color:view==="wishlist"?"#8B6914":"#aaa",borderBottom:view==="wishlist"?"2px solid #8B6914":"2px solid transparent",padding:"8px 12px"}}>
@@ -346,10 +363,10 @@ export default function App() {
             </button>
           </div>
           <div style={{display:"flex",alignItems:"center",gap:10}}>
-            <img src={LOGO} alt="HUDA'S" style={{width:48,height:48,borderRadius:"50%",objectFit:"cover",boxShadow:"0 2px 12px rgba(0,0,0,.12)",flexShrink:0,cursor:"pointer"}} onClick={()=>setView("home")}/>
+            <img src={LOGO} alt="HUDA'S" style={{width:38,height:38,borderRadius:"50%",objectFit:"cover",boxShadow:"0 2px 12px rgba(0,0,0,.12)",flexShrink:0,cursor:"pointer"}} onClick={()=>setView("home")}/>
             <div>
-              <div style={{fontFamily:"Cormorant Garamond,serif",fontSize:"1.4rem",color:"#4a2e06",letterSpacing:".1em",fontWeight:600,lineHeight:1.1}}>{settings.storeName}</div>
-              <div style={{fontSize:".58rem",color:"#c4a56a",letterSpacing:".16em",fontFamily:"DM Sans,sans-serif",marginTop:1}}>{settings.storeTagline}</div>
+              <div style={{fontFamily:"Cormorant Garamond,serif",fontSize:"clamp(1rem,3vw,1.4rem)",color:"#4a2e06",letterSpacing:".06em",fontWeight:600,lineHeight:1.1}}>{settings.storeName}</div>
+              <div style={{fontSize:".52rem",color:"#c4a56a",letterSpacing:".1em",fontFamily:"DM Sans,sans-serif",marginTop:1,display:"none"}}>{settings.storeTagline}</div>
             </div>
           </div>
           <div style={{display:"flex",gap:12,alignItems:"center"}}>
@@ -381,9 +398,9 @@ export default function App() {
             {/* Floating shapes */}
             <div style={{position:"absolute",top:"15%",right:"8%",width:120,height:120,borderRadius:"50%",background:"rgba(212,175,106,.06)",filter:"blur(20px)"}}/>
             <div style={{position:"absolute",bottom:"20%",left:"5%",width:200,height:200,borderRadius:"50%",background:"rgba(212,175,106,.04)",filter:"blur(30px)"}}/>
-            <div style={{textAlign:"center",position:"relative",zIndex:2,padding:"60px 28px",animation:"up .8s ease"}}>
+            <div style={{textAlign:"center",position:"relative",zIndex:2,padding:"40px 16px",animation:"up .8s ease",className:"mobile-hero"}}>
               <div style={{fontFamily:"DM Sans,sans-serif",fontSize:".75rem",letterSpacing:".35em",color:"#c4a56a",textTransform:"uppercase",marginBottom:20}}>{isAr?"تشكيلة جديدة متاحة":"NEW COLLECTION AVAILABLE"}</div>
-              <h1 style={{fontFamily:"Cormorant Garamond,serif",fontSize:"clamp(2.8rem,7vw,6rem)",color:"#d4af6a",fontWeight:400,fontStyle:"italic",lineHeight:1.1,marginBottom:16,letterSpacing:"-.01em"}}>
+              <h1 style={{fontFamily:"Cormorant Garamond,serif",fontSize:"clamp(1.8rem,6vw,5rem)",color:"#d4af6a",fontWeight:400,fontStyle:"italic",lineHeight:1.1,marginBottom:16,letterSpacing:"-.01em"}}>
                 Huda's Abaya
                 <br/><span style={{color:"#d4af6a"}}>Elegance in Every Thread</span>
               </h1>
@@ -396,12 +413,12 @@ export default function App() {
           </div>
 
           {/* Category Quick Links */}
-          <div style={{maxWidth:1300,margin:"60px auto 0",padding:"0 28px"}}>
+          <div style={{maxWidth:1300,margin:"60px auto 0",padding:"0 12px"}}>
             <div style={{textAlign:"center",marginBottom:40}}>
               <div style={{fontFamily:"DM Sans,sans-serif",fontSize:".72rem",letterSpacing:".25em",color:"#c4a56a",textTransform:"uppercase",marginBottom:8}}>Browse by Category</div>
               <h2 style={{fontFamily:"Cormorant Garamond,serif",fontSize:"2.2rem",color:"#2a1a06",fontStyle:"italic",fontWeight:600}}>Our Collections</h2>
             </div>
-            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(180px,1fr))",gap:16,marginBottom:60}}>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(120px,1fr))",gap:10,marginBottom:40}}>
               {ALL_SUBCATS.filter(c=>c!=="All").map(cat=>{
                 const count=products.filter(p=>p.subcategory===cat).length;
                 return (
@@ -434,7 +451,7 @@ export default function App() {
 
       {/* ── SHOP ── */}
       {view==="shop"&&(
-        <div style={{maxWidth:1300,margin:"0 auto",padding:"36px 28px"}} className="slide-in">
+        <div style={{maxWidth:1300,margin:"0 auto",padding:"24px 12px"}} className="slide-in">
           <div style={{textAlign:"center",marginBottom:44}}>
             <div style={{fontFamily:"DM Sans,sans-serif",fontSize:".72rem",letterSpacing:".25em",color:"#c4a56a",textTransform:"uppercase",marginBottom:8}}>Modest Fashion</div>
             <h1 style={{fontFamily:"Cormorant Garamond,serif",fontSize:"clamp(2rem,4vw,3rem)",color:"#2a1a06",fontWeight:600,fontStyle:"italic"}}>{isAr?"تشكيلتنا":"Our Collection"}</h1>
@@ -457,7 +474,7 @@ export default function App() {
           </div>
           {filtered.length===0
             ?<div style={{textAlign:"center",padding:"80px 20px",color:"#d4c4a8"}}><div style={{fontSize:"3.5rem",marginBottom:14}}>🌸</div><p style={{fontFamily:"Cormorant Garamond,serif",fontSize:"1.4rem",color:"#b09070",fontStyle:"italic"}}>{isAr?"لا توجد منتجات":"No products yet"}</p></div>
-            :<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(270px,1fr))",gap:24}}>
+            :<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(160px,1fr))",gap:12,className:"mobile-grid"}}>
               {filtered.map((p,i)=><PCard key={p.id} p={p} i={i} t={t} F={F} isAr={isAr} isWished={wishlist.includes(p.id)} rating={ratings[p.id]} onView={()=>{setSelProd(p);setView("product");}} onAdd={()=>{const v=p.variants?.find(v=>v.stock>0);if(v)addToCart(p,v);else toast(t.outOfStock,true);}} onWish={()=>toggleWish(p.id)}/>)}
             </div>
           }
@@ -468,7 +485,7 @@ export default function App() {
 
       {/* ── WISHLIST ── */}
       {view==="wishlist"&&(
-        <div style={{maxWidth:1300,margin:"40px auto",padding:"0 28px"}} className="slide-in">
+        <div style={{maxWidth:1300,margin:"40px auto",padding:"0 12px"}} className="slide-in">
           <h2 style={{fontFamily:"Cormorant Garamond,serif",fontSize:"2rem",fontWeight:600,color:"#2a1a06",marginBottom:28,fontStyle:"italic"}}>❤️ {t.wishlistNav}</h2>
           {wishlist.length===0
             ?<div style={{textAlign:"center",padding:"80px",color:"#d4c4a8"}}><div style={{fontSize:"3rem",marginBottom:12}}>🤍</div><p style={{fontFamily:F,fontSize:"1rem"}}>{isAr?"قائمة المفضلة فارغة":"Your wishlist is empty"}</p></div>
@@ -481,7 +498,7 @@ export default function App() {
 
       {/* ── TRACK ORDER ── */}
       {view==="track"&&(
-        <div style={{maxWidth:600,margin:"60px auto",padding:"0 28px"}} className="slide-in">
+        <div style={{maxWidth:600,margin:"20px auto",padding:"0 12px"}} className="slide-in">
           <div style={{background:"#fff",borderRadius:20,padding:"40px 36px",boxShadow:"0 4px 32px rgba(0,0,0,.07)"}}>
             <div style={{textAlign:"center",marginBottom:28}}>
               <div style={{fontSize:"2.5rem",marginBottom:10}}>📦</div>
@@ -515,7 +532,7 @@ export default function App() {
 
       {/* ── ADMIN LOCK ── */}
       {view==="admin"&&!adminUnlocked&&(
-        <div style={{maxWidth:380,margin:"80px auto",padding:"0 28px"}} className="slide-in">
+        <div style={{maxWidth:380,margin:"80px auto",padding:"0 12px"}} className="slide-in">
           <div style={{background:"#fff",borderRadius:20,padding:"40px 32px",boxShadow:"0 4px 32px rgba(0,0,0,.07)",textAlign:"center"}}>
             <div style={{fontSize:"2.5rem",marginBottom:16}}>🔒</div>
             <h2 style={{fontFamily:"Cormorant Garamond,serif",fontSize:"1.6rem",fontWeight:600,color:"#2a1a06",marginBottom:20,fontStyle:"italic"}}>{t.adminPanel}</h2>
@@ -596,9 +613,9 @@ function PDetail({p,t,F,isAr,isWished,rating,products,onBack,onAdd,onWish,onRate
   };
 
   return (
-    <div style={{maxWidth:1100,margin:"40px auto",padding:"0 28px"}} className="slide-in">
+    <div style={{maxWidth:1100,margin:"20px auto",padding:"0 12px"}} className="slide-in">
       <button onClick={onBack} style={{background:"none",border:"none",cursor:"pointer",color:"#c4a56a",fontFamily:F,fontSize:".85rem",marginBottom:28,display:"flex",alignItems:"center",gap:8}}>{t.back}</button>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:40,marginBottom:60}}>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:20,marginBottom:40}}>
         {/* Image Gallery */}
         <div>
           <div style={{position:"relative",height:480,background:"linear-gradient(135deg,#f5ede0,#ede0cc)",borderRadius:16,overflow:"hidden",marginBottom:12}}>
@@ -682,7 +699,7 @@ function PDetail({p,t,F,isAr,isWished,rating,products,onBack,onAdd,onWish,onRate
 /* ─── CART ──────────────────────────────────────────────────────── */
 function CartPage({cart,total,t,F,isAr,remove,updQ,onBack,onCheckout}) {
   return (
-    <div style={{maxWidth:720,margin:"40px auto",padding:"0 28px"}} className="slide-in">
+    <div style={{maxWidth:720,margin:"20px auto",padding:"0 12px"}} className="slide-in">
       <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:30}}>
         <button onClick={onBack} style={{background:"none",border:"none",cursor:"pointer",color:"#c4a56a",fontSize:"1.2rem"}}>←</button>
         <h2 style={{fontFamily:"Cormorant Garamond,serif",fontSize:"1.8rem",fontWeight:600,color:"#2a1a06",fontStyle:"italic"}}>{t.bag}</h2>
@@ -741,7 +758,7 @@ function CheckoutPage({cart,total,t,F,isAr,settings,onBack,onOrder}) {
     const s=document.createElement("script");s.src=`https://www.paypal.com/sdk/js?client-id=${settings.paypalClientId}&currency=USD`;s.async=true;s.onload=render;s.onerror=()=>setPpErr(true);document.head.appendChild(s);
   },[step]);
   return (
-    <div style={{maxWidth:720,margin:"40px auto",padding:"0 28px"}} className="slide-in">
+    <div style={{maxWidth:720,margin:"20px auto",padding:"0 12px"}} className="slide-in">
       <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:28}}>
         <button onClick={step==="payment"?()=>setStep("info"):onBack} style={{background:"none",border:"none",cursor:"pointer",color:"#c4a56a",fontSize:"1.2rem"}}>←</button>
         <h2 style={{fontFamily:"Cormorant Garamond,serif",fontSize:"1.8rem",fontWeight:600,color:"#2a1a06",fontStyle:"italic"}}>{step==="info"?t.shippingInfo:t.payment}</h2>
@@ -757,7 +774,7 @@ function CheckoutPage({cart,total,t,F,isAr,settings,onBack,onOrder}) {
       </div>
       {step==="info"&&(
         <div style={{background:"#fff",borderRadius:16,padding:"26px",boxShadow:"0 2px 8px rgba(0,0,0,.04)"}}>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:12}}>
             {[[t.fullName,"name","text",true],[t.email,"email","email",true],[t.phone,"phone","tel",true],[t.addr1,"address1","text",true],[t.addr2,"address2","text",true],[t.city,"city","text",false],[t.zip,"zip","text",false]].map(([l,f,tp,full])=>(
               <div key={f} style={{gridColumn:full?"1/-1":undefined}}>
                 <label style={{display:"block",color:"#c4a56a",fontSize:".7rem",fontFamily:F,letterSpacing:".1em",textTransform:"uppercase",marginBottom:5}}>{l}</label>
@@ -797,12 +814,12 @@ function AdminPage({products,orders,settings,t,F,isAr,form,setForm,vForm,setVFor
   };
 
   return (
-    <div dir={isAr?"rtl":"ltr"} style={{maxWidth:1200,margin:"30px auto",padding:"0 28px"}} className="slide-in">
+    <div dir={isAr?"rtl":"ltr"} style={{maxWidth:1200,margin:"30px auto",padding:"0 12px"}} className="slide-in">
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:26}}>
         <h2 style={{fontFamily:"Cormorant Garamond,serif",fontSize:"2rem",fontWeight:600,color:"#2a1a06",fontStyle:"italic"}}>{t.adminPanel}</h2>
         <button onClick={onLogout} style={{background:"#fef2f2",border:"none",color:"#c0392b",padding:"8px 18px",borderRadius:20,cursor:"pointer",fontFamily:F,fontSize:".82rem",fontWeight:600}}>🔒 {t.logout}</button>
       </div>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:16,marginBottom:28}}>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:12,marginBottom:20}}>
         {[[t.sProd,products.length,"📦"],[t.sStock,totalInv,"🏷️"],[t.sOrders,orders.length,"🛍️"],[t.sRev,"$"+revenue.toFixed(2),"💰"]].map(([l,v,ic])=>(
           <div key={l} style={{background:"#fff",borderRadius:14,padding:"18px 20px",textAlign:"center",boxShadow:"0 2px 8px rgba(0,0,0,.04)"}}>
             <div style={{fontSize:"1.5rem",marginBottom:6}}>{ic}</div>
@@ -862,7 +879,7 @@ function AdminPage({products,orders,settings,t,F,isAr,form,setForm,vForm,setVFor
               {editProd&&<button onClick={()=>{setEditProd(null);setForm(emptyForm);}} style={{background:"none",border:"none",color:"#c4a56a",cursor:"pointer",fontFamily:F,fontSize:".82rem"}}>{t.cancelEdit}</button>}
             </div>
             {/* Category selects */}
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14,marginBottom:14}}>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))",gap:12,marginBottom:12}}>
               {[[t.catLabel,"category",Object.keys(CATEGORY_TREE)],[t.subcatLabel,"subcategory",CATEGORY_TREE[form.category]?.subcats||[]],[t.typeLabel,"type",CATEGORY_TREE[form.category]?.types[form.subcategory]||[]]].map(([l,field,opts])=>(
                 <div key={field}>
                   <label style={{display:"block",color:"#c4a56a",fontSize:".68rem",fontFamily:F,letterSpacing:".08em",textTransform:"uppercase",marginBottom:5}}>{l}</label>
