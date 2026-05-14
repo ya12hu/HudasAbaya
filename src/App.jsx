@@ -310,7 +310,7 @@ export default function App() {
   if(loading) return (<div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100vh",background:"#faf7f2",color:"#8B6914",fontFamily:"serif",fontSize:"1.3rem"}}>Loading...</div>);
 
   return (
-    <div dir={isAr?"rtl":"ltr"} style={{minHeight:"100vh",background:"#faf7f2",color:"#1a1208",fontFamily:"Georgia,serif"}}>
+    <div dir={isAr?"rtl":"ltr"} style={{minHeight:"100vh",background:"#faf7f2",color:"#1a1208",fontFamily:"Georgia,serif",overflowX:"hidden",width:"100%",maxWidth:"100vw",position:"relative"}}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=Tajawal:wght@300;400;500;700&display=swap');
         *{box-sizing:border-box;margin:0;padding:0}
@@ -328,6 +328,8 @@ export default function App() {
         input,select,textarea{outline:none}
         .tag{display:inline-block;background:#f0e4cc;color:#7a5012;padding:2px 10px;border-radius:30px;font-size:.7rem;font-weight:600;letter-spacing:.04em}
         .slide-in{animation:up .4s cubic-bezier(.25,.8,.25,1) both}
+        html,body{overflow-x:hidden;width:100%;max-width:100vw}
+        *{-webkit-tap-highlight-color:transparent}
         @media(max-width:768px){
           .mobile-grid{grid-template-columns:repeat(2,1fr)!important}
           .mobile-hide{display:none!important}
@@ -351,16 +353,14 @@ export default function App() {
 
       {/* ── HEADER ── */}
       <header style={{background:"rgba(255,252,248,.96)",backdropFilter:"blur(12px)",borderBottom:"1px solid #ede5d8",position:"sticky",top:0,zIndex:100,boxShadow:"0 2px 20px rgba(0,0,0,.04)"}}>
-        <div style={{maxWidth:1300,margin:"0 auto",padding:"0 12px",display:"flex",alignItems:"center",justifyContent:"space-between",height:60}}>
-          <div style={{display:"flex",gap:2,alignItems:"center"}}>
-            <button className="nav-link" onClick={()=>setView("home")} style={{fontFamily:F,fontSize:isAr?".88rem":".75rem",color:view==="home"?"#8B6914":"#aaa",borderBottom:view==="home"?"2px solid #8B6914":"2px solid transparent",padding:"8px 12px"}}>{t.store}</button>
-            <button className="nav-link" onClick={()=>{setView("wishlist");}} style={{fontFamily:F,fontSize:isAr?".88rem":".75rem",color:view==="wishlist"?"#8B6914":"#aaa",borderBottom:view==="wishlist"?"2px solid #8B6914":"2px solid transparent",padding:"8px 12px"}}>
-              {t.wishlistNav}{wishlist.length>0&&<span style={{marginRight:4,background:"#c0392b",color:"#fff",borderRadius:"50%",width:16,height:16,display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:".6rem",fontFamily:"DM Sans,sans-serif",fontWeight:700}}>{wishlist.length}</span>}
+        <div style={{maxWidth:1300,margin:"0 auto",padding:"0 12px",display:"flex",alignItems:"center",justifyContent:"space-between",height:56,width:"100%"}}>
+          {/* Left: Nav links */}
+          <div style={{display:"flex",gap:0,alignItems:"center",overflow:"hidden"}}>
+            <button className="nav-link" onClick={()=>setView("home")} style={{fontFamily:F,fontSize:".72rem",color:view==="home"?"#8B6914":"#aaa",borderBottom:view==="home"?"2px solid #8B6914":"2px solid transparent",padding:"8px 8px",whiteSpace:"nowrap"}}>{t.store}</button>
+            <button className="nav-link" onClick={()=>{setView("wishlist");}} style={{fontFamily:F,fontSize:".72rem",color:view==="wishlist"?"#8B6914":"#aaa",borderBottom:view==="wishlist"?"2px solid #8B6914":"2px solid transparent",padding:"8px 8px",whiteSpace:"nowrap"}}>
+              {t.wishlistNav}{wishlist.length>0&&<span style={{marginRight:4,background:"#c0392b",color:"#fff",borderRadius:"50%",width:14,height:14,display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:".55rem",fontFamily:"DM Sans,sans-serif",fontWeight:700}}>{wishlist.length}</span>}
             </button>
-            <button className="nav-link" onClick={()=>{setView("track");setTrackedOrder(null);setTrackSearched(false);}} style={{fontFamily:F,fontSize:isAr?".88rem":".75rem",color:view==="track"?"#8B6914":"#aaa",borderBottom:view==="track"?"2px solid #8B6914":"2px solid transparent",padding:"8px 12px"}}>{t.trackNav}</button>
-            <button onClick={()=>setLang(l=>l==="en"?"ar":"en")} style={{background:"#f0e4cc",border:"none",color:"#7a5012",padding:"5px 12px",borderRadius:20,cursor:"pointer",fontFamily:lang==="en"?"Tajawal,sans-serif":"DM Sans,sans-serif",fontSize:".78rem",fontWeight:700,transition:"all .2s",marginRight:4}}>
-              {lang==="en"?"عربي":"English"}
-            </button>
+            <button className="nav-link" onClick={()=>{setView("track");setTrackedOrder(null);setTrackSearched(false);}} style={{fontFamily:F,fontSize:".72rem",color:view==="track"?"#8B6914":"#aaa",borderBottom:view==="track"?"2px solid #8B6914":"2px solid transparent",padding:"8px 8px",whiteSpace:"nowrap"}}>{t.trackNav}</button>
           </div>
           <div style={{display:"flex",alignItems:"center",gap:10}}>
             <img src={LOGO} alt="HUDA'S" style={{width:38,height:38,borderRadius:"50%",objectFit:"cover",boxShadow:"0 2px 12px rgba(0,0,0,.12)",flexShrink:0,cursor:"pointer"}} onClick={()=>setView("home")}/>
@@ -369,7 +369,10 @@ export default function App() {
               <div style={{fontSize:".52rem",color:"#c4a56a",letterSpacing:".1em",fontFamily:"DM Sans,sans-serif",marginTop:1,display:"none"}}>{settings.storeTagline}</div>
             </div>
           </div>
-          <div style={{display:"flex",gap:12,alignItems:"center"}}>
+          <div style={{display:"flex",gap:8,alignItems:"center"}}>
+            <button onClick={()=>setLang(l=>l==="en"?"ar":"en")} style={{background:"#f0e4cc",border:"none",color:"#7a5012",padding:"4px 10px",borderRadius:20,cursor:"pointer",fontFamily:lang==="en"?"Tajawal,sans-serif":"DM Sans,sans-serif",fontSize:".72rem",fontWeight:700,whiteSpace:"nowrap"}}>
+              {lang==="en"?"عربي":"EN"}
+            </button>
             <a href="https://snapchat.com/t/KurOUTVy" target="_blank" rel="noreferrer" style={{display:"flex",alignItems:"center",justifyContent:"center",background:"#FFFC00",borderRadius:"50%",width:32,height:32,textDecoration:"none",fontSize:"1rem",boxShadow:"0 2px 8px rgba(0,0,0,.1)",flexShrink:0}} title="Snapchat">👻</a>
             <a href="https://www.instagram.com/hudas_abaya_boutique" target="_blank" rel="noreferrer" style={{display:"flex",alignItems:"center",justifyContent:"center",background:"linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)",borderRadius:"50%",width:32,height:32,textDecoration:"none",flexShrink:0,boxShadow:"0 2px 8px rgba(0,0,0,.1)"}} title="Instagram">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
@@ -390,7 +393,7 @@ export default function App() {
       {view==="home"&&(
         <div>
           {/* Hero */}
-          <div style={{position:"relative",minHeight:"88vh",background:"linear-gradient(135deg,#2a1506 0%,#4a2e10 40%,#3a2008 70%,#1a0d03 100%)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
+          <div style={{position:"relative",minHeight:"70vh",background:"linear-gradient(135deg,#2a1506 0%,#4a2e10 40%,#3a2008 70%,#1a0d03 100%)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden",width:"100%"}}>
             {/* Decorative circles */}
             <div style={{position:"absolute",width:600,height:600,borderRadius:"50%",border:"1px solid rgba(212,175,106,.08)",top:"50%",left:"50%",transform:"translate(-50%,-50%)"}}/>
             <div style={{position:"absolute",width:400,height:400,borderRadius:"50%",border:"1px solid rgba(212,175,106,.12)",top:"50%",left:"50%",transform:"translate(-50%,-50%)"}}/>
