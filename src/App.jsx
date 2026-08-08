@@ -507,7 +507,7 @@ export default function App() {
           <div style={styles.heroOverlay}></div>
           <div style={styles.heroContent}>
             <div style={{fontFamily:"'Cormorant Garamond',serif", fontSize:"clamp(1.8rem,6vw,3.2rem)", fontWeight:700, letterSpacing:".05em", color:"#c4a56a", marginBottom:32, textShadow:"0 4px 20px rgba(0,0,0,.5)", whiteSpace:"nowrap"}}>
-              HUDA'S Abaya Boutique
+              Huda’s Abaya Boutique
             </div>
             <button style={styles.shopBtn} onClick={()=>document.getElementById("shop-grid")?.scrollIntoView({behavior:"smooth"})}>{t.collection}</button>
           </div>
@@ -949,7 +949,7 @@ export default function App() {
           {winWidth>=500 && (
             <div style={{flex:1, overflow:"hidden", margin:"0 14px"}}>
               <div style={{display:"inline-block", whiteSpace:"nowrap", animation:"huda-marquee 18s linear infinite", fontSize:".72rem", fontWeight:700, letterSpacing:".06em", color:"#c4a56a"}}>
-                🇺🇸&nbsp; SHIPPING TO ALL 50 US STATES &nbsp;·&nbsp; NEW ARRIVALS EVERY WEEK &nbsp;·&nbsp; SHOP NOW &nbsp;·&nbsp; 🇺🇸&nbsp; SHIPPING TO ALL 50 US STATES &nbsp;·&nbsp; NEW ARRIVALS EVERY WEEK &nbsp;·&nbsp; SHOP NOW &nbsp;·&nbsp;
+                🇺🇸&nbsp; SHIPPING TO ALL 50 STATES &nbsp;·&nbsp; 🇺🇸&nbsp; SHIPPING TO ALL 50 STATES &nbsp;·&nbsp;
               </div>
             </div>
           )}
@@ -984,7 +984,7 @@ export default function App() {
         {winWidth<500 && (
           <div style={{overflow:"hidden", padding:"5px 0", borderBottom:"1px solid #333"}}>
             <div style={{display:"inline-block", whiteSpace:"nowrap", animation:"huda-marquee 15s linear infinite", fontSize:".68rem", fontWeight:700, letterSpacing:".05em", color:"#c4a56a"}}>
-              🇺🇸&nbsp; SHIPPING TO ALL 50 US STATES &nbsp;·&nbsp; NEW ARRIVALS EVERY WEEK &nbsp;·&nbsp; SHOP NOW &nbsp;·&nbsp; 🇺🇸&nbsp; SHIPPING TO ALL 50 US STATES &nbsp;·&nbsp; NEW ARRIVALS EVERY WEEK &nbsp;·&nbsp; SHOP NOW &nbsp;·&nbsp;
+              🇺🇸&nbsp; SHIPPING TO ALL 50 STATES &nbsp;·&nbsp; 🇺🇸&nbsp; SHIPPING TO ALL 50 STATES &nbsp;·&nbsp;
             </div>
           </div>
         )}
