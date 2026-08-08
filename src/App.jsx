@@ -4,12 +4,12 @@ import { useState, useEffect, useRef } from "react";
 const T = {
   en: {
     store:"Store", admin:"Admin", langBtn:"عربي",
-    collection:"Our Collection", subtitle:"MODEST · PREMIUM · FREE US SHIPPING",
+    collection:"Our Collection", subtitle:"MODEST · PREMIUM ·  US SHIPPING",
     search:"Search products...", outOfStock:"Out of Stock", addToCart:"Add to Cart",
     soldOut:"Sold Out", addedToCart:"✓ Added", back:"← Back",
     shoppingBag:"Shopping Bag", emptyBag:"Your bag is empty",
     continueShopping:"Continue Shopping", subtotal:"Subtotal",
-    shipping:"Shipping", freeShip:"FREE 🇺🇸", total:"Total", checkout:"Checkout →",
+    shipping:"Shipping", Ship:" 🇺🇸", total:"Total", checkout:"Checkout →",
     shippingInfo:"Shipping Info", payment:"Payment",
     fullName:"Full Name", email:"Email", phone:"Phone (optional)",
     addr1:"Address Line 1", addr2:"Apt/Suite (optional)",
@@ -26,7 +26,7 @@ const T = {
     discountExpiry:"Discount Expiry", categoryDiscount:"Category Discount (%)",
     couponCode:"Coupon Code", couponDiscount:"Coupon Discount (%)",
     buyX:"Buy X Get Discount", buyXQty:"Min Quantity", buyXDisc:"Discount (%)",
-    shipping_price:"Shipping Price ($)", freeShipOver:"Free Shipping Over ($)",
+    shipping_price:"Shipping Price ($)", ShipOver:"Shipping Over ($)",
     save:"Save", saved:"✓ Saved", taxRate:"Tax Rate (%)",
     active:"Active", inactive:"Inactive", toggle:"Toggle",
     wishlist:"Wishlist", addWishlist:"♡ Save", removeWishlist:"♥ Saved",
@@ -41,12 +41,12 @@ const T = {
   },
   ar: {
     store:"المتجر", admin:"الإدارة", langBtn:"English",
-    collection:"مجموعتنا", subtitle:"محتشم · فاخر · شحن مجاني داخل أمريكا",
+    collection:"مجموعتنا", subtitle:"محتشم · فاخر · شحن داخل أمريكا",
     search:"ابحثي عن منتج...", outOfStock:"نفذ المخزون", addToCart:"أضيفي للسلة",
     soldOut:"نفذ", addedToCart:"✓ تمت الإضافة", back:"→ رجوع",
     shoppingBag:"سلة التسوق", emptyBag:"سلتك فارغة",
     continueShopping:"تابعي التسوق", subtotal:"المجموع",
-    shipping:"الشحن", freeShip:"مجاني 🇺🇸", total:"الإجمالي", checkout:"إتمام الطلب ←",
+    shipping:"الشحن", Ship:"🇺🇸", total:"الإجمالي", checkout:"إتمام الطلب ←",
     shippingInfo:"بيانات الشحن", payment:"الدفع",
     fullName:"الاسم الكامل", email:"البريد الإلكتروني", phone:"الهاتف (اختياري)",
     addr1:"العنوان", addr2:"شقة/جناح (اختياري)",
@@ -63,7 +63,7 @@ const T = {
     discountExpiry:"انتهاء الخصم", categoryDiscount:"خصم الفئة (%)",
     couponCode:"كود الخصم", couponDiscount:"نسبة كود الخصم (%)",
     buyX:"اشتري X واحصلي على خصم", buyXQty:"الحد الأدنى للكمية", buyXDisc:"الخصم (%)",
-    shipping_price:"سعر الشحن ($)", freeShipOver:"شحن مجاني فوق ($)",
+    shipping_price:"سعر الشحن ($)",
     save:"حفظ", saved:"✓ تم الحفظ", taxRate:"نسبة الضريبة (%)",
     active:"فعال", inactive:"غير فعال", toggle:"تفعيل/إيقاف",
     wishlist:"المفضلة", addWishlist:"♡ حفظ", removeWishlist:"♥ محفوظ",
@@ -164,7 +164,7 @@ const DEFAULT_PRODUCTS = [
 const DEFAULT_SETTINGS = {
   paypalClientId:"", storeName:"Huda's Abaya Boutique", storeTagline:"",
   whatsapp:"", snapchat:"hudas_abaya_boutique", instagram:"hudas_abaya_boutique", tiktok:"hudas.abaya",
-  shippingPrice:0, freeShipOver:50, taxRate:0, adminPassword:"huda2024",
+  shippingPrice:0, taxRate:0, adminPassword:"huda2025",
   couponCode:"", couponDiscount:0, couponActive:false,
   buyXQty:2, buyXDisc:10, buyXActive:false,
   categoryDiscounts:{ hijabMagnets:0, printedModal:0 },
@@ -260,7 +260,7 @@ export default function App() {
   useEffect(()=>{ LS.set("huda_wishlist",wishlist); },[wishlist]);
 
   const cartTotal = cart.reduce((s,i)=>s+calcPrice(products.find(p=>p.id===i.id)||{price:0,discount:0,category:""},settings,i.qty,couponInput)*i.qty,0);
-  const shippingCost = cartTotal>=settings.freeShipOver ? 0 : settings.shippingPrice||0;
+  const shippingCost = cartTotal>=settings. ? 0 : settings.shippingPrice||0;
   const tax = cartTotal*(settings.taxRate||0)/100;
   const orderTotal = cartTotal+shippingCost+tax;
 
@@ -612,7 +612,7 @@ export default function App() {
             <div style={{background:"#fff",borderRadius:12,padding:16,boxShadow:"0 1px 8px rgba(0,0,0,.06)"}}>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}><span>{t.subtotal}</span><span>${cartTotal.toFixed(2)}</span></div>
               {tax>0&&<div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}><span>Tax</span><span>${tax.toFixed(2)}</span></div>}
-              <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}><span>{t.shipping}</span><span>{shippingCost===0?t.freeShip:`$${shippingCost.toFixed(2)}`}</span></div>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}><span>{t.shipping}</span><span>{shippingCost===0?t.:`$${shippingCost.toFixed(2)}`}</span></div>
               <div style={{display:"flex",justifyContent:"space-between",fontWeight:700,fontSize:"1.1rem",borderTop:"1px solid #eee",paddingTop:8}}>
                 <span>{t.total}</span><span>${orderTotal.toFixed(2)}</span>
               </div>
@@ -816,9 +816,9 @@ export default function App() {
                   onChange={e=>updateSetting("shippingPrice",parseFloat(e.target.value)||0)} />
               </div>
               <div style={styles.pricingRow}>
-                <span style={styles.pricingLabel}>{t.freeShipOver}</span>
-                <input type="number" style={styles.adminInput} min={0} value={settings.freeShipOver}
-                  onChange={e=>updateSetting("freeShipOver",parseFloat(e.target.value)||0)} />
+                <span style={styles.pricingLabel}></span>
+                <input type="number" style={styles.adminInput} min={0} value={settings}
+                  onChange={e=>updateSetting(parseFloat(e.target.value)||0)} />
                 <button style={styles.saveBtn} onClick={()=>saveAdmin("ship")}>{savedMsg["ship"]?t.saved:t.save}</button>
               </div>
             </div>
