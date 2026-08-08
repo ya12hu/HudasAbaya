@@ -233,16 +233,20 @@ export default function App() {
   const [crossSell, setCrossSell] = useState(null);
   const [winWidth, setWinWidth] = useState(typeof window!=="undefined"?window.innerWidth:375);
   const [heroImgIdx, setHeroImgIdx] = useState(0);
-  const heroImages = products.filter(p=>p.category==="printedModal").slice(0,8).map(p=>p.image);
+  const heroImages = products.filter(p=>p.category==="printedModal").slice(0,4).map(p=>p.image);
   useEffect(()=>{
     if(heroImages.length===0) return;
-    const iv = setInterval(()=>setHeroImgIdx(i=>(i+1)%heroImages.length), 3500);
+    const iv = setInterval(()=>setHeroImgIdx(i=>(i+1)%heroImages.length), 2200);
     return ()=>clearInterval(iv);
   },[heroImages.length]);
   useEffect(()=>{
-    const onResize=()=>setWinWidth(window.innerWidth);
-    window.addEventListener("resize",onResize);
-    return ()=>window.removeEventListener("resize",onResize);
+    let raf=null;
+    const onResize=()=>{
+      if(raf) return;
+      raf = requestAnimationFrame(()=>{ setWinWidth(window.innerWidth); raf=null; });
+    };
+    window.addEventListener("resize",onResize,{passive:true});
+    return ()=>{ window.removeEventListener("resize",onResize); if(raf) cancelAnimationFrame(raf); };
   },[]);
   const gridCols = winWidth<640 ? 2 : winWidth<1000 ? 3 : 4;
 
@@ -320,10 +324,12 @@ export default function App() {
   }
 
   const styles = {
-    app:{ fontFamily:"'Cormorant Garamond',serif", background:"#faf9f7", minHeight:"100vh", direction:isRTL?"rtl":"ltr" },
+    app:{ fontFamily:"'Cormorant Garamond',serif", background:"#faf9f7", minHeight:"100vh", direction:isRTL?"rtl":"ltr", WebkitOverflowScrolling:"touch", overscrollBehaviorY:"none", touchAction:"manipulation", WebkitTapHighlightColor:"transparent" },
     header:{ background:"#1a1a1a", color:"#fff", padding:"0 20px", position:"sticky", top:0, zIndex:100 },
-    headerTop:{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"10px 0", borderBottom:"1px solid #333" },
-    logoCircle:{ width:64, height:64, borderRadius:"50%", overflow:"hidden", border:"2px solid #c4a56a", flexShrink:0, boxShadow:"0 4px 16px rgba(196,165,106,.35)", background:"#1a1a1a" },
+    announceBar:{ background:"#c4a56a", color:"#1a1a1a", overflow:"hidden", whiteSpace:"nowrap", padding:"7px 0", fontSize:".78rem", fontWeight:700, letterSpacing:".04em" },
+    announceTrack:{ display:"inline-block", paddingLeft:"100%", animation:"huda-marquee 22s linear infinite" },
+    headerTop:{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"12px 0", borderBottom:"1px solid #333" },
+    logoCircle:{ width:76, height:76, borderRadius:"50%", overflow:"hidden", border:"2px solid #c4a56a", flexShrink:0, boxShadow:"0 4px 16px rgba(196,165,106,.35)", background:"#1a1a1a" },
     logoCircleImg:{ width:"100%", height:"100%", objectFit:"cover" },
     brandRow:{ display:"flex", alignItems:"center", gap:12 },
     brandText:{ display:"flex", flexDirection:"column" },
@@ -332,10 +338,10 @@ export default function App() {
     tagline:{ fontSize:".6rem", color:"#888", letterSpacing:".2em", marginTop:2 },
     navBtn:{ background:"none", border:"none", color:"#ccc", cursor:"pointer", fontSize:".85rem", letterSpacing:".08em", padding:"4px 8px", whiteSpace:"nowrap" },
     navBtnActive:{ color:"#c4a56a", borderBottom:"2px solid #c4a56a" },
-    cartBtn:{ background:"#c4a56a", color:"#fff", border:"none", borderRadius:20, padding:"6px 14px", cursor:"pointer", fontSize:".8rem", fontWeight:600 },
+    cartBtn:{ background:"#c4a56a", color:"#1a1a1a", border:"none", borderRadius:24, padding:"9px 18px", cursor:"pointer", fontSize:".85rem", fontWeight:800, boxShadow:"0 3px 12px rgba(196,165,106,.4)" },
     hero:{ background:"#0f0c0a", color:"#fff", textAlign:"center", padding:"90px 20px 70px", position:"relative", overflow:"hidden", minHeight:420 },
-    heroBg:{ position:"absolute", inset:0, width:"100%", height:"100%", objectFit:"cover", opacity:0, transition:"opacity 1.8s ease" },
-    heroBgActive:{ opacity:.38 },
+    heroBg:{ position:"absolute", inset:0, width:"100%", height:"100%", objectFit:"cover", opacity:0, transform:"scale(1.06)", transition:"opacity 1.4s cubic-bezier(.4,0,.2,1), transform 6s ease-out" },
+    heroBgActive:{ opacity:.38, transform:"scale(1)" },
     heroOverlay:{ position:"absolute", inset:0, background:"linear-gradient(180deg,rgba(15,12,10,.55) 0%,rgba(15,12,10,.75) 60%,rgba(15,12,10,.95) 100%)" },
     heroContent:{ position:"relative", zIndex:2 },
     heroTitle:{ fontFamily:"'Cormorant Garamond',serif", fontSize:"clamp(2rem,5vw,3.5rem)", letterSpacing:".15em", color:"#c4a56a", marginBottom:8 },
@@ -442,7 +448,7 @@ export default function App() {
         {/* Hero */}
         <div style={styles.hero}>
           {heroImages.map((img,i)=>(
-            <img key={img} src={img} alt="" style={{...styles.heroBg, ...(i===heroImgIdx?styles.heroBgActive:{})}} />
+            <img key={img} src={img} alt="" loading={i===0?"eager":"lazy"} decoding="async" style={{...styles.heroBg, ...(i===heroImgIdx?styles.heroBgActive:{})}} />
           ))}
           <div style={styles.heroOverlay}></div>
           <div style={styles.heroContent}>
@@ -482,7 +488,7 @@ export default function App() {
       <div>
         <button style={{...styles.navBtn, padding:"16px 20px"}} onClick={()=>setPage("shop")}>← {t.back}</button>
         <div style={{...styles.detailWrap, gridTemplateColumns:window.innerWidth<600?"1fr":"1fr 1fr"}}>
-          <img src={p.image} alt={getProdName(p)} style={styles.detailImg} />
+          <img src={p.image} alt={getProdName(p)} style={styles.detailImg} loading="eager" decoding="async" />
           <div>
             <div style={styles.detailName}>{getProdName(p)}</div>
             <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16}}>
@@ -529,7 +535,7 @@ export default function App() {
               const fp=getFinalPrice(p,item.qty);
               return (
                 <div key={item.id} style={styles.cartItem}>
-                  <img src={p.image} alt={getProdName(p)} style={styles.cartImg} />
+                  <img src={p.image} alt={getProdName(p)} style={styles.cartImg} loading="lazy" decoding="async" />
                   <div style={{flex:1}}>
                     <div style={{fontWeight:600,marginBottom:4}}>{getProdName(p)}</div>
                     <div style={{color:"#c4a56a",fontWeight:700}}>{p.price>0?`$${fp.toFixed(2)}`:"Price TBD"}</div>
@@ -543,12 +549,10 @@ export default function App() {
                 </div>
               );
             })}
-            {/* Coupon */}
-            {settings.couponActive && (
-              <div style={{display:"flex",gap:8,marginBottom:16}}>
-                <input style={{...styles.input,marginBottom:0}} placeholder={t.couponCode} value={couponInput} onChange={e=>setCouponInput(e.target.value)} />
-              </div>
-            )}
+            {/* Coupon - always available */}
+            <div style={{display:"flex",gap:8,marginBottom:16}}>
+              <input style={{...styles.input,marginBottom:0}} placeholder={t.couponCode} value={couponInput} onChange={e=>setCouponInput(e.target.value)} />
+            </div>
             {/* Summary */}
             <div style={{background:"#fff",borderRadius:12,padding:16,boxShadow:"0 1px 8px rgba(0,0,0,.06)"}}>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}><span>{t.subtotal}</span><span>${cartTotal.toFixed(2)}</span></div>
@@ -670,7 +674,7 @@ export default function App() {
               <tbody>
                 {products.map(p=>(
                   <tr key={p.id}>
-                    <td style={styles.td}><img src={p.image} style={{width:50,height:65,objectFit:"cover",borderRadius:6}} alt="" /></td>
+                    <td style={styles.td}><img src={p.image} style={{width:50,height:65,objectFit:"cover",borderRadius:6}} alt="" loading="lazy" decoding="async" /></td>
                     <td style={styles.td}>
                       <input style={{...styles.adminInput,width:160}} value={p.name} onChange={e=>updateProduct(p.id,"name",e.target.value)} />
                     </td>
@@ -857,10 +861,23 @@ export default function App() {
     <div style={styles.app}>
       {/* Header */}
       <div style={styles.header}>
+        <style>{`
+          @keyframes huda-marquee{0%{transform:translateX(0)}100%{transform:translateX(-100%)}}
+          @media (prefers-reduced-motion: reduce) {
+            *{animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important;}
+          }
+          html{-webkit-text-size-adjust:100%;}
+          img{-webkit-user-drag:none;}
+        `}</style>
         <div style={styles.headerTop}>
           <div style={styles.brandRow}>
             <div style={styles.logoCircle}>
               <img src="https://i.ibb.co/0g2zNT6/D8-F67706-FEEF-4-CB8-B919-00-B889-A36214.png" alt={settings.storeName} style={styles.logoCircleImg} />
+            </div>
+          </div>
+          <div style={{flex:1, overflow:"hidden", margin:"0 14px", display: winWidth<500 ? "none" : "block"}}>
+            <div style={{display:"inline-block", whiteSpace:"nowrap", animation:"huda-marquee 18s linear infinite", fontSize:".72rem", fontWeight:700, letterSpacing:".06em", color:"#c4a56a"}}>
+              🇺🇸&nbsp; SHIPPING TO ALL 50 US STATES &nbsp;·&nbsp; NEW ARRIVALS EVERY WEEK &nbsp;·&nbsp; SHOP NOW &nbsp;·&nbsp; 🇺🇸&nbsp; SHIPPING TO ALL 50 US STATES &nbsp;·&nbsp; NEW ARRIVALS EVERY WEEK &nbsp;·&nbsp; SHOP NOW &nbsp;·&nbsp;
             </div>
           </div>
           <div style={{display:"flex",gap:10,alignItems:"center"}}>
