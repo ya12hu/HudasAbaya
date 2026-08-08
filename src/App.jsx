@@ -232,6 +232,13 @@ export default function App() {
   const [confirmOrder, setConfirmOrder] = useState(null);
   const [crossSell, setCrossSell] = useState(null);
   const [winWidth, setWinWidth] = useState(typeof window!=="undefined"?window.innerWidth:375);
+  const [heroImgIdx, setHeroImgIdx] = useState(0);
+  const heroImages = products.filter(p=>p.category==="printedModal").slice(0,8).map(p=>p.image);
+  useEffect(()=>{
+    if(heroImages.length===0) return;
+    const iv = setInterval(()=>setHeroImgIdx(i=>(i+1)%heroImages.length), 3500);
+    return ()=>clearInterval(iv);
+  },[heroImages.length]);
   useEffect(()=>{
     const onResize=()=>setWinWidth(window.innerWidth);
     window.addEventListener("resize",onResize);
@@ -326,7 +333,11 @@ export default function App() {
     navBtn:{ background:"none", border:"none", color:"#ccc", cursor:"pointer", fontSize:".85rem", letterSpacing:".08em", padding:"4px 8px", whiteSpace:"nowrap" },
     navBtnActive:{ color:"#c4a56a", borderBottom:"2px solid #c4a56a" },
     cartBtn:{ background:"#c4a56a", color:"#fff", border:"none", borderRadius:20, padding:"6px 14px", cursor:"pointer", fontSize:".8rem", fontWeight:600 },
-    hero:{ background:"radial-gradient(ellipse at top,#2d2320 0%,#1a1512 60%,#0f0c0a 100%)", color:"#fff", textAlign:"center", padding:"70px 20px 60px", position:"relative", overflow:"hidden" },
+    hero:{ background:"#0f0c0a", color:"#fff", textAlign:"center", padding:"90px 20px 70px", position:"relative", overflow:"hidden", minHeight:420 },
+    heroBg:{ position:"absolute", inset:0, width:"100%", height:"100%", objectFit:"cover", opacity:0, transition:"opacity 1.8s ease" },
+    heroBgActive:{ opacity:.38 },
+    heroOverlay:{ position:"absolute", inset:0, background:"linear-gradient(180deg,rgba(15,12,10,.55) 0%,rgba(15,12,10,.75) 60%,rgba(15,12,10,.95) 100%)" },
+    heroContent:{ position:"relative", zIndex:2 },
     heroTitle:{ fontFamily:"'Cormorant Garamond',serif", fontSize:"clamp(2rem,5vw,3.5rem)", letterSpacing:".15em", color:"#c4a56a", marginBottom:8 },
     heroSub:{ fontSize:".75rem", letterSpacing:".2em", color:"#aaa", marginBottom:30 },
     shopBtn:{ background:"linear-gradient(135deg,#c4a56a,#d4b57a)", color:"#fff", border:"none", borderRadius:30, padding:"12px 32px", fontSize:"1rem", cursor:"pointer", letterSpacing:".1em" },
@@ -430,12 +441,15 @@ export default function App() {
       <>
         {/* Hero */}
         <div style={styles.hero}>
-          <div style={{width:150,height:150,borderRadius:"50%",overflow:"hidden",margin:"0 auto 22px",border:"3px solid #c4a56a",boxShadow:"0 0 0 6px rgba(196,165,106,.15), 0 20px 50px rgba(0,0,0,.5)"}}>
-            <img src="https://i.ibb.co/0g2zNT6/D8-F67706-FEEF-4-CB8-B919-00-B889-A36214.png" alt={settings.storeName} style={{width:"100%",height:"100%",objectFit:"cover",transform:"scale(1.35)"}} />
+          {heroImages.map((img,i)=>(
+            <img key={img} src={img} alt="" style={{...styles.heroBg, ...(i===heroImgIdx?styles.heroBgActive:{})}} />
+          ))}
+          <div style={styles.heroOverlay}></div>
+          <div style={styles.heroContent}>
+            <img src="https://i.ibb.co/0g2zNT6/D8-F67706-FEEF-4-CB8-B919-00-B889-A36214.png" alt={settings.storeName}
+              style={{width:"min(280px,70vw)",height:"auto",margin:"0 auto 30px",display:"block",borderRadius:12,boxShadow:"0 25px 60px rgba(0,0,0,.6)"}} />
+            <button style={styles.shopBtn} onClick={()=>document.getElementById("shop-grid")?.scrollIntoView({behavior:"smooth"})}>{t.collection}</button>
           </div>
-          <div style={{fontFamily:"'Cormorant Garamond',serif", fontSize:"clamp(1.8rem,6vw,3rem)", fontWeight:700, letterSpacing:".1em", color:"#fff", marginBottom:4}}>HUDA'S</div>
-          <div style={{fontFamily:"'Cormorant Garamond',serif", fontSize:"clamp(.85rem,2.5vw,1.15rem)", letterSpacing:".35em", color:"#c4a56a", textTransform:"uppercase", marginBottom:26}}>Abaya Boutique</div>
-          <button style={styles.shopBtn} onClick={()=>document.getElementById("shop-grid")?.scrollIntoView({behavior:"smooth"})}>{t.collection}</button>
         </div>
         {/* Filter Bar */}
         <div style={styles.filterBar}>
@@ -844,13 +858,7 @@ export default function App() {
       <div style={styles.header}>
         <div style={styles.headerTop}>
           <div style={styles.brandRow}>
-            <div style={styles.logoCircle}>
-              <img src="https://i.ibb.co/0g2zNT6/D8-F67706-FEEF-4-CB8-B919-00-B889-A36214.png" alt={settings.storeName} style={styles.logoCircleImg} />
-            </div>
-            <div style={styles.brandText}>
-              <div style={{fontFamily:"'Cormorant Garamond',serif", fontSize:"1.05rem", fontWeight:700, letterSpacing:".04em", color:"#fff", lineHeight:1.1}}>HUDA'S</div>
-              <div style={{fontFamily:"'Cormorant Garamond',serif", fontSize:".72rem", letterSpacing:".14em", color:"#c4a56a", textTransform:"uppercase"}}>Abaya Boutique</div>
-            </div>
+            <img src="https://i.ibb.co/0g2zNT6/D8-F67706-FEEF-4-CB8-B919-00-B889-A36214.png" alt={settings.storeName} style={{height:44,width:"auto",borderRadius:8,display:"block"}} />
           </div>
           <div style={{display:"flex",gap:10,alignItems:"center"}}>
             <button style={styles.navBtn} onClick={()=>setLang(l=>l==="en"?"ar":"en")}>{t.langBtn}</button>
