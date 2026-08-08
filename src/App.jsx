@@ -36,6 +36,8 @@ const T = {
     orderId:"Order ID", orderDate:"Date", orderStatus:"Status", orderTotal:"Total",
     pending:"Pending", shipped:"Shipped", delivered:"Delivered",
     exportCSV:"Export CSV", noOrders:"No orders yet",
+    completeLook:"Complete the Look", completeLookSub:"Add a matching magnet pin?",
+    yesAdd:"Yes, add it", noThanks:"No thanks",
   },
   ar: {
     store:"المتجر", admin:"الإدارة", langBtn:"English",
@@ -71,6 +73,8 @@ const T = {
     orderId:"رقم الطلب", orderDate:"التاريخ", orderStatus:"الحالة", orderTotal:"الإجمالي",
     pending:"قيد المعالجة", shipped:"تم الشحن", delivered:"تم التسليم",
     exportCSV:"تصدير CSV", noOrders:"لا توجد طلبات بعد",
+    completeLook:"كمّلي الإطلالة", completeLookSub:"تريدين تضيفين دبوس مغناطيس يناسبه؟",
+    yesAdd:"أي، ضيفيه", noThanks:"لا شكراً",
   }
 };
 
@@ -226,6 +230,7 @@ export default function App() {
   const [savedMsg, setSavedMsg] = useState({});
   const [addedMap, setAddedMap] = useState({});
   const [confirmOrder, setConfirmOrder] = useState(null);
+  const [crossSell, setCrossSell] = useState(null); // product just added, show magnet suggestion
 
   useEffect(()=>{ LS.set("huda_products",products); },[products]);
   useEffect(()=>{ LS.set("huda_settings",settings); },[settings]);
@@ -245,6 +250,10 @@ export default function App() {
     });
     setAddedMap(m=>({...m,[prod.id]:true}));
     setTimeout(()=>setAddedMap(m=>({...m,[prod.id]:false})),1500);
+    if(prod.category==="printedModal"){
+      const magnets = products.filter(p=>p.active && p.category==="hijabMagnets" && !cart.find(c=>c.id===p.id));
+      if(magnets.length>0) setCrossSell(magnets[Math.floor(Math.random()*magnets.length)]);
+    }
   }
 
   function removeFromCart(id){ setCart(c=>c.filter(x=>x.id!==id)); }
@@ -858,6 +867,22 @@ export default function App() {
         {page==="confirm" && <ConfirmPage/>}
         {page==="admin" && <AdminPage/>}
       </div>
+      {/* Cross-sell modal */}
+      {crossSell && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.5)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,padding:20}}
+          onClick={()=>setCrossSell(null)}>
+          <div style={{background:"#fff",borderRadius:16,padding:24,maxWidth:340,width:"100%",textAlign:"center",boxShadow:"0 20px 60px rgba(0,0,0,.3)"}}
+            onClick={e=>e.stopPropagation()}>
+            <h3 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1.3rem",marginBottom:4}}>{t.completeLook}</h3>
+            <p style={{color:"#777",fontSize:".85rem",marginBottom:16}}>{t.completeLookSub}</p>
+            <img src={crossSell.image} alt="" style={{width:120,height:150,objectFit:"cover",borderRadius:10,margin:"0 auto 16px"}} />
+            <div style={{display:"flex",gap:10}}>
+              <button style={{...styles.detailAddBtn,marginTop:0,flex:1}} onClick={()=>{ addToCart(crossSell); setCrossSell(null); }}>{t.yesAdd}</button>
+              <button style={{...styles.detailAddBtn,marginTop:0,flex:1,background:"none",color:"#1a1a1a",border:"1px solid #ddd"}} onClick={()=>setCrossSell(null)}>{t.noThanks}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
