@@ -322,9 +322,9 @@ export default function App() {
   const styles = {
     app:{ fontFamily:"'Cormorant Garamond',serif", background:"#faf9f7", minHeight:"100vh", direction:isRTL?"rtl":"ltr" },
     header:{ background:"#1a1a1a", color:"#fff", padding:"0 20px", position:"sticky", top:0, zIndex:100 },
-    headerTop:{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"14px 0", borderBottom:"1px solid #333" },
-    logoCircle:{ width:48, height:48, borderRadius:"50%", overflow:"hidden", border:"2px solid #c4a56a", flexShrink:0, boxShadow:"0 2px 10px rgba(196,165,106,.3)" },
-    logoCircleImg:{ width:"100%", height:"100%", objectFit:"cover", transform:"scale(1.35)" },
+    headerTop:{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"10px 0", borderBottom:"1px solid #333" },
+    logoCircle:{ width:64, height:64, borderRadius:"50%", overflow:"hidden", border:"2px solid #c4a56a", flexShrink:0, boxShadow:"0 4px 16px rgba(196,165,106,.35)", background:"#1a1a1a" },
+    logoCircleImg:{ width:"100%", height:"100%", objectFit:"cover" },
     brandRow:{ display:"flex", alignItems:"center", gap:12 },
     brandText:{ display:"flex", flexDirection:"column" },
     headerBottom:{ display:"flex", gap:20, padding:"10px 0", overflowX:"auto" },
@@ -858,7 +858,9 @@ export default function App() {
       <div style={styles.header}>
         <div style={styles.headerTop}>
           <div style={styles.brandRow}>
-            <img src="https://i.ibb.co/0g2zNT6/D8-F67706-FEEF-4-CB8-B919-00-B889-A36214.png" alt={settings.storeName} style={{height:44,width:"auto",borderRadius:8,display:"block"}} />
+            <div style={styles.logoCircle}>
+              <img src="https://i.ibb.co/0g2zNT6/D8-F67706-FEEF-4-CB8-B919-00-B889-A36214.png" alt={settings.storeName} style={styles.logoCircleImg} />
+            </div>
           </div>
           <div style={{display:"flex",gap:10,alignItems:"center"}}>
             <button style={styles.navBtn} onClick={()=>setLang(l=>l==="en"?"ar":"en")}>{t.langBtn}</button>
