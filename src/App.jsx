@@ -36,7 +36,7 @@ const T = {
     orderId:"Order ID", orderDate:"Date", orderStatus:"Status", orderTotal:"Total",
     pending:"Pending", shipped:"Shipped", delivered:"Delivered",
     exportCSV:"Export CSV", noOrders:"No orders yet",
-    completeLook:"Complete the Look", completeLookSub:"Add a matching magnet pin?",
+    completeLook:"Complete the Look", completeLookSub:"You may also like this:",
     yesAdd:"Yes, add it", noThanks:"No thanks",
   },
   ar: {
@@ -73,7 +73,7 @@ const T = {
     orderId:"رقم الطلب", orderDate:"التاريخ", orderStatus:"الحالة", orderTotal:"الإجمالي",
     pending:"قيد المعالجة", shipped:"تم الشحن", delivered:"تم التسليم",
     exportCSV:"تصدير CSV", noOrders:"لا توجد طلبات بعد",
-    completeLook:"كمّلي الإطلالة", completeLookSub:"تريدين تضيفين دبوس مغناطيس يناسبه؟",
+    completeLook:"كمّلي الإطلالة", completeLookSub:"تريدين تضيفين هذا معه؟",
     yesAdd:"أي، ضيفيه", noThanks:"لا شكراً",
   }
 };
@@ -228,6 +228,10 @@ export default function App() {
   const [formError, setFormError] = useState("");
   const [couponInput, setCouponInput] = useState("");
   const [savedMsg, setSavedMsg] = useState({});
+  const IMG_FALLBACK = "data:image/svg+xml;utf8," + encodeURIComponent(
+    `<svg xmlns='http://www.w3.org/2000/svg' width='300' height='400'><rect width='300' height='400' fill='#f0ece4'/><text x='150' y='205' font-family='sans-serif' font-size='14' fill='#b8a98f' text-anchor='middle'>Huda's Abaya</text></svg>`
+  );
+  const onImgErr = (e)=>{ if(e.currentTarget.src!==IMG_FALLBACK){ e.currentTarget.src = IMG_FALLBACK; } };
   const [addedMap, setAddedMap] = useState({});
   const [confirmOrder, setConfirmOrder] = useState(null);
   const [crossSell, setCrossSell] = useState(null);
@@ -273,8 +277,23 @@ export default function App() {
     setAddedMap(m=>({...m,[prod.id]:true}));
     setTimeout(()=>setAddedMap(m=>({...m,[prod.id]:false})),1500);
     if(prod.category==="printedModal"){
-      const magnets = products.filter(p=>p.active && p.category==="hijabMagnets" && !cart.find(c=>c.id===p.id));
-      if(magnets.length>0) setCrossSell(magnets[Math.floor(Math.random()*magnets.length)]);
+      const magnetHasNone = !cart.some(c=>{
+        const cp = products.find(x=>x.id===c.id);
+        return cp && cp.category==="hijabMagnets";
+      });
+      if(magnetHasNone){
+        const magnets = products.filter(p=>p.active && p.category==="hijabMagnets" && !cart.find(c=>c.id===p.id));
+        if(magnets.length>0) setCrossSell(magnets[Math.floor(Math.random()*magnets.length)]);
+      }
+    } else if(prod.category==="hijabMagnets"){
+      const hijabHasNone = !cart.some(c=>{
+        const cp = products.find(x=>x.id===c.id);
+        return cp && cp.category==="printedModal";
+      });
+      if(hijabHasNone){
+        const hijabs = products.filter(p=>p.active && p.category==="printedModal" && !cart.find(c=>c.id===p.id));
+        if(hijabs.length>0) setCrossSell(hijabs[Math.floor(Math.random()*hijabs.length)]);
+      }
     }
     // Fly-to-cart animation — origin is the actual product image the person clicked from
     let imgEl = sourceEl || null;
@@ -445,7 +464,7 @@ export default function App() {
         onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-4px)";e.currentTarget.style.boxShadow="0 8px 24px rgba(0,0,0,.12)";}}
         onMouseLeave={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="0 2px 12px rgba(0,0,0,.06)";}}>
         <div style={{position:"relative"}} onClick={()=>{setSelectedProduct(p);setPage("product");window.scrollTo({top:0,behavior:"smooth"});}}>
-          <img src={p.image} alt={getProdName(p)} style={styles.cardImg} loading="lazy" />
+          <img src={p.image} alt={getProdName(p)} style={styles.cardImg} loading="lazy" onError={onImgErr} />
           {p.newArrival && <span style={styles.badge}>{t.newArrival}</span>}
           {hasDisc && p.price>0 && <span style={styles.saleBadge}>{t.sale}</span>}
         </div>
@@ -533,7 +552,7 @@ export default function App() {
       <div>
         <button style={{...styles.navBtn, padding:"16px 20px"}} onClick={()=>setPage("shop")}>← {t.back}</button>
         <div style={{...styles.detailWrap, gridTemplateColumns:window.innerWidth<600?"1fr":"1fr 1fr"}}>
-          <img ref={detailImgRef} src={p.image} alt={getProdName(p)} style={styles.detailImg} loading="eager" decoding="async" />
+          <img ref={detailImgRef} src={p.image} alt={getProdName(p)} style={styles.detailImg} loading="eager" decoding="async" onError={onImgErr} />
           <div>
             <div style={styles.detailName}>{getProdName(p)}</div>
             <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16}}>
@@ -580,7 +599,7 @@ export default function App() {
               const fp=getFinalPrice(p,item.qty);
               return (
                 <div key={item.id} style={styles.cartItem}>
-                  <img src={p.image} alt={getProdName(p)} style={styles.cartImg} loading="lazy" decoding="async" />
+                  <img src={p.image} alt={getProdName(p)} style={styles.cartImg} loading="lazy" decoding="async" onError={onImgErr} />
                   <div style={{flex:1}}>
                     <div style={{fontWeight:600,marginBottom:4}}>{getProdName(p)}</div>
                     <div style={{color:"#c4a56a",fontWeight:700}}>{p.price>0?`$${fp.toFixed(2)}`:"Price TBD"}</div>
@@ -719,7 +738,7 @@ export default function App() {
               <tbody>
                 {products.map(p=>(
                   <tr key={p.id}>
-                    <td style={styles.td}><img src={p.image} style={{width:50,height:65,objectFit:"cover",borderRadius:6}} alt="" loading="lazy" decoding="async" /></td>
+                    <td style={styles.td}><img src={p.image} style={{width:50,height:65,objectFit:"cover",borderRadius:6}} alt="" loading="lazy" decoding="async" onError={onImgErr} /></td>
                     <td style={styles.td}>
                       <input style={{...styles.adminInput,width:160}} value={p.name} onChange={e=>updateProduct(p.id,"name",e.target.value)} />
                     </td>
@@ -919,6 +938,11 @@ export default function App() {
             55%{ transform:scale(.92); }
             100%{ transform:scale(1); }
           }
+          @keyframes huda-spin-glow{
+            0%{ transform:rotate(0deg); filter:drop-shadow(0 0 6px rgba(196,165,106,.5)); }
+            50%{ filter:drop-shadow(0 0 14px rgba(196,165,106,.85)); }
+            100%{ transform:rotate(360deg); filter:drop-shadow(0 0 6px rgba(196,165,106,.5)); }
+          }
           @media (prefers-reduced-motion: reduce) {
             *{animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important;}
           }
@@ -931,11 +955,13 @@ export default function App() {
               <img src="https://i.ibb.co/0g2zNT6/D8-F67706-FEEF-4-CB8-B919-00-B889-A36214.png" alt={settings.storeName} style={styles.logoCircleImg} />
             </div>
           </div>
-          <div style={{flex:1, overflow:"hidden", margin:"0 14px", display: winWidth<500 ? "none" : "block"}}>
-            <div style={{display:"inline-block", whiteSpace:"nowrap", animation:"huda-marquee 18s linear infinite", fontSize:".72rem", fontWeight:700, letterSpacing:".06em", color:"#c4a56a"}}>
-              🇺🇸&nbsp; SHIPPING TO ALL 50 US STATES &nbsp;·&nbsp; NEW ARRIVALS EVERY WEEK &nbsp;·&nbsp; SHOP NOW &nbsp;·&nbsp; 🇺🇸&nbsp; SHIPPING TO ALL 50 US STATES &nbsp;·&nbsp; NEW ARRIVALS EVERY WEEK &nbsp;·&nbsp; SHOP NOW &nbsp;·&nbsp;
+          {winWidth>=500 && (
+            <div style={{flex:1, overflow:"hidden", margin:"0 14px"}}>
+              <div style={{display:"inline-block", whiteSpace:"nowrap", animation:"huda-marquee 18s linear infinite", fontSize:".72rem", fontWeight:700, letterSpacing:".06em", color:"#c4a56a"}}>
+                🇺🇸&nbsp; SHIPPING TO ALL 50 US STATES &nbsp;·&nbsp; NEW ARRIVALS EVERY WEEK &nbsp;·&nbsp; SHOP NOW &nbsp;·&nbsp; 🇺🇸&nbsp; SHIPPING TO ALL 50 US STATES &nbsp;·&nbsp; NEW ARRIVALS EVERY WEEK &nbsp;·&nbsp; SHOP NOW &nbsp;·&nbsp;
+              </div>
             </div>
-          </div>
+          )}
           <div style={{display:"flex",gap:10,alignItems:"center"}}>
             <button style={styles.navBtn} onClick={()=>setLang(l=>l==="en"?"ar":"en")}>{t.langBtn}</button>
             <div style={{position:"relative"}}>
@@ -964,6 +990,13 @@ export default function App() {
             </div>
           </div>
         </div>
+        {winWidth<500 && (
+          <div style={{overflow:"hidden", padding:"5px 0", borderBottom:"1px solid #333"}}>
+            <div style={{display:"inline-block", whiteSpace:"nowrap", animation:"huda-marquee 15s linear infinite", fontSize:".68rem", fontWeight:700, letterSpacing:".05em", color:"#c4a56a"}}>
+              🇺🇸&nbsp; SHIPPING TO ALL 50 US STATES &nbsp;·&nbsp; NEW ARRIVALS EVERY WEEK &nbsp;·&nbsp; SHOP NOW &nbsp;·&nbsp; 🇺🇸&nbsp; SHIPPING TO ALL 50 US STATES &nbsp;·&nbsp; NEW ARRIVALS EVERY WEEK &nbsp;·&nbsp; SHOP NOW &nbsp;·&nbsp;
+            </div>
+          </div>
+        )}
         <div style={styles.headerBottom}>
           {[["shop",t.store],["cart",t.shoppingBag],["admin",t.admin]].map(([p2,label])=>(
             <button key={p2} style={{...styles.navBtn,...(page===p2||( p2==="shop"&&["shop","product"].includes(page))?styles.navBtnActive:{})}}
@@ -1032,8 +1065,14 @@ export default function App() {
           <div style={{background:"#fff",borderRadius:16,padding:24,maxWidth:340,width:"100%",textAlign:"center",boxShadow:"0 20px 60px rgba(0,0,0,.3)"}}
             onClick={e=>e.stopPropagation()}>
             <h3 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1.3rem",marginBottom:4}}>{t.completeLook}</h3>
-            <p style={{color:"#777",fontSize:".85rem",marginBottom:16}}>{t.completeLookSub}</p>
-            <img src={crossSell.image} alt="" style={{width:120,height:150,objectFit:"cover",borderRadius:10,margin:"0 auto 16px"}} />
+            <p style={{color:"#777",fontSize:".85rem",marginBottom:18}}>{t.completeLookSub}</p>
+            <div style={{width:140,height:140,margin:"0 auto 18px",borderRadius:"50%",position:"relative",padding:4,
+              background:"conic-gradient(from 0deg,#c4a56a,#f4e4c1,#c4a56a,#8a7047,#c4a56a)",
+              animation:"huda-spin-glow 3s linear infinite"}}>
+              <div style={{width:"100%",height:"100%",borderRadius:"50%",overflow:"hidden",background:"#fff",padding:3}}>
+                <img src={crossSell.image} alt="" style={{width:"100%",height:"100%",objectFit:"cover",borderRadius:"50%"}} onError={onImgErr} />
+              </div>
+            </div>
             <div style={{display:"flex",gap:10}}>
               <button style={{...styles.detailAddBtn,marginTop:0,flex:1}} onClick={()=>{ addToCart(crossSell); setCrossSell(null); }}>{t.yesAdd}</button>
               <button style={{...styles.detailAddBtn,marginTop:0,flex:1,background:"none",color:"#1a1a1a",border:"1px solid #ddd"}} onClick={()=>setCrossSell(null)}>{t.noThanks}</button>
