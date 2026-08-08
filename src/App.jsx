@@ -337,6 +337,7 @@ export default function App() {
   useEffect(()=>{ LS.set("huda_settings",settings); },[settings]);
   useEffect(()=>{ LS.set("huda_orders",orders); },[orders]);
   useEffect(()=>{ LS.set("huda_wishlist",wishlist); },[wishlist]);
+  useEffect(()=>{ window.scrollTo({top:0}); },[page,selectedProduct]);
 
   const cartTotal = cart.reduce((s,i)=>s+calcPrice(products.find(p=>p.id===i.id)||{price:0,discount:0,category:""},settings,i.qty,couponInput)*i.qty,0);
   const shippingCost = !settings.shippingMethod ? 0 : Number(settings.shippingZones?.[shippingForm.state] ?? settings.shippingPrice ?? 0);
