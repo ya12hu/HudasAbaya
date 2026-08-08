@@ -160,7 +160,7 @@ const DEFAULT_PRODUCTS = [
       "https://i.ibb.co/4wm0CZGR/02bf38fb-0b92-4ac3-bffd-4c0c94f25e9f.jpg",
       "https://i.ibb.co/5m9t5g9/0b889236-99da-41df-a18b-3a36d05da210.jpg",
       "https://i.ibb.co/SDjdK4Mh/3cd4cd1c-6002-463e-8098-fbac85d984e6.jpg",
-    ][i],
+    ][i % 48],
     price:20, discount:0, active:true, newArrival:i<8, bestSeller:i<10, featured:i<14, rating:4.7, stock:99,
   })),
 ];
