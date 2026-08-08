@@ -613,7 +613,7 @@ export default function App() {
       <div data-card style={{...styles.card, position:"relative"}}
         onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-4px)";e.currentTarget.style.boxShadow="0 8px 24px rgba(0,0,0,.12)";}}
         onMouseLeave={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="0 2px 12px rgba(0,0,0,.06)";}}>
-        <div style={{position:"relative"}} onClick={()=>{setSelectedProduct(p);setPage("product");window.scrollTo({top:0,behavior:"smooth"});}}>
+        <div style={{position:"relative"}} onClick={()=>{setSelectedProduct(p);setPage("product");window.scrollTo({top:0});}}>
           <img src={p.image} alt={getProdName(p)} style={styles.cardImg} loading="lazy" onError={onImgErr} />
           {p.newArrival && <span style={styles.badge}>{t.newArrival}</span>}
           {settings.showBestSellerBadges!==false && p.bestSeller && <span style={{...styles.bestBadge,top:p.newArrival?34:8}}>{t.bestSeller}</span>}
@@ -645,7 +645,7 @@ export default function App() {
                 <span>✓</span><span>{inCartQty}</span>
               </div>
             )}
-            <button style={styles.quickBtn} onClick={(e)=>{e.stopPropagation();setSelectedProduct(p);setPage("product");window.scrollTo({top:0,behavior:"smooth"});}}>{t.quickView}</button>
+            <button style={styles.quickBtn} onClick={(e)=>{e.stopPropagation();setSelectedProduct(p);setPage("product");window.scrollTo({top:0});}}>{t.quickView}</button>
             <button
               style={{...styles.addBtn, ...(addedMap[p.id]?styles.addBtnAdded:{})}}
               onClick={(e)=>{ if(p.stock>0) addToCart(p,e); }}>
@@ -1190,6 +1190,10 @@ export default function App() {
           <div style={styles.brandRow}>
             <div style={styles.logoCircle}>
               <img src="https://i.ibb.co/0g2zNT6/D8-F67706-FEEF-4-CB8-B919-00-B889-A36214.png" alt={settings.storeName} style={styles.logoCircleImg} />
+            </div>
+            <div style={styles.brandText}>
+              <span style={styles.logo}>{lang==="ar"?(settings.heroTitleAr||settings.storeName):settings.storeName}</span>
+              {settings.storeTagline && <span style={styles.tagline}>{settings.storeTagline}</span>}
             </div>
           </div>
           {winWidth>=500 && (
