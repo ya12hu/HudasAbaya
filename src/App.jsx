@@ -448,11 +448,6 @@ export default function App() {
           <img src={p.image} alt={getProdName(p)} style={styles.cardImg} loading="lazy" />
           {p.newArrival && <span style={styles.badge}>{t.newArrival}</span>}
           {hasDisc && p.price>0 && <span style={styles.saleBadge}>{t.sale}</span>}
-          {inCartQty>0 && (
-            <div style={{position:"absolute", bottom:8, left:isRTL?undefined:8, right:isRTL?8:undefined, background:"#1a1a1a", color:"#c4a56a", fontSize:".68rem", fontWeight:800, padding:"3px 8px", borderRadius:20, display:"flex", alignItems:"center", gap:4, boxShadow:"0 2px 8px rgba(0,0,0,.3)"}}>
-              <span>✓</span><span>{inCartQty}</span>
-            </div>
-          )}
         </div>
         <button style={{...styles.wishBtn, right:isRTL?undefined:8, left:isRTL?8:undefined, top:hasDisc&&p.price>0?36:8}}
           onClick={()=>toggleWishlist(p.id)}>
@@ -468,11 +463,23 @@ export default function App() {
               </>
             ) : <span style={{...styles.cardPrice, color:"#999",fontSize:".85rem"}}>Price TBD</span>}
           </div>
-          <button
-            style={{...styles.addBtn, ...(addedMap[p.id]?styles.addBtnAdded:{})}}
-            onClick={(e)=>{ if(p.stock>0) addToCart(p,e); }}>
-            {p.stock===0 ? t.outOfStock : addedMap[p.id] ? t.addedToCart : t.addToCart}
-          </button>
+          <div style={{position:"relative"}}>
+            {inCartQty>0 && (
+              <div style={{
+                position:"absolute", top:-9, left:"50%", transform:"translateX(-50%)",
+                background:"#1a1a1a", color:"#fff", fontSize:".62rem", fontWeight:800,
+                padding:"2px 7px", borderRadius:20, display:"flex", alignItems:"center", gap:3,
+                boxShadow:"0 2px 8px rgba(0,0,0,.35), 0 0 0 2px #c4a56a", zIndex:2, whiteSpace:"nowrap"
+              }}>
+                <span>✓</span><span>{inCartQty}</span>
+              </div>
+            )}
+            <button
+              style={{...styles.addBtn, ...(addedMap[p.id]?styles.addBtnAdded:{})}}
+              onClick={(e)=>{ if(p.stock>0) addToCart(p,e); }}>
+              {p.stock===0 ? t.outOfStock : addedMap[p.id] ? t.addedToCart : t.addToCart}
+            </button>
+          </div>
         </div>
       </div>
     );
