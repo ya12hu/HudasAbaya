@@ -310,6 +310,7 @@ export default function App() {
   const [addedMap, setAddedMap] = useState({});
   const [confirmOrder, setConfirmOrder] = useState(null);
   const [crossSell, setCrossSell] = useState(null);
+  const [pendingCrossSell, setPendingCrossSell] = useState(null);
   const [winWidth, setWinWidth] = useState(typeof window!=="undefined"?window.innerWidth:375);
   const [heroImgIdx, setHeroImgIdx] = useState(0);
   const heroImages = (settings.heroImages && settings.heroImages.length ? settings.heroImages : products.filter(p=>p.category==="printedModal").slice(0,4).map(p=>p.image));
@@ -353,13 +354,16 @@ export default function App() {
     setMiniCartOpen(true);
     setTimeout(()=>setAddedMap(m=>({...m,[prod.id]:false})),1500);
     if(prod.category==="printedModal"){
+      // Cross-sell suggestion stored but shown only when cart is opened
       const magnetHasNone = !cart.some(c=>{
         const cp = products.find(x=>x.id===c.id);
         return cp && cp.category==="hijabMagnets";
       });
       if(magnetHasNone){
         const magnets = products.filter(p=>p.active && p.category==="hijabMagnets" && !cart.find(c=>c.id===p.id));
-        if(magnets.length>0) setCrossSell(magnets[Math.floor(Math.random()*magnets.length)]);
+        if(magnets.length>0) setPendingCrossSell(magnets[Math.floor(Math.random()*magnets.length)]);
+      } else {
+        setPendingCrossSell(null);
       }
     }
     // Fly-to-cart animation — origin is the actual product image the person clicked from
@@ -1148,7 +1152,10 @@ export default function App() {
                   transform:`scale(${(cartPulse?1.12:1) * Math.min(1+cart.reduce((s,i)=>s+i.qty,0)*0.02,1.15)})`,
                   transition: cartPulse ? "transform .18s cubic-bezier(.34,1.56,.64,1)" : "transform .35s cubic-bezier(.34,1.56,.64,1)",
                 }}
-                onClick={()=>{setPage("cart");window.scrollTo({top:0,behavior:"smooth"});}}>
+                onClick={()=>{
+                  if(pendingCrossSell){ setCrossSell(pendingCrossSell); setPendingCrossSell(null); }
+                  else { setPage("cart"); window.scrollTo({top:0,behavior:"smooth"}); }
+                }}>
                 🛍️
               </button>
               {cart.reduce((s,i)=>s+i.qty,0)>0 && (
@@ -1257,8 +1264,8 @@ export default function App() {
               </div>
             </div>
             <div style={{display:"flex",gap:10}}>
-              <button style={{...styles.detailAddBtn,marginTop:0,flex:1}} onClick={()=>{ addToCart(crossSell); setCrossSell(null); }}>{t.yesAdd}</button>
-              <button style={{...styles.detailAddBtn,marginTop:0,flex:1,background:"none",color:"#1a1a1a",border:"1px solid #ddd"}} onClick={()=>setCrossSell(null)}>{t.noThanks}</button>
+              <button style={{...styles.detailAddBtn,marginTop:0,flex:1}} onClick={()=>{ addToCart(crossSell); setCrossSell(null); setPage("cart"); window.scrollTo({top:0,behavior:"smooth"}); }}>{t.yesAdd}</button>
+              <button style={{...styles.detailAddBtn,marginTop:0,flex:1,background:"none",color:"#1a1a1a",border:"1px solid #ddd"}} onClick={()=>{ setCrossSell(null); setPage("cart"); window.scrollTo({top:0,behavior:"smooth"}); }}>{t.noThanks}</button>
             </div>
           </div>
         </div>
