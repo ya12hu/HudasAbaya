@@ -659,7 +659,7 @@ export default function App() {
           <h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"clamp(1.6rem,4vw,2.5rem)",marginBottom:10}}>{lang==='ar'?sec.titleAr:sec.title}</h2>
           {(lang==='ar'?sec.bodyAr:sec.body) && <p style={{maxWidth:720,margin:"0 auto 20px",color:"#666",lineHeight:1.8}}>{lang==='ar'?sec.bodyAr:sec.body}</p>}
           {(lang==='ar'?sec.buttonTextAr:sec.buttonText) && <button style={styles.shopBtn} onClick={()=>{const link=sec.buttonLink||'#shop-grid'; if(link.startsWith('#')) document.getElementById(link.slice(1))?.scrollIntoView({behavior:'smooth'}); else window.location.href=link;}}>{lang==='ar'?sec.buttonTextAr:sec.buttonText}</button>}
-        </section>
+        </section>)}
       </>
     );
   }
