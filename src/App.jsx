@@ -315,14 +315,18 @@ export default function App() {
   const styles = {
     app:{ fontFamily:"'Cormorant Garamond',serif", background:"#faf9f7", minHeight:"100vh", direction:isRTL?"rtl":"ltr" },
     header:{ background:"#1a1a1a", color:"#fff", padding:"0 20px", position:"sticky", top:0, zIndex:100 },
-    headerTop:{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"12px 0", borderBottom:"1px solid #333" },
+    headerTop:{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"14px 0", borderBottom:"1px solid #333" },
+    logoCircle:{ width:48, height:48, borderRadius:"50%", overflow:"hidden", border:"2px solid #c4a56a", flexShrink:0, boxShadow:"0 2px 10px rgba(196,165,106,.3)" },
+    logoCircleImg:{ width:"100%", height:"100%", objectFit:"cover", transform:"scale(1.35)" },
+    brandRow:{ display:"flex", alignItems:"center", gap:12 },
+    brandText:{ display:"flex", flexDirection:"column" },
     headerBottom:{ display:"flex", gap:20, padding:"10px 0", overflowX:"auto" },
     logo:{ fontFamily:"'Cormorant Garamond',serif", fontSize:"clamp(1.1rem,4vw,1.6rem)", letterSpacing:".08em", fontWeight:600, color:"#c4a56a", whiteSpace:"nowrap" },
     tagline:{ fontSize:".6rem", color:"#888", letterSpacing:".2em", marginTop:2 },
     navBtn:{ background:"none", border:"none", color:"#ccc", cursor:"pointer", fontSize:".85rem", letterSpacing:".08em", padding:"4px 8px", whiteSpace:"nowrap" },
     navBtnActive:{ color:"#c4a56a", borderBottom:"2px solid #c4a56a" },
     cartBtn:{ background:"#c4a56a", color:"#fff", border:"none", borderRadius:20, padding:"6px 14px", cursor:"pointer", fontSize:".8rem", fontWeight:600 },
-    hero:{ background:"linear-gradient(135deg,#1a1a1a 0%,#2d2d2d 50%,#1a1a1a 100%)", color:"#fff", textAlign:"center", padding:"60px 20px" },
+    hero:{ background:"radial-gradient(ellipse at top,#2d2320 0%,#1a1512 60%,#0f0c0a 100%)", color:"#fff", textAlign:"center", padding:"70px 20px 60px", position:"relative", overflow:"hidden" },
     heroTitle:{ fontFamily:"'Cormorant Garamond',serif", fontSize:"clamp(2rem,5vw,3.5rem)", letterSpacing:".15em", color:"#c4a56a", marginBottom:8 },
     heroSub:{ fontSize:".75rem", letterSpacing:".2em", color:"#aaa", marginBottom:30 },
     shopBtn:{ background:"linear-gradient(135deg,#c4a56a,#d4b57a)", color:"#fff", border:"none", borderRadius:30, padding:"12px 32px", fontSize:"1rem", cursor:"pointer", letterSpacing:".1em" },
@@ -426,7 +430,11 @@ export default function App() {
       <>
         {/* Hero */}
         <div style={styles.hero}>
-          <img src="https://i.ibb.co/0g2zNT6/D8-F67706-FEEF-4-CB8-B919-00-B889-A36214.png" alt={settings.storeName} style={{height:90,width:"auto",margin:"0 auto 20px",display:"block",borderRadius:8}} />
+          <div style={{width:150,height:150,borderRadius:"50%",overflow:"hidden",margin:"0 auto 22px",border:"3px solid #c4a56a",boxShadow:"0 0 0 6px rgba(196,165,106,.15), 0 20px 50px rgba(0,0,0,.5)"}}>
+            <img src="https://i.ibb.co/0g2zNT6/D8-F67706-FEEF-4-CB8-B919-00-B889-A36214.png" alt={settings.storeName} style={{width:"100%",height:"100%",objectFit:"cover",transform:"scale(1.35)"}} />
+          </div>
+          <div style={{fontFamily:"'Cormorant Garamond',serif", fontSize:"clamp(1.8rem,6vw,3rem)", fontWeight:700, letterSpacing:".1em", color:"#fff", marginBottom:4}}>HUDA'S</div>
+          <div style={{fontFamily:"'Cormorant Garamond',serif", fontSize:"clamp(.85rem,2.5vw,1.15rem)", letterSpacing:".35em", color:"#c4a56a", textTransform:"uppercase", marginBottom:26}}>Abaya Boutique</div>
           <button style={styles.shopBtn} onClick={()=>document.getElementById("shop-grid")?.scrollIntoView({behavior:"smooth"})}>{t.collection}</button>
         </div>
         {/* Filter Bar */}
@@ -835,8 +843,14 @@ export default function App() {
       {/* Header */}
       <div style={styles.header}>
         <div style={styles.headerTop}>
-          <div>
-            <img src="https://i.ibb.co/0g2zNT6/D8-F67706-FEEF-4-CB8-B919-00-B889-A36214.png" alt={settings.storeName} style={{height:52,width:"auto",display:"block"}} />
+          <div style={styles.brandRow}>
+            <div style={styles.logoCircle}>
+              <img src="https://i.ibb.co/0g2zNT6/D8-F67706-FEEF-4-CB8-B919-00-B889-A36214.png" alt={settings.storeName} style={styles.logoCircleImg} />
+            </div>
+            <div style={styles.brandText}>
+              <div style={{fontFamily:"'Cormorant Garamond',serif", fontSize:"1.05rem", fontWeight:700, letterSpacing:".04em", color:"#fff", lineHeight:1.1}}>HUDA'S</div>
+              <div style={{fontFamily:"'Cormorant Garamond',serif", fontSize:".72rem", letterSpacing:".14em", color:"#c4a56a", textTransform:"uppercase"}}>Abaya Boutique</div>
+            </div>
           </div>
           <div style={{display:"flex",gap:10,alignItems:"center"}}>
             <button style={styles.navBtn} onClick={()=>setLang(l=>l==="en"?"ar":"en")}>{t.langBtn}</button>
