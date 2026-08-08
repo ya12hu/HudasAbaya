@@ -20,8 +20,8 @@ const T = {
     ppNotConf:"PayPal Not Configured", ppHint:"Go to Admin → Settings and enter your PayPal Client ID.",
     allCategories:"All", hijabMagnets:"Hijab Magnets", printedModal:"Printed Modal Hijab",
     noResults:"No products found", filterBy:"Filter by",
-    adminPanel:"Admin Panel", products:"Products", pricing:"Pricing & Discounts",
-    orders:"Orders", settings:"Settings", logout:"Logout",
+    adminPanel:"Admin Panel", dashboard:"Dashboard", homepage:"Homepage", products:"Products", categories:"Categories", banners:"Banners", pricing:"Pricing & Discounts",
+    orders:"Orders", customers:"Customers", content:"Content", media:"Media", settings:"Settings", logout:"Logout",
     productName:"Product Name", price:"Price ($)", discount:"Discount (%)",
     discountExpiry:"Discount Expiry", categoryDiscount:"Category Discount (%)",
     couponCode:"Coupon Code", couponDiscount:"Coupon Discount (%)",
@@ -57,8 +57,8 @@ const T = {
     ppNotConf:"PayPal غير مُفعّل", ppHint:"اذهبي إلى الإدارة ← الإعدادات وأدخلي Client ID الخاص بـ PayPal.",
     allCategories:"الكل", hijabMagnets:"مغناطيسات الحجاب", printedModal:"حجاب مودال مطبوع",
     noResults:"لا توجد منتجات", filterBy:"تصفية",
-    adminPanel:"لوحة التحكم", products:"المنتجات", pricing:"التسعير والخصومات",
-    orders:"الطلبات", settings:"الإعدادات", logout:"خروج",
+    adminPanel:"لوحة التحكم", dashboard:"لوحة المعلومات", homepage:"الصفحة الرئيسية", products:"المنتجات", categories:"الفئات", banners:"البانرات", pricing:"التسعير والخصومات",
+    orders:"الطلبات", customers:"العملاء", content:"المحتوى", media:"الوسائط", settings:"الإعدادات", logout:"خروج",
     productName:"اسم المنتج", price:"السعر ($)", discount:"الخصم (%)",
     discountExpiry:"انتهاء الخصم", categoryDiscount:"خصم الفئة (%)",
     couponCode:"كود الخصم", couponDiscount:"نسبة كود الخصم (%)",
@@ -168,6 +168,24 @@ const DEFAULT_SETTINGS = {
   couponCode:"", couponDiscount:0, couponActive:false,
   buyXQty:2, buyXDisc:10, buyXActive:false,
   categoryDiscounts:{ hijabMagnets:0, printedModal:0 },
+  announcementText:"Welcome to Huda’s Abaya Boutique",
+  heroTitle:"Huda’s Abaya Boutique",
+  heroTitleAr:"بوتيك هدى للعبايات",
+  heroSubtitle:"MODEST · PREMIUM · FREE US SHIPPING",
+  heroSubtitleAr:"محتشم · فاخر · شحن مجاني داخل أمريكا",
+  heroButtonText:"Our Collection",
+  heroButtonTextAr:"مجموعتنا",
+  heroButtonLink:"#shop-grid",
+  heroImages:[],
+  heroInterval:2200,
+  categories:[
+    {id:"hijabMagnets",name:"Hijab Magnets",nameAr:"مغناطيسات الحجاب",active:true,order:1},
+    {id:"printedModal",name:"Printed Modal Hijab",nameAr:"حجاب مودال مطبوع",active:true,order:2}
+  ],
+  banners:[],
+  content:{about:"",contact:"",faq:"",privacy:"",terms:"",shippingPolicy:"",returnPolicy:""},
+  appearance:{primaryColor:"#c4a56a",secondaryColor:"#1a1a1a",buttonRadius:8,productColumns:5},
+  footer:{about:"",phone:"",email:"",address:"",copyright:""},
 };
 
 const LS = {
@@ -212,7 +230,7 @@ export default function App() {
   const [transitioning, setTransitioning] = useState(false);
 
   const [products, setProducts] = useState(()=>LS.get("huda_products", DEFAULT_PRODUCTS));
-  const [settings, setSettings] = useState(()=>LS.get("huda_settings", DEFAULT_SETTINGS));
+  const [settings, setSettings] = useState(()=>{ const saved=LS.get("huda_settings",{}); return { ...DEFAULT_SETTINGS, ...saved, categoryDiscounts:{...DEFAULT_SETTINGS.categoryDiscounts,...(saved.categoryDiscounts||{})}, appearance:{...DEFAULT_SETTINGS.appearance,...(saved.appearance||{})}, footer:{...DEFAULT_SETTINGS.footer,...(saved.footer||{})}, content:{...DEFAULT_SETTINGS.content,...(saved.content||{})}, categories:saved.categories||DEFAULT_SETTINGS.categories, banners:saved.banners||DEFAULT_SETTINGS.banners, heroImages:saved.heroImages||DEFAULT_SETTINGS.heroImages }; });
   const [orders, setOrders] = useState(()=>LS.get("huda_orders",[]));
   const [cart, setCart] = useState([]);
   const [wishlist, setWishlist] = useState(()=>LS.get("huda_wishlist",[]));
@@ -237,10 +255,10 @@ export default function App() {
   const [crossSell, setCrossSell] = useState(null);
   const [winWidth, setWinWidth] = useState(typeof window!=="undefined"?window.innerWidth:375);
   const [heroImgIdx, setHeroImgIdx] = useState(0);
-  const heroImages = products.filter(p=>p.category==="printedModal").slice(0,4).map(p=>p.image);
+  const heroImages = (settings.heroImages && settings.heroImages.length ? settings.heroImages : products.filter(p=>p.category==="printedModal").slice(0,4).map(p=>p.image));
   useEffect(()=>{
-    if(heroImages.length===0 || page!=="shop") return;
-    const iv = setInterval(()=>setHeroImgIdx(i=>(i+1)%heroImages.length), 2200);
+    if(heroImages.length===0 || page!=="shop" || !settings.heroInterval) return;
+    const iv = setInterval(()=>setHeroImgIdx(i=>(i+1)%heroImages.length), Number(settings.heroInterval)||2200);
     return ()=>clearInterval(iv);
   },[heroImages.length, page]);
   useEffect(()=>{
@@ -337,6 +355,18 @@ export default function App() {
   }
   function updateSetting(field,val){ setSettings(s=>({...s,[field]:val})); }
   function updateCatDisc(cat,val){ setSettings(s=>({...s,categoryDiscounts:{...s.categoryDiscounts,[cat]:val}})); }
+  function updateNestedSetting(group,field,val){ setSettings(s=>({...s,[group]:{...(s[group]||{}),[field]:val}})); }
+  function addBanner(){ setSettings(s=>({...s,banners:[...(s.banners||[]),{id:"ban-"+Date.now(),title:"New Banner",subtitle:"",image:"",buttonText:"Shop Now",buttonLink:"#shop-grid",active:true,order:(s.banners||[]).length+1}]})); }
+  function updateBanner(id,field,val){ setSettings(s=>({...s,banners:(s.banners||[]).map(b=>b.id===id?{...b,[field]:val}:b)})); }
+  function deleteBanner(id){ setSettings(s=>({...s,banners:(s.banners||[]).filter(b=>b.id!==id)})); }
+  function addCategory(){ const id="cat-"+Date.now(); setSettings(s=>({...s,categories:[...(s.categories||[]),{id,name:"New Category",nameAr:"فئة جديدة",active:true,order:(s.categories||[]).length+1}]})); }
+  function updateCategory(id,field,val){ setSettings(s=>({...s,categories:(s.categories||[]).map(c=>c.id===id?{...c,[field]:val}:c)})); }
+  function deleteCategory(id){ setSettings(s=>({...s,categories:(s.categories||[]).filter(c=>c.id!==id)})); }
+  function addHeroImage(){ setSettings(s=>({...s,heroImages:[...(s.heroImages||[]),""]})); }
+  function updateHeroImage(i,val){ setSettings(s=>({...s,heroImages:(s.heroImages||[]).map((x,idx)=>idx===i?val:x)})); }
+  function deleteHeroImage(i){ setSettings(s=>({...s,heroImages:(s.heroImages||[]).filter((_,idx)=>idx!==i)})); }
+  function resetCmsSettings(){ setSettings(s=>({...DEFAULT_SETTINGS,...s,appearance:{...DEFAULT_SETTINGS.appearance,...(s.appearance||{})},footer:{...DEFAULT_SETTINGS.footer,...(s.footer||{})},content:{...DEFAULT_SETTINGS.content,...(s.content||{})}})); }
+  function exportData(){ const data={products,settings,orders,wishlist,exportedAt:new Date().toISOString()}; const a=document.createElement("a"); a.href="data:application/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(data,null,2)); a.download="huda-abaya-backup.json"; a.click(); }
 
   function placeOrder(ppDetails=null){
     const order = {
@@ -507,18 +537,19 @@ export default function App() {
           <div style={styles.heroOverlay}></div>
           <div style={styles.heroContent}>
             <div style={{fontFamily:"'Cormorant Garamond',serif", fontSize:"clamp(1.8rem,6vw,3.2rem)", fontWeight:700, letterSpacing:".05em", color:"#c4a56a", marginBottom:32, textShadow:"0 4px 20px rgba(0,0,0,.5)", whiteSpace:"nowrap"}}>
-              Huda’s Abaya Boutique
+              {lang==="ar" ? (settings.heroTitleAr || settings.heroTitle) : settings.heroTitle}
             </div>
-            <button style={styles.shopBtn} onClick={()=>document.getElementById("shop-grid")?.scrollIntoView({behavior:"smooth"})}>{t.collection}</button>
+            {settings.heroSubtitle && <div style={{color:"#fff",fontSize:".72rem",letterSpacing:".18em",marginBottom:18,textShadow:"0 2px 10px rgba(0,0,0,.5)"}}>{lang==="ar" ? (settings.heroSubtitleAr || settings.heroSubtitle) : settings.heroSubtitle}</div>}
+            <button style={styles.shopBtn} onClick={()=>{ const link=settings.heroButtonLink||"#shop-grid"; if(link.startsWith("#")) document.getElementById(link.slice(1))?.scrollIntoView({behavior:"smooth"}); else window.location.href=link; }}>{lang==="ar" ? (settings.heroButtonTextAr || settings.heroButtonText) : (settings.heroButtonText || t.collection)}</button>
           </div>
         </div>
         {/* Filter Bar */}
         <div style={styles.filterBar}>
           <input style={styles.searchInput} placeholder={t.search} value={search} onChange={e=>setSearch(e.target.value)} />
-          {["all","hijabMagnets","printedModal"].map(cat=>(
-            <button key={cat} style={{...styles.filterBtn,...(categoryFilter===cat?styles.filterBtnActive:{})}}
-              onClick={()=>setCategoryFilter(cat)}>
-              {t[cat==="all"?"allCategories":cat]}
+          {[{id:"all",name:t.allCategories,nameAr:t.allCategories},...(settings.categories||[]).filter(c=>c.active!==false).sort((a,b)=>(a.order||0)-(b.order||0))].map(cat=>(
+            <button key={cat.id} style={{...styles.filterBtn,...(categoryFilter===cat.id?styles.filterBtnActive:{})}}
+              onClick={()=>setCategoryFilter(cat.id)}>
+              {cat.id==="all" ? cat.name : (lang==="ar" ? cat.nameAr : cat.name)}
             </button>
           ))}
         </div>
@@ -684,215 +715,81 @@ export default function App() {
       return (
         <div style={{maxWidth:360,margin:"80px auto",padding:24,background:"#fff",borderRadius:12,boxShadow:"0 2px 16px rgba(0,0,0,.08)"}}>
           <h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1.6rem",marginBottom:20,textAlign:"center"}}>{t.adminPanel}</h2>
-          <AdminPasswordInput
-            styles={styles}
-            placeholder={t.passwordLabel}
-            onSubmit={(val,isBlur)=>{
-              setAdminPass(val);
-              if(isBlur) return;
-              if(val===settings.adminPassword){setAdminLoggedIn(true);setAdminPassErr(false);}else setAdminPassErr(true);
-            }}
-          />
+          <AdminPasswordInput styles={styles} placeholder={t.passwordLabel} onSubmit={(val,isBlur)=>{setAdminPass(val);if(isBlur)return;if(val===settings.adminPassword){setAdminLoggedIn(true);setAdminPassErr(false);}else setAdminPassErr(true);}} />
           {adminPassErr && <div style={{color:"#e53935",fontSize:".85rem",marginBottom:8}}>{t.wrongPass}</div>}
-          <button style={styles.checkoutBtn} onClick={()=>{ if(adminPass===settings.adminPassword){setAdminLoggedIn(true);setAdminPassErr(false);}else setAdminPassErr(true); }}>{t.login}</button>
+          <button style={styles.checkoutBtn} onClick={()=>{if(adminPass===settings.adminPassword){setAdminLoggedIn(true);setAdminPassErr(false);}else setAdminPassErr(true);}}>{t.login}</button>
         </div>
       );
     }
+    const tabs=["dashboard","homepage","products","categories","banners","pricing","orders","customers","content","media","settings"];
+    const activeProducts=products.filter(p=>p.active).length;
+    const revenue=orders.reduce((sum,o)=>sum+(parseFloat(o.total)||0),0);
+    const customers=[...new Map(orders.map(o=>[o.shipping?.email||o.shipping?.phone||o.shipping?.name||o.id,o.shipping||{}])).values()];
+    const saveField=(key)=>saveAdmin(key);
     return (
       <div style={styles.adminWrap}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-          <h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1.8rem"}}>{t.adminPanel}</h2>
-          <button style={{...styles.navBtn,color:"#e53935"}} onClick={()=>setAdminLoggedIn(false)}>{t.logout}</button>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16,gap:10}}>
+          <div><h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1.8rem"}}>{t.adminPanel}</h2><div style={{fontSize:".75rem",color:"#888"}}>Full CMS control</div></div>
+          <div style={{display:"flex",gap:8}}><button style={{...styles.saveBtn,background:"#1a1a1a"}} onClick={exportData}>Export Backup</button><button style={{...styles.navBtn,color:"#e53935"}} onClick={()=>setAdminLoggedIn(false)}>{t.logout}</button></div>
         </div>
-        <div style={styles.adminTabs}>
-          {["products","pricing","orders","settings"].map(tab=>(
-            <button key={tab} style={{...styles.adminTab,...(adminTab===tab?styles.adminTabActive:{})}} onClick={()=>setAdminTab(tab)}>
-              {t[tab]}
-            </button>
-          ))}
+        <div style={{...styles.adminTabs,overflowX:"auto",flexWrap:"nowrap"}}>
+          {tabs.map(tab=><button key={tab} style={{...styles.adminTab,...(adminTab===tab?styles.adminTabActive:{})}} onClick={()=>setAdminTab(tab)}>{t[tab]}</button>)}
         </div>
 
-        {/* Products Tab */}
-        {adminTab==="products" && (
-          <div style={{overflowX:"auto"}}>
-            <table style={styles.table}>
-              <thead>
-                <tr>
-                  <th style={styles.th}>Image</th>
-                  <th style={styles.th}>{t.productName}</th>
-                  <th style={styles.th}>{t.price} ($)</th>
-                  <th style={styles.th}>{t.discount} (%)</th>
-                  <th style={styles.th}>New Arrival</th>
-                  <th style={styles.th}>{t.active}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {products.map(p=>(
-                  <tr key={p.id}>
-                    <td style={styles.td}><img src={p.image} style={{width:50,height:65,objectFit:"cover",borderRadius:6}} alt="" loading="lazy" decoding="async" onError={onImgErr} /></td>
-                    <td style={styles.td}>
-                      <input style={{...styles.adminInput,width:160}} value={p.name} onChange={e=>updateProduct(p.id,"name",e.target.value)} />
-                    </td>
-                    <td style={styles.td}>
-                      <input type="number" style={styles.adminInput} value={p.price} min={0} step={0.01}
-                        onChange={e=>updateProduct(p.id,"price",parseFloat(e.target.value)||0)} />
-                    </td>
-                    <td style={styles.td}>
-                      <input type="number" style={styles.adminInput} value={p.discount} min={0} max={100}
-                        onChange={e=>updateProduct(p.id,"discount",parseFloat(e.target.value)||0)} />
-                    </td>
-                    <td style={styles.td}><Toggle on={p.newArrival} onToggle={()=>updateProduct(p.id,"newArrival",!p.newArrival)}/></td>
-                    <td style={styles.td}><Toggle on={p.active} onToggle={()=>updateProduct(p.id,"active",!p.active)}/></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        {adminTab==="dashboard" && <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:12}}>
+          {[["Products",products.length],["Active Products",activeProducts],["Orders",orders.length],["Customers",customers.length],["Revenue",`$${revenue.toFixed(2)}`],["Out of Stock",products.filter(p=>(p.stock??99)<=0).length]].map(([label,value])=><div key={label} style={styles.pricingCard}><div style={{fontSize:".78rem",color:"#888"}}>{label}</div><div style={{fontSize:"1.8rem",fontWeight:700,marginTop:8}}>{value}</div></div>)}
+          <div style={{...styles.pricingCard,gridColumn:"1/-1"}}><h3>Quick Controls</h3><p style={{color:"#777",fontSize:".85rem",lineHeight:1.6}}>Manage the homepage, images, banners, products, categories, promotions, orders and customer-facing content from this panel. All CMS settings are saved locally in the current app storage.</p></div>
+        </div>}
 
-        {/* Pricing Tab */}
-        {adminTab==="pricing" && (
-          <div>
-            {/* Category Discounts */}
-            <div style={styles.pricingCard}>
-              <h3 style={{marginBottom:16,fontSize:"1.1rem"}}>Category Discounts</h3>
-              {["hijabMagnets","printedModal"].map(cat=>(
-                <div key={cat} style={styles.pricingRow}>
-                  <span style={styles.pricingLabel}>{t[cat]}</span>
-                  <input type="number" style={styles.adminInput} min={0} max={100}
-                    value={settings.categoryDiscounts?.[cat]||0}
-                    onChange={e=>updateCatDisc(cat,parseFloat(e.target.value)||0)} />
-                  <span style={{fontSize:".85rem",color:"#666"}}>%</span>
-                  <button style={styles.saveBtn} onClick={()=>saveAdmin("catDisc"+cat)}>{savedMsg["catDisc"+cat]?t.saved:t.save}</button>
-                </div>
-              ))}
-            </div>
-
-            {/* Coupon Code */}
-            <div style={styles.pricingCard}>
-              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16}}>
-                <h3 style={{fontSize:"1.1rem"}}>{t.couponCode}</h3>
-                <Toggle on={settings.couponActive} onToggle={()=>updateSetting("couponActive",!settings.couponActive)}/>
-              </div>
-              <div style={styles.pricingRow}>
-                <span style={styles.pricingLabel}>{t.couponCode}</span>
-                <input style={{...styles.adminInput,width:120}} value={settings.couponCode} onChange={e=>updateSetting("couponCode",e.target.value)} />
-              </div>
-              <div style={styles.pricingRow}>
-                <span style={styles.pricingLabel}>{t.couponDiscount}</span>
-                <input type="number" style={styles.adminInput} min={0} max={100} value={settings.couponDiscount}
-                  onChange={e=>updateSetting("couponDiscount",parseFloat(e.target.value)||0)} />
-                <span style={{fontSize:".85rem",color:"#666"}}>%</span>
-                <button style={styles.saveBtn} onClick={()=>saveAdmin("coupon")}>{savedMsg["coupon"]?t.saved:t.save}</button>
-              </div>
-            </div>
-
-            {/* Buy X Get Discount */}
-            <div style={styles.pricingCard}>
-              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16}}>
-                <h3 style={{fontSize:"1.1rem"}}>{t.buyX}</h3>
-                <Toggle on={settings.buyXActive} onToggle={()=>updateSetting("buyXActive",!settings.buyXActive)}/>
-              </div>
-              <div style={styles.pricingRow}>
-                <span style={styles.pricingLabel}>{t.buyXQty}</span>
-                <input type="number" style={styles.adminInput} min={1} value={settings.buyXQty}
-                  onChange={e=>updateSetting("buyXQty",parseInt(e.target.value)||2)} />
-              </div>
-              <div style={styles.pricingRow}>
-                <span style={styles.pricingLabel}>{t.buyXDisc}</span>
-                <input type="number" style={styles.adminInput} min={0} max={100} value={settings.buyXDisc}
-                  onChange={e=>updateSetting("buyXDisc",parseFloat(e.target.value)||0)} />
-                <span style={{fontSize:".85rem",color:"#666"}}>%</span>
-                <button style={styles.saveBtn} onClick={()=>saveAdmin("buyX")}>{savedMsg["buyX"]?t.saved:t.save}</button>
-              </div>
-            </div>
-
-            {/* Shipping */}
-            <div style={styles.pricingCard}>
-              <h3 style={{marginBottom:16,fontSize:"1.1rem"}}>{t.shipping}</h3>
-              <div style={styles.pricingRow}>
-                <span style={styles.pricingLabel}>{t.shipping_price}</span>
-                <input type="number" style={styles.adminInput} min={0} value={settings.shippingPrice}
-                  onChange={e=>updateSetting("shippingPrice",parseFloat(e.target.value)||0)} />
-              </div>
-              <div style={styles.pricingRow}>
-                <span style={styles.pricingLabel}>{t.freeShipOver}</span>
-                <input type="number" style={styles.adminInput} min={0} value={settings.freeShipOver}
-                  onChange={e=>updateSetting("freeShipOver",parseFloat(e.target.value)||0)} />
-                <button style={styles.saveBtn} onClick={()=>saveAdmin("ship")}>{savedMsg["ship"]?t.saved:t.save}</button>
-              </div>
-            </div>
-
-            {/* Tax */}
-            <div style={styles.pricingCard}>
-              <h3 style={{marginBottom:16,fontSize:"1.1rem"}}>{t.taxRate}</h3>
-              <div style={styles.pricingRow}>
-                <span style={styles.pricingLabel}>{t.taxRate}</span>
-                <input type="number" style={styles.adminInput} min={0} max={30} value={settings.taxRate||0}
-                  onChange={e=>updateSetting("taxRate",parseFloat(e.target.value)||0)} />
-                <span style={{fontSize:".85rem",color:"#666"}}>%</span>
-                <button style={styles.saveBtn} onClick={()=>saveAdmin("tax")}>{savedMsg["tax"]?t.saved:t.save}</button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Orders Tab */}
-        {adminTab==="orders" && (
-          <div>
-            {orders.length===0
-              ? <div style={{textAlign:"center",padding:60,color:"#999"}}>{t.noOrders}</div>
-              : <>
-                <button style={{...styles.saveBtn,marginBottom:16}} onClick={exportCSV}>{t.exportCSV}</button>
-                <div style={{overflowX:"auto"}}>
-                  <table style={styles.table}>
-                    <thead>
-                      <tr>
-                        <th style={styles.th}>{t.orderId}</th>
-                        <th style={styles.th}>{t.orderDate}</th>
-                        <th style={styles.th}>Customer</th>
-                        <th style={styles.th}>{t.orderTotal}</th>
-                        <th style={styles.th}>{t.orderStatus}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {orders.map(o=>(
-                        <tr key={o.id}>
-                          <td style={styles.td}>{o.id}</td>
-                          <td style={styles.td}>{o.date}</td>
-                          <td style={styles.td}>{o.shipping?.name}</td>
-                          <td style={styles.td}>${o.total}</td>
-                          <td style={styles.td}>
-                            <select value={o.status}
-                              onChange={e=>setOrders(os=>os.map(x=>x.id===o.id?{...x,status:e.target.value}:x))}
-                              style={{border:"1px solid #ddd",borderRadius:6,padding:"4px 8px",fontSize:".8rem"}}>
-                              <option value="pending">{t.pending}</option>
-                              <option value="shipped">{t.shipped}</option>
-                              <option value="delivered">{t.delivered}</option>
-                            </select>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </>
-            }
-          </div>
-        )}
-
-        {/* Settings Tab */}
-        {adminTab==="settings" && (
+        {adminTab==="homepage" && <div>
           <div style={styles.pricingCard}>
-            {[["storeName","Store Name"],["storeTagline","Tagline"],["paypalClientId","PayPal Client ID"],["whatsapp","WhatsApp Number"],["instagram","Instagram"],["snapchat","Snapchat"],["tiktok","TikTok"],["adminPassword","Admin Password"]].map(([k,label])=>(
-              <div key={k} style={styles.pricingRow}>
-                <span style={styles.pricingLabel}>{label}</span>
-                <input style={{...styles.adminInput,width:220}} value={settings[k]||""} onChange={e=>updateSetting(k,e.target.value)} />
-              </div>
-            ))}
-            <button style={{...styles.saveBtn,marginTop:8}} onClick={()=>saveAdmin("settings")}>{savedMsg["settings"]?t.saved:t.save}</button>
+            <h3 style={{marginBottom:16}}>Hero / Homepage</h3>
+            {[['heroTitle','Hero Title'],['heroTitleAr','Hero Title Arabic'],['heroSubtitle','Hero Subtitle'],['heroSubtitleAr','Hero Subtitle Arabic'],['heroButtonText','Button Text'],['heroButtonTextAr','Button Text Arabic'],['heroButtonLink','Button Link'],['announcementText','Announcement Bar']].map(([k,label])=><div key={k} style={styles.pricingRow}><span style={styles.pricingLabel}>{label}</span><input style={{...styles.adminInput,width:"min(100%,430px)"}} value={settings[k]||""} onChange={e=>updateSetting(k,e.target.value)}/></div>)}
+            <div style={styles.pricingRow}><span style={styles.pricingLabel}>Hero Interval (ms)</span><input type="number" style={styles.adminInput} value={settings.heroInterval||2200} min={500} onChange={e=>updateSetting("heroInterval",parseInt(e.target.value)||2200)}/></div>
+            <button style={styles.saveBtn} onClick={()=>saveField("homepage")}>{savedMsg.homepage?t.saved:t.save}</button>
           </div>
-        )}
+          <div style={styles.pricingCard}><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}><h3>Hero Images</h3><button style={styles.saveBtn} onClick={addHeroImage}>+ Add Image</button></div>
+            {(settings.heroImages||[]).map((img,i)=><div key={i} style={{display:"flex",gap:8,alignItems:"center",marginBottom:10}}><input style={{...styles.adminInput,flex:1}} placeholder="Image URL" value={img} onChange={e=>updateHeroImage(i,e.target.value)}/>{img&&<img src={img} onError={onImgErr} alt="" style={{width:52,height:52,objectFit:"cover",borderRadius:6}}/>}<button style={{...styles.navBtn,color:"#e53935"}} onClick={()=>deleteHeroImage(i)}>Delete</button></div>)}
+            <div style={{fontSize:".75rem",color:"#888"}}>If no custom hero images are added, the current product-based hero images remain as fallback.</div>
+          </div>
+        </div>}
+
+        {adminTab==="products" && <div style={{overflowX:"auto"}}><table style={styles.table}><thead><tr>{["Image",t.productName,"Arabic Name",t.price,t.discount,"Stock","Category","New Arrival","Featured","Best Seller",t.active].map(h=><th key={h} style={styles.th}>{h}</th>)}</tr></thead><tbody>{products.map(p=><tr key={p.id}>
+          <td style={styles.td}><img src={p.image} style={{width:50,height:65,objectFit:"cover",borderRadius:6}} alt="" loading="lazy" onError={onImgErr}/><input style={{...styles.adminInput,width:180,marginTop:5}} value={p.image||""} onChange={e=>updateProduct(p.id,"image",e.target.value)}/></td>
+          <td style={styles.td}><input style={{...styles.adminInput,width:160}} value={p.name||""} onChange={e=>updateProduct(p.id,"name",e.target.value)}/></td>
+          <td style={styles.td}><input style={{...styles.adminInput,width:160}} value={p.nameAr||""} onChange={e=>updateProduct(p.id,"nameAr",e.target.value)}/></td>
+          <td style={styles.td}><input type="number" style={styles.adminInput} value={p.price??0} min={0} step=".01" onChange={e=>updateProduct(p.id,"price",parseFloat(e.target.value)||0)}/></td>
+          <td style={styles.td}><input type="number" style={styles.adminInput} value={p.discount??0} min={0} max={100} onChange={e=>updateProduct(p.id,"discount",parseFloat(e.target.value)||0)}/></td>
+          <td style={styles.td}><input type="number" style={styles.adminInput} value={p.stock??0} min={0} onChange={e=>updateProduct(p.id,"stock",parseInt(e.target.value)||0)}/></td>
+          <td style={styles.td}><select style={styles.adminInput} value={p.category||""} onChange={e=>updateProduct(p.id,"category",e.target.value)}>{(settings.categories||[]).map(c=><option key={c.id} value={c.id}>{lang==="ar"?c.nameAr:c.name}</option>)}</select></td>
+          <td style={styles.td}><Toggle on={!!p.newArrival} onToggle={()=>updateProduct(p.id,"newArrival",!p.newArrival)}/></td><td style={styles.td}><Toggle on={!!p.featured} onToggle={()=>updateProduct(p.id,"featured",!p.featured)}/></td><td style={styles.td}><Toggle on={!!p.bestSeller} onToggle={()=>updateProduct(p.id,"bestSeller",!p.bestSeller)}/></td><td style={styles.td}><Toggle on={!!p.active} onToggle={()=>updateProduct(p.id,"active",!p.active)}/></td>
+        </tr>)}</tbody></table></div>}
+
+        {adminTab==="categories" && <div><div style={{display:"flex",justifyContent:"space-between",marginBottom:12}}><h3>Categories</h3><button style={styles.saveBtn} onClick={addCategory}>+ Add Category</button></div>{(settings.categories||[]).map(c=><div key={c.id} style={{...styles.pricingCard,display:"grid",gridTemplateColumns:"1fr 1fr 80px auto",gap:10,alignItems:"center"}}><input style={styles.adminInput} value={c.name||""} onChange={e=>updateCategory(c.id,"name",e.target.value)} placeholder="English name"/><input style={styles.adminInput} value={c.nameAr||""} onChange={e=>updateCategory(c.id,"nameAr",e.target.value)} placeholder="Arabic name"/><input type="number" style={styles.adminInput} value={c.order||0} onChange={e=>updateCategory(c.id,"order",parseInt(e.target.value)||0)}/><div style={{display:"flex",gap:6}}><Toggle on={c.active!==false} onToggle={()=>updateCategory(c.id,"active",c.active===false)}/><button style={{...styles.navBtn,color:"#e53935"}} onClick={()=>deleteCategory(c.id)}>Delete</button></div></div>)}</div>}
+
+        {adminTab==="banners" && <div><div style={{display:"flex",justifyContent:"space-between",marginBottom:12}}><h3>Promotional Banners</h3><button style={styles.saveBtn} onClick={addBanner}>+ Add Banner</button></div>{(settings.banners||[]).map(b=><div key={b.id} style={styles.pricingCard}>{[["title","Title"],["subtitle","Subtitle"],["image","Image URL"],["buttonText","Button Text"],["buttonLink","Button Link"]].map(([k,l])=><div key={k} style={styles.pricingRow}><span style={styles.pricingLabel}>{l}</span><input style={{...styles.adminInput,width:"min(100%,420px)"}} value={b[k]||""} onChange={e=>updateBanner(b.id,k,e.target.value)}/></div>)}<div style={{display:"flex",gap:12,alignItems:"center"}}><Toggle on={b.active!==false} onToggle={()=>updateBanner(b.id,"active",b.active===false)}/><input type="number" style={styles.adminInput} value={b.order||0} onChange={e=>updateBanner(b.id,"order",parseInt(e.target.value)||0)}/><button style={{...styles.navBtn,color:"#e53935"}} onClick={()=>deleteBanner(b.id)}>Delete Banner</button></div></div>)}</div>}
+
+        {adminTab==="pricing" && <div>
+          <div style={styles.pricingCard}><h3 style={{marginBottom:16}}>Category Discounts</h3>{(settings.categories||[]).map(cat=><div key={cat.id} style={styles.pricingRow}><span style={styles.pricingLabel}>{lang==="ar"?cat.nameAr:cat.name}</span><input type="number" style={styles.adminInput} min={0} max={100} value={settings.categoryDiscounts?.[cat.id]||0} onChange={e=>updateCatDisc(cat.id,parseFloat(e.target.value)||0)}/><span>%</span></div>)}</div>
+          <div style={styles.pricingCard}><h3>{t.couponCode}</h3><div style={styles.pricingRow}><span style={styles.pricingLabel}>{t.couponCode}</span><input style={styles.adminInput} value={settings.couponCode||""} onChange={e=>updateSetting("couponCode",e.target.value)}/></div><div style={styles.pricingRow}><span style={styles.pricingLabel}>{t.couponDiscount}</span><input type="number" style={styles.adminInput} value={settings.couponDiscount||0} onChange={e=>updateSetting("couponDiscount",parseFloat(e.target.value)||0)}/><span>%</span><Toggle on={!!settings.couponActive} onToggle={()=>updateSetting("couponActive",!settings.couponActive)}/></div></div>
+          <div style={styles.pricingCard}><h3>{t.buyX}</h3><div style={styles.pricingRow}><span style={styles.pricingLabel}>{t.buyXQty}</span><input type="number" style={styles.adminInput} value={settings.buyXQty||2} onChange={e=>updateSetting("buyXQty",parseInt(e.target.value)||2)}/></div><div style={styles.pricingRow}><span style={styles.pricingLabel}>{t.buyXDisc}</span><input type="number" style={styles.adminInput} value={settings.buyXDisc||0} onChange={e=>updateSetting("buyXDisc",parseFloat(e.target.value)||0)}/><span>%</span><Toggle on={!!settings.buyXActive} onToggle={()=>updateSetting("buyXActive",!settings.buyXActive)}/></div></div>
+          <div style={styles.pricingCard}><h3>{t.shipping}</h3><div style={styles.pricingRow}><span className="pricingLabel">{t.shipping_price}</span><input type="number" style={styles.adminInput} value={settings.shippingPrice||0} onChange={e=>updateSetting("shippingPrice",parseFloat(e.target.value)||0)}/></div><div style={styles.pricingRow}><span style={styles.pricingLabel}>{t.freeShipOver}</span><input type="number" style={styles.adminInput} value={settings.freeShipOver||0} onChange={e=>updateSetting("freeShipOver",parseFloat(e.target.value)||0)}/></div><div style={styles.pricingRow}><span style={styles.pricingLabel}>{t.taxRate}</span><input type="number" style={styles.adminInput} value={settings.taxRate||0} onChange={e=>updateSetting("taxRate",parseFloat(e.target.value)||0)}/><span>%</span></div></div>
+        </div>}
+
+        {adminTab==="orders" && <div>{orders.length===0?<div style={{textAlign:"center",padding:60,color:"#999"}}>{t.noOrders}</div>:<><button style={{...styles.saveBtn,marginBottom:16}} onClick={exportCSV}>{t.exportCSV}</button><div style={{overflowX:"auto"}}><table style={styles.table}><thead><tr>{[t.orderId,t.orderDate,"Customer","Email","Total",t.orderStatus].map(h=><th key={h} style={styles.th}>{h}</th>)}</tr></thead><tbody>{orders.map(o=><tr key={o.id}><td style={styles.td}>{o.id}</td><td style={styles.td}>{o.date}</td><td style={styles.td}>{o.shipping?.name}</td><td style={styles.td}>{o.shipping?.email}</td><td style={styles.td}>${o.total}</td><td style={styles.td}><select value={o.status} onChange={e=>setOrders(os=>os.map(x=>x.id===o.id?{...x,status:e.target.value}:x))} style={{border:"1px solid #ddd",borderRadius:6,padding:"4px 8px",fontSize:".8rem"}}><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="processing">Processing</option><option value="shipped">Shipped</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select></td></tr>)}</tbody></table></div></>}</div>}
+
+        {adminTab==="customers" && <div style={{overflowX:"auto"}}><table style={styles.table}><thead><tr>{["Name","Email","Phone","City","Orders"].map(h=><th key={h} style={styles.th}>{h}</th>)}</tr></thead><tbody>{customers.map((c,i)=><tr key={i}><td style={styles.td}>{c.name||"-"}</td><td style={styles.td}>{c.email||"-"}</td><td style={styles.td}>{c.phone||"-"}</td><td style={styles.td}>{c.city||"-"}</td><td style={styles.td}>{orders.filter(o=>(o.shipping?.email||o.shipping?.phone||o.shipping?.name)===(c.email||c.phone||c.name)).length}</td></tr>)}</tbody></table></div>}
+
+        {adminTab==="content" && <div style={styles.pricingCard}>{Object.keys(settings.content||{}).map(k=><div key={k} style={{marginBottom:16}}><label style={{display:"block",fontSize:".82rem",fontWeight:700,marginBottom:6}}>{k}</label><textarea style={{...styles.adminInput,width:"100%",minHeight:100,resize:"vertical"}} value={settings.content?.[k]||""} onChange={e=>updateNestedSetting("content",k,e.target.value)}/></div>)}<div style={{display:"flex",gap:8}}><button style={styles.saveBtn} onClick={()=>saveField("content")}>{savedMsg.content?t.saved:t.save}</button></div></div>}
+
+        {adminTab==="media" && <div style={styles.pricingCard}><h3>Media Library</h3><p style={{color:"#777",fontSize:".85rem"}}>This browser-only version stores image URLs. Use the Homepage, Banner and Product image controls to add or replace media.</p><div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(120px,1fr))",gap:10,marginTop:16}}>{[...new Set([...products.map(p=>p.image),...(settings.heroImages||[]),...(settings.banners||[]).map(b=>b.image)].filter(Boolean))].map((img,i)=><div key={i} style={{border:"1px solid #eee",padding:6,borderRadius:8}}><img src={img} alt="" onError={onImgErr} style={{width:"100%",height:120,objectFit:"cover",borderRadius:5}}/><div style={{fontSize:".6rem",wordBreak:"break-all",marginTop:5,color:"#777"}}>{img}</div></div>)}</div></div>}
+
+        {adminTab==="settings" && <div>
+          <div style={styles.pricingCard}>{[["storeName","Store Name"],["storeTagline","Tagline"],["paypalClientId","PayPal Client ID"],["whatsapp","WhatsApp Number"],["instagram","Instagram"],["snapchat","Snapchat"],["tiktok","TikTok"],["adminPassword","Admin Password"]].map(([k,label])=><div key={k} style={styles.pricingRow}><span style={styles.pricingLabel}>{label}</span><input type={k==="adminPassword"?"password":"text"} style={{...styles.adminInput,width:260}} value={settings[k]||""} onChange={e=>updateSetting(k,e.target.value)}/></div>)}<button style={styles.saveBtn} onClick={()=>saveField("settings")}>{savedMsg.settings?t.saved:t.save}</button></div>
+          <div style={styles.pricingCard}><h3>Appearance</h3>{[["primaryColor","Primary Color"],["secondaryColor","Secondary Color"]].map(([k,l])=><div key={k} style={styles.pricingRow}><span style={styles.pricingLabel}>{l}</span><input type="color" value={settings.appearance?.[k]||"#000000"} onChange={e=>updateNestedSetting("appearance",k,e.target.value)} /><input style={styles.adminInput} value={settings.appearance?.[k]||""} onChange={e=>updateNestedSetting("appearance",k,e.target.value)}/></div>)}<div style={styles.pricingRow}><span style={styles.pricingLabel}>Button Radius</span><input type="number" style={styles.adminInput} value={settings.appearance?.buttonRadius||8} onChange={e=>updateNestedSetting("appearance","buttonRadius",parseInt(e.target.value)||0)}/></div></div>
+          <div style={styles.pricingCard}><h3>Footer</h3>{Object.keys(settings.footer||{}).map(k=><div key={k} style={styles.pricingRow}><span style={styles.pricingLabel}>{k}</span><input style={{...styles.adminInput,width:"min(100%,420px)"}} value={settings.footer?.[k]||""} onChange={e=>updateNestedSetting("footer",k,e.target.value)}/></div>)}</div>
+          <div style={{display:"flex",gap:8}}><button style={{...styles.saveBtn,background:"#9b2c2c"}} onClick={resetCmsSettings}>Reset CMS Defaults</button></div>
+        </div>}
       </div>
     );
   }
