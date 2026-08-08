@@ -1,15 +1,15 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 
 // ─── Translations ────────────────────────────────────────────────
 const T = {
   en: {
     store:"Store", admin:"Admin", langBtn:"عربي",
-    collection:"Our Collection", subtitle:"MODEST · PREMIUM · FREE US SHIPPING",
+    collection:"Our Collection", subtitle:"MODEST · PREMIUM · SHIPPING ACROSS ALL 50 STATES",
     search:"Search products...", outOfStock:"Out of Stock", addToCart:"Add to Cart",
     soldOut:"Sold Out", addedToCart:"✓ Added", back:"← Back",
     shoppingBag:"Shopping Bag", emptyBag:"Your bag is empty",
     continueShopping:"Continue Shopping", subtotal:"Subtotal",
-    shipping:"Shipping", freeShip:"FREE 🇺🇸", total:"Total", checkout:"Checkout →",
+    shipping:"Shipping", freeShip:"Shipping calculated at checkout", total:"Total", checkout:"Checkout →",
     shippingInfo:"Shipping Info", payment:"Payment",
     fullName:"Full Name", email:"Email", phone:"Phone (optional)",
     addr1:"Address Line 1", addr2:"Apt/Suite (optional)",
@@ -20,8 +20,8 @@ const T = {
     ppNotConf:"PayPal Not Configured", ppHint:"Go to Admin → Settings and enter your PayPal Client ID.",
     allCategories:"All", hijabMagnets:"Hijab Magnets", printedModal:"Printed Modal Hijab",
     noResults:"No products found", filterBy:"Filter by",
-    adminPanel:"Admin Panel", dashboard:"Dashboard", homepage:"Homepage", products:"Products", categories:"Categories", banners:"Banners", pricing:"Pricing & Discounts",
-    orders:"Orders", customers:"Customers", content:"Content", media:"Media", settings:"Settings", logout:"Logout",
+    adminPanel:"Admin Panel", dashboard:"Dashboard", homepage:"Homepage", products:"Products", categories:"Categories", banners:"Banners", pricing:"Pricing & Discounts", shipping:"Shipping",
+    orders:"Orders", customers:"Customers", analytics:"Analytics", marketing:"Marketing", content:"Content", media:"Media", seo:"SEO", settings:"Settings", language:"Language & Copy", sections:"Sections & Pages", access:"Admin Access", advanced:"Advanced Control", control:"Everything Control", navigation:"Navigation", checkoutSettings:"Checkout & Customer Experience", notifications:"Notifications & Emails", policies:"Policies & Legal", integrations:"Integrations & Tracking", localization:"Localization", logout:"Logout",
     productName:"Product Name", price:"Price ($)", discount:"Discount (%)",
     discountExpiry:"Discount Expiry", categoryDiscount:"Category Discount (%)",
     couponCode:"Coupon Code", couponDiscount:"Coupon Discount (%)",
@@ -35,18 +35,18 @@ const T = {
     passwordLabel:"Admin Password", login:"Login", wrongPass:"Wrong password",
     orderId:"Order ID", orderDate:"Date", orderStatus:"Status", orderTotal:"Total",
     pending:"Pending", shipped:"Shipped", delivered:"Delivered",
-    exportCSV:"Export CSV", noOrders:"No orders yet",
+    exportCSV:"Export CSV", noOrders:"No orders yet", invoice:"Invoice", printInvoice:"Print / Save Invoice", shippingFee:"Shipping Fee", subtotalLabel:"Subtotal", taxLabel:"Tax",
     completeLook:"Complete the Look", completeLookSub:"You may also like this:",
     yesAdd:"Yes, add it", noThanks:"No thanks",
   },
   ar: {
     store:"المتجر", admin:"الإدارة", langBtn:"English",
-    collection:"مجموعتنا", subtitle:"محتشم · فاخر · شحن مجاني داخل أمريكا",
+    collection:"مجموعتنا", subtitle:"محتشم · فاخر · شحن إلى جميع الولايات الخمسين",
     search:"ابحثي عن منتج...", outOfStock:"نفذ المخزون", addToCart:"أضيفي للسلة",
     soldOut:"نفذ", addedToCart:"✓ تمت الإضافة", back:"→ رجوع",
     shoppingBag:"سلة التسوق", emptyBag:"سلتك فارغة",
     continueShopping:"تابعي التسوق", subtotal:"المجموع",
-    shipping:"الشحن", freeShip:"مجاني 🇺🇸", total:"الإجمالي", checkout:"إتمام الطلب ←",
+    shipping:"الشحن", freeShip:"يتم احتساب تكلفة الشحن عند إتمام الطلب", total:"الإجمالي", checkout:"إتمام الطلب ←",
     shippingInfo:"بيانات الشحن", payment:"الدفع",
     fullName:"الاسم الكامل", email:"البريد الإلكتروني", phone:"الهاتف (اختياري)",
     addr1:"العنوان", addr2:"شقة/جناح (اختياري)",
@@ -57,8 +57,8 @@ const T = {
     ppNotConf:"PayPal غير مُفعّل", ppHint:"اذهبي إلى الإدارة ← الإعدادات وأدخلي Client ID الخاص بـ PayPal.",
     allCategories:"الكل", hijabMagnets:"مغناطيسات الحجاب", printedModal:"حجاب مودال مطبوع",
     noResults:"لا توجد منتجات", filterBy:"تصفية",
-    adminPanel:"لوحة التحكم", dashboard:"لوحة المعلومات", homepage:"الصفحة الرئيسية", products:"المنتجات", categories:"الفئات", banners:"البانرات", pricing:"التسعير والخصومات",
-    orders:"الطلبات", customers:"العملاء", content:"المحتوى", media:"الوسائط", settings:"الإعدادات", logout:"خروج",
+    adminPanel:"لوحة التحكم", dashboard:"لوحة المعلومات", homepage:"الصفحة الرئيسية", products:"المنتجات", categories:"الفئات", banners:"البانرات", pricing:"التسعير والخصومات", shipping:"الشحن",
+    orders:"الطلبات", customers:"العملاء", analytics:"التحليلات", marketing:"التسويق", content:"المحتوى", media:"الوسائط", seo:"SEO", settings:"الإعدادات", language:"اللغة والنصوص", sections:"الأقسام والصفحات", access:"صلاحيات الإدارة", advanced:"تحكم متقدم", control:"تحكم شامل", navigation:"التنقل والقوائم", checkoutSettings:"الدفع وتجربة العميل", notifications:"الإشعارات والبريد", policies:"السياسات والقانونيات", integrations:"التكاملات والتتبع", localization:"التوطين", logout:"خروج",
     productName:"اسم المنتج", price:"السعر ($)", discount:"الخصم (%)",
     discountExpiry:"انتهاء الخصم", categoryDiscount:"خصم الفئة (%)",
     couponCode:"كود الخصم", couponDiscount:"نسبة كود الخصم (%)",
@@ -72,7 +72,7 @@ const T = {
     passwordLabel:"كلمة مرور الإدارة", login:"دخول", wrongPass:"كلمة المرور خاطئة",
     orderId:"رقم الطلب", orderDate:"التاريخ", orderStatus:"الحالة", orderTotal:"الإجمالي",
     pending:"قيد المعالجة", shipped:"تم الشحن", delivered:"تم التسليم",
-    exportCSV:"تصدير CSV", noOrders:"لا توجد طلبات بعد",
+    exportCSV:"تصدير CSV", noOrders:"لا توجد طلبات بعد", invoice:"الفاتورة", printInvoice:"طباعة / حفظ الفاتورة", shippingFee:"رسوم الشحن", subtotalLabel:"المجموع الفرعي", taxLabel:"الضريبة",
     completeLook:"كمّلي الإطلالة", completeLookSub:"تريدين تضيفين هذا معه؟",
     yesAdd:"أي، ضيفيه", noThanks:"لا شكراً",
   }
@@ -164,15 +164,23 @@ const DEFAULT_PRODUCTS = [
 const DEFAULT_SETTINGS = {
   paypalClientId:"", storeName:"Huda's Abaya Boutique", storeTagline:"",
   whatsapp:"", snapchat:"hudas_abaya_boutique", instagram:"hudas_abaya_boutique", tiktok:"hudas.abaya",
-  shippingPrice:0, freeShipOver:50, taxRate:0, adminPassword:"huda2024",
+  shippingPrice:8.99, freeShipOver:null, freeShippingEnabled:false, taxRate:0, adminPassword:"huda2024",
+  shippingMethod:"Standard Shipping", shippingEtaMin:3, shippingEtaMax:7, handlingDays:1, trackingUrlTemplate:"",
+  shippingZones:{
+    "AL":8.99,"AK":14.99,"AZ":8.99,"AR":8.99,"CA":8.99,"CO":8.99,"CT":8.99,"DE":8.99,"FL":8.99,"GA":8.99,
+    "HI":14.99,"ID":10.99,"IL":8.99,"IN":8.99,"IA":8.99,"KS":8.99,"KY":8.99,"LA":8.99,"ME":10.99,"MD":8.99,
+    "MA":8.99,"MI":8.99,"MN":8.99,"MS":8.99,"MO":8.99,"MT":10.99,"NE":8.99,"NV":8.99,"NH":10.99,"NJ":8.99,
+    "NM":10.99,"NY":8.99,"NC":8.99,"ND":10.99,"OH":8.99,"OK":8.99,"OR":10.99,"PA":8.99,"RI":10.99,"SC":8.99,
+    "SD":10.99,"TN":8.99,"TX":8.99,"UT":10.99,"VT":10.99,"VA":8.99,"WA":10.99,"WV":8.99,"WI":8.99,"WY":10.99
+  },
   couponCode:"", couponDiscount:0, couponActive:false,
   buyXQty:2, buyXDisc:10, buyXActive:false,
   categoryDiscounts:{ hijabMagnets:0, printedModal:0 },
   announcementText:"Welcome to Huda’s Abaya Boutique",
   heroTitle:"Huda’s Abaya Boutique",
   heroTitleAr:"بوتيك هدى للعبايات",
-  heroSubtitle:"MODEST · PREMIUM · FREE US SHIPPING",
-  heroSubtitleAr:"محتشم · فاخر · شحن مجاني داخل أمريكا",
+  heroSubtitle:"MODEST · PREMIUM · SHIPPING ACROSS ALL 50 STATES",
+  heroSubtitleAr:"محتشم · فاخر · شحن إلى جميع الولايات الخمسين",
   heroButtonText:"Our Collection",
   heroButtonTextAr:"مجموعتنا",
   heroButtonLink:"#shop-grid",
@@ -186,6 +194,43 @@ const DEFAULT_SETTINGS = {
   content:{about:"",contact:"",faq:"",privacy:"",terms:"",shippingPolicy:"",returnPolicy:""},
   appearance:{primaryColor:"#c4a56a",secondaryColor:"#1a1a1a",buttonRadius:8,productColumns:5},
   footer:{about:"",phone:"",email:"",address:"",copyright:""},
+  heroKenBurns:true, announcementActive:true, defaultLanguage:"en", languageSwitcher:true, arabicRTL:true, maintenanceMode:false, storefrontPublished:true, allowGuestCheckout:true, showAdminShortcut:true, enableAuditLog:true, enableDraftPreview:true,
+  wishlistEnabled:true, quickViewEnabled:true, recentlyViewedEnabled:true, backInStockEnabled:true, lowStockEnabled:true, reviewsEnabled:true, sizeGuideEnabled:true, compareEnabled:false,
+  campaignActive:false, campaignTitle:"", campaignSubtitle:"", campaignButton:"Shop Now", campaignLink:"#shop-grid",
+  stickyHeader:true, smoothScroll:true, productHoverZoom:true, showTrustBadges:true, showShippingEta:true,
+  seoTitle:"Huda’s Abaya Boutique", seoDescription:"Premium modest fashion and abayas with shipping across all 50 U.S. states.", seoKeywords:"abaya, modest fashion, hijab, premium abaya", ogImage:"", canonicalUrl:"",
+  reducedMotion:true, lazyImages:true, highContrast:false,
+  // Full bilingual CMS: every editable UI label can be overridden from Admin
+  translations:{en:{},ar:{}},
+  homepageSections:[
+    {id:"welcome",type:"text",title:"Welcome to Huda’s Abaya Boutique",titleAr:"مرحباً بكم في بوتيك هدى للعبايات",body:"Discover modest, premium pieces designed for effortless elegance.",bodyAr:"اكتشفي قطعاً محتشمة وفاخرة مصممة لأناقة سهلة.",image:"",buttonText:"Explore Collection",buttonTextAr:"استكشفي المجموعة",buttonLink:"#shop-grid",active:true,order:1},
+    {id:"shipping-note",type:"feature",title:"Shipping Across All 50 States",titleAr:"الشحن إلى جميع الولايات الخمسين",body:"Shipping rates are calculated by destination. No free-shipping claim is shown unless enabled by the admin.",bodyAr:"يتم احتساب رسوم الشحن حسب الولاية. لا يظهر الشحن المجاني إلا إذا فعّله الأدمن.",image:"",buttonText:"View Shipping",buttonTextAr:"عرض الشحن",buttonLink:"#shop-grid",active:true,order:2}
+  ],
+  // Professional CMS control center: all customer-facing behavior, copy, layout and operational rules.
+  siteMeta:{titleEn:"Huda’s Abaya Boutique",titleAr:"بوتيك هدى للعبايات",descriptionEn:"Premium modest fashion and abayas with shipping across all 50 U.S. states.",descriptionAr:"أزياء محتشمة وفاخرة مع الشحن إلى جميع الولايات الأمريكية الخمسين.",favicon:"",ogImage:"",canonical:""},
+  navigation:{items:[{id:"home",labelEn:"Home",labelAr:"الرئيسية",href:"#top",active:true,order:1},{id:"collection",labelEn:"Collection",labelAr:"المجموعة",href:"#shop-grid",active:true,order:2},{id:"about",labelEn:"About",labelAr:"من نحن",href:"#about",active:true,order:3},{id:"contact",labelEn:"Contact",labelAr:"تواصل معنا",href:"#contact",active:true,order:4}]},
+  checkout:{showOrderNotes:true,showPhone:true,requirePhone:false,showCompany:false,showAddress2:true,showCoupon:true,showTax:true,showShippingEstimate:true,paymentMethod:"PayPal",currency:"USD",currencySymbol:"$",termsRequired:false,termsTextEn:"I agree to the store terms.",termsTextAr:"أوافق على شروط المتجر.",successRedirect:"",thankYouMessageEn:"Thank you for your order!",thankYouMessageAr:"شكراً لطلبك!"},
+  customerExperience:{showSearch:true,showWishlist:true,showQuickView:true,showRecentlyViewed:true,showReviews:true,showSizeGuide:true,showCompare:true,showRelatedProducts:true,showBreadcrumbs:true,showBackToTop:true,showCookieNotice:false,cookieTextEn:"We use cookies to improve your experience.",cookieTextAr:"نستخدم ملفات تعريف الارتباط لتحسين تجربتك.",popupEnabled:false,popupTitleEn:"",popupTitleAr:"",popupBodyEn:"",popupBodyAr:"",popupButtonEn:"Shop Now",popupButtonAr:"تسوقي الآن",popupLink:"#shop-grid",popupDelay:5},
+  notifications:{orderConfirmation:true,shippingUpdate:true,deliveryUpdate:true,lowStock:true,backInStock:true,adminOrderAlert:true,adminEmail:"",whatsappAlerts:true,customerEmailFrom:"",customerSupportEmail:"",supportPhone:"",templates:{orderConfirmationEn:"Your order {{orderId}} has been received.",orderConfirmationAr:"تم استلام طلبك {{orderId}}.",shippingEn:"Your order {{orderId}} has shipped.",shippingAr:"تم شحن طلبك {{orderId}}.",deliveryEn:"Your order {{orderId}} was delivered.",deliveryAr:"تم تسليم طلبك {{orderId}}."}},
+  policies:{privacyEn:"",privacyAr:"",termsEn:"",termsAr:"",shippingEn:"Shipping rates are calculated by destination across all 50 U.S. states.",shippingAr:"يتم احتساب رسوم الشحن حسب الولاية لجميع الولايات الأمريكية الخمسين.",returnsEn:"",returnsAr:"",refundsEn:"",refundsAr:"",sizeGuideEn:"",sizeGuideAr:"",accessibilityEn:"",accessibilityAr:""},
+  integrations:{googleAnalyticsId:"",googleTagManagerId:"",metaPixelId:"",tiktokPixelId:"",facebookDomainVerification:"",googleSiteVerification:"",paypalClientId:"",stripePublicKey:"",mapsApiKey:"",mailchimpUrl:"",webhookUrl:"",whatsappNumber:"",instagramUrl:"",facebookUrl:"",tiktokUrl:"",snapchatUrl:""},
+  localization:{defaultLanguage:"en",enabledLanguages:["en","ar"],arabicRTL:true,dateFormat:"MM/DD/YYYY",timeZone:"America/New_York",currency:"USD",currencySymbol:"$",decimalPlaces:2,thousandSeparator:",",decimalSeparator:".",stateLabelEn:"State",stateLabelAr:"الولاية",zipLabelEn:"ZIP Code",zipLabelAr:"الرمز البريدي"},
+  storefront:{published:true,maintenance:false,passwordProtected:false,showAnnouncement:true,announcementTextEn:"",announcementTextAr:"",showPromoPopup:false,showSaleBadges:true,showStockBadges:true,showNewBadges:true,showDeliveryBadges:true,showTrustBadges:true,enableAnimations:true,enableProductZoom:true,enableStickyHeader:true,enableDarkMode:false,enableAccessibilityWidget:false},
+  shippingRules:{methodEn:"Standard Shipping",methodAr:"الشحن القياسي",paidShippingOnly:true,freeShippingEnabled:false,freeShippingThreshold:null,etaMin:3,etaMax:7,handlingDays:1,cutoffHour:15,weekendProcessing:false,carrier:"",trackingTemplate:"",internationalShipping:false,poBoxAllowed:true,signatureRequired:false,insuranceEnabled:false},
+  invoice:{enabled:true,includeShippingFee:true,includeTax:true,includeCustomerPhone:true,includeShippingAddress:true,storeName:"Huda’s Abaya Boutique",storeEmail:"",storePhone:"",footerEn:"Thank you for your order.",footerAr:"شكراً لطلبكم."},
+  inventory:{lowStockThreshold:5,allowBackorders:false,showStockQuantity:false,hideOutOfStock:true,autoDisableOutOfStock:false,notifyAdminAtLowStock:true},
+  marketing:{utmSource:"",utmMedium:"",utmCampaign:"",googleAdsId:"",metaAdsId:"",defaultCoupon:"",newsletterEnabled:false,newsletterTitleEn:"",newsletterTitleAr:"",newsletterTextEn:"",newsletterTextAr:"",newsletterButtonEn:"Subscribe",newsletterButtonAr:"اشتراك"},
+  accessibility:{altTextRequired:false,keyboardFocus:true,reducedMotion:true,highContrast:false,largeText:false,screenReaderLabels:true},
+  security:{sessionTimeoutMinutes:120,lockAfterFailedLogins:5,maintenanceLockMessageEn:"Store temporarily unavailable.",maintenanceLockMessageAr:"المتجر غير متاح مؤقتاً.",allowAdminShortcut:true,requireAdminPassword:true},
+  customCopy:{en:{},ar:{}},
+  adminRoles:[
+    {id:"super-admin",name:"Super Admin",permissions:["*"]},
+    {id:"catalog-manager",name:"Catalog Manager",permissions:["products","categories","media"]},
+    {id:"orders-manager",name:"Orders Manager",permissions:["orders","customers","shipping"]},
+    {id:"marketing-manager",name:"Marketing Manager",permissions:["homepage","banners","pricing","marketing","seo"]},
+    {id:"content-manager",name:"Content & Language Manager",permissions:["content","language","homepage"]}
+  ],
+  adminAuditLog:[],
 };
 
 const LS = {
@@ -224,13 +269,13 @@ function AdminPasswordInput({styles, placeholder, onSubmit}){
 
 export default function App() {
   const [lang, setLang] = useState("en");
-  const t = T[lang];
   const isRTL = lang==="ar";
   const [pageKey, setPageKey] = useState(0);
   const [transitioning, setTransitioning] = useState(false);
 
   const [products, setProducts] = useState(()=>LS.get("huda_products", DEFAULT_PRODUCTS));
-  const [settings, setSettings] = useState(()=>{ const saved=LS.get("huda_settings",{}); return { ...DEFAULT_SETTINGS, ...saved, categoryDiscounts:{...DEFAULT_SETTINGS.categoryDiscounts,...(saved.categoryDiscounts||{})}, appearance:{...DEFAULT_SETTINGS.appearance,...(saved.appearance||{})}, footer:{...DEFAULT_SETTINGS.footer,...(saved.footer||{})}, content:{...DEFAULT_SETTINGS.content,...(saved.content||{})}, categories:saved.categories||DEFAULT_SETTINGS.categories, banners:saved.banners||DEFAULT_SETTINGS.banners, heroImages:saved.heroImages||DEFAULT_SETTINGS.heroImages }; });
+  const [settings, setSettings] = useState(()=>{ const saved=LS.get("huda_settings",{}); saved.freeShippingEnabled=false; if(saved.shippingRules) saved.shippingRules={...saved.shippingRules,freeShippingEnabled:false,freeShippingThreshold:null}; return { ...DEFAULT_SETTINGS, ...saved, categoryDiscounts:{...DEFAULT_SETTINGS.categoryDiscounts,...(saved.categoryDiscounts||{})}, appearance:{...DEFAULT_SETTINGS.appearance,...(saved.appearance||{})}, footer:{...DEFAULT_SETTINGS.footer,...(saved.footer||{})}, content:{...DEFAULT_SETTINGS.content,...(saved.content||{})}, shippingZones:{...DEFAULT_SETTINGS.shippingZones,...(saved.shippingZones||{})}, categories:saved.categories||DEFAULT_SETTINGS.categories, banners:saved.banners||DEFAULT_SETTINGS.banners, heroImages:saved.heroImages||DEFAULT_SETTINGS.heroImages, translations:{en:{...DEFAULT_SETTINGS.translations.en,...(saved.translations?.en||{})},ar:{...DEFAULT_SETTINGS.translations.ar,...(saved.translations?.ar||{})}}, siteMeta:{...DEFAULT_SETTINGS.siteMeta,...(saved.siteMeta||{})}, navigation:{...DEFAULT_SETTINGS.navigation,...(saved.navigation||{}),items:saved.navigation?.items||DEFAULT_SETTINGS.navigation.items}, checkout:{...DEFAULT_SETTINGS.checkout,...(saved.checkout||{})}, customerExperience:{...DEFAULT_SETTINGS.customerExperience,...(saved.customerExperience||{}),}, notifications:{...DEFAULT_SETTINGS.notifications,...(saved.notifications||{}),templates:{...DEFAULT_SETTINGS.notifications.templates,...(saved.notifications?.templates||{})}}, policies:{...DEFAULT_SETTINGS.policies,...(saved.policies||{})}, integrations:{...DEFAULT_SETTINGS.integrations,...(saved.integrations||{})}, localization:{...DEFAULT_SETTINGS.localization,...(saved.localization||{}),enabledLanguages:saved.localization?.enabledLanguages||DEFAULT_SETTINGS.localization.enabledLanguages}, storefront:{...DEFAULT_SETTINGS.storefront,...(saved.storefront||{})}, shippingRules:{...DEFAULT_SETTINGS.shippingRules,...(saved.shippingRules||{})}, invoice:{...DEFAULT_SETTINGS.invoice,...(saved.invoice||{})}, inventory:{...DEFAULT_SETTINGS.inventory,...(saved.inventory||{})}, marketing:{...DEFAULT_SETTINGS.marketing,...(saved.marketing||{})}, accessibility:{...DEFAULT_SETTINGS.accessibility,...(saved.accessibility||{})}, security:{...DEFAULT_SETTINGS.security,...(saved.security||{})}, customCopy:{en:{...(DEFAULT_SETTINGS.customCopy?.en||{}),...(saved.customCopy?.en||{})},ar:{...(DEFAULT_SETTINGS.customCopy?.ar||{}),...(saved.customCopy?.ar||{})}}, homepageSections:saved.homepageSections||DEFAULT_SETTINGS.homepageSections, adminRoles:saved.adminRoles||DEFAULT_SETTINGS.adminRoles, adminAuditLog:saved.adminAuditLog||[] }; });
+  const t = useMemo(()=>({...T[lang], ...(settings?.translations?.[lang]||{})}),[lang,settings?.translations]);
   const [orders, setOrders] = useState(()=>LS.get("huda_orders",[]));
   const [cart, setCart] = useState([]);
   const [wishlist, setWishlist] = useState(()=>LS.get("huda_wishlist",[]));
@@ -242,6 +287,13 @@ export default function App() {
   const [adminLoggedIn, setAdminLoggedIn] = useState(false);
   const [adminPass, setAdminPass] = useState("");
   const [adminPassErr, setAdminPassErr] = useState(false);
+  const US_STATES = [
+    ["AL","Alabama"],["AK","Alaska"],["AZ","Arizona"],["AR","Arkansas"],["CA","California"],["CO","Colorado"],["CT","Connecticut"],["DE","Delaware"],["FL","Florida"],["GA","Georgia"],
+    ["HI","Hawaii"],["ID","Idaho"],["IL","Illinois"],["IN","Indiana"],["IA","Iowa"],["KS","Kansas"],["KY","Kentucky"],["LA","Louisiana"],["ME","Maine"],["MD","Maryland"],
+    ["MA","Massachusetts"],["MI","Michigan"],["MN","Minnesota"],["MS","Mississippi"],["MO","Missouri"],["MT","Montana"],["NE","Nebraska"],["NV","Nevada"],["NH","New Hampshire"],["NJ","New Jersey"],
+    ["NM","New Mexico"],["NY","New York"],["NC","North Carolina"],["ND","North Dakota"],["OH","Ohio"],["OK","Oklahoma"],["OR","Oregon"],["PA","Pennsylvania"],["RI","Rhode Island"],["SC","South Carolina"],
+    ["SD","South Dakota"],["TN","Tennessee"],["TX","Texas"],["UT","Utah"],["VT","Vermont"],["VA","Virginia"],["WA","Washington"],["WV","West Virginia"],["WI","Wisconsin"],["WY","Wyoming"]
+  ];
   const [shippingForm, setShippingForm] = useState({name:"",email:"",phone:"",addr1:"",addr2:"",city:"",state:"",zip:""});
   const [formError, setFormError] = useState("");
   const [couponInput, setCouponInput] = useState("");
@@ -278,7 +330,7 @@ export default function App() {
   useEffect(()=>{ LS.set("huda_wishlist",wishlist); },[wishlist]);
 
   const cartTotal = cart.reduce((s,i)=>s+calcPrice(products.find(p=>p.id===i.id)||{price:0,discount:0,category:""},settings,i.qty,couponInput)*i.qty,0);
-  const shippingCost = cartTotal>=settings.freeShipOver ? 0 : settings.shippingPrice||0;
+  const shippingCost = !settings.shippingMethod ? 0 : Number(settings.shippingZones?.[shippingForm.state] ?? settings.shippingPrice ?? 0);
   const tax = cartTotal*(settings.taxRate||0)/100;
   const orderTotal = cartTotal+shippingCost+tax;
 
@@ -353,9 +405,15 @@ export default function App() {
   function updateProduct(id,field,val){
     setProducts(ps=>ps.map(p=>p.id===id?{...p,[field]:val}:p));
   }
-  function updateSetting(field,val){ setSettings(s=>({...s,[field]:val})); }
+  function updateSetting(field,val){ setSettings(s=>({...s,[field]:(field==="freeShippingEnabled"?false:val)})); }
   function updateCatDisc(cat,val){ setSettings(s=>({...s,categoryDiscounts:{...s.categoryDiscounts,[cat]:val}})); }
-  function updateNestedSetting(group,field,val){ setSettings(s=>({...s,[group]:{...(s[group]||{}),[field]:val}})); }
+  function updateNestedSetting(group,field,val){ setSettings(s=>({...s,[group]:{...(s[group]||{}),[field]:(group==="shippingRules" && field==="freeShippingEnabled"?false:val)}})); }
+  function updateTranslation(language,key,val){ setSettings(s=>({...s,translations:{...(s.translations||{}),[language]:{...((s.translations||{})[language]||{}),[key]:val}}})); }
+  function addHomepageSection(){ const id="section-"+Date.now(); setSettings(s=>({...s,homepageSections:[...(s.homepageSections||[]),{id,type:"text",title:"New Section",titleAr:"قسم جديد",body:"",bodyAr:"",image:"",buttonText:"",buttonTextAr:"",buttonLink:"#shop-grid",active:true,order:(s.homepageSections||[]).length+1}]})); }
+  function updateHomepageSection(id,field,val){ setSettings(s=>({...s,homepageSections:(s.homepageSections||[]).map(x=>x.id===id?{...x,[field]:val}:x)})); }
+  function deleteHomepageSection(id){ setSettings(s=>({...s,homepageSections:(s.homepageSections||[]).filter(x=>x.id!==id)})); }
+  function moveHomepageSection(id,direction){ setSettings(s=>{ const arr=[...(s.homepageSections||[])].sort((a,b)=>(a.order||0)-(b.order||0)); const i=arr.findIndex(x=>x.id===id); const j=direction==='up'?i-1:i+1; if(i<0||j<0||j>=arr.length) return s; [arr[i],arr[j]]=[arr[j],arr[i]]; return {...s,homepageSections:arr.map((x,idx)=>({...x,order:idx+1}))}; }); }
+  function addAudit(action,details=""){ setSettings(s=>({...s,adminAuditLog:[{id:Date.now(),action,details,at:new Date().toISOString()},...(s.adminAuditLog||[])].slice(0,200)})); }
   function addBanner(){ setSettings(s=>({...s,banners:[...(s.banners||[]),{id:"ban-"+Date.now(),title:"New Banner",subtitle:"",image:"",buttonText:"Shop Now",buttonLink:"#shop-grid",active:true,order:(s.banners||[]).length+1}]})); }
   function updateBanner(id,field,val){ setSettings(s=>({...s,banners:(s.banners||[]).map(b=>b.id===id?{...b,[field]:val}:b)})); }
   function deleteBanner(id){ setSettings(s=>({...s,banners:(s.banners||[]).filter(b=>b.id!==id)})); }
@@ -365,7 +423,16 @@ export default function App() {
   function addHeroImage(){ setSettings(s=>({...s,heroImages:[...(s.heroImages||[]),""]})); }
   function updateHeroImage(i,val){ setSettings(s=>({...s,heroImages:(s.heroImages||[]).map((x,idx)=>idx===i?val:x)})); }
   function deleteHeroImage(i){ setSettings(s=>({...s,heroImages:(s.heroImages||[]).filter((_,idx)=>idx!==i)})); }
-  function resetCmsSettings(){ setSettings(s=>({...DEFAULT_SETTINGS,...s,appearance:{...DEFAULT_SETTINGS.appearance,...(s.appearance||{})},footer:{...DEFAULT_SETTINGS.footer,...(s.footer||{})},content:{...DEFAULT_SETTINGS.content,...(s.content||{})}})); }
+  function updateShippingZone(code,val){ setSettings(s=>({...s,shippingZones:{...(s.shippingZones||{}),[code]:Number(val)||0}})); }
+  function resetCmsSettings(){ setSettings(s=>({...DEFAULT_SETTINGS,...s,siteMeta:{...DEFAULT_SETTINGS.siteMeta,...(s.siteMeta||{})},navigation:{...DEFAULT_SETTINGS.navigation,...(s.navigation||{}),items:s.navigation?.items||DEFAULT_SETTINGS.navigation.items},checkout:{...DEFAULT_SETTINGS.checkout,...(s.checkout||{})},customerExperience:{...DEFAULT_SETTINGS.customerExperience,...(s.customerExperience||{})},notifications:{...DEFAULT_SETTINGS.notifications,...(s.notifications||{}),templates:{...DEFAULT_SETTINGS.notifications.templates,...(s.notifications?.templates||{})}},policies:{...DEFAULT_SETTINGS.policies,...(s.policies||{})},integrations:{...DEFAULT_SETTINGS.integrations,...(s.integrations||{})},localization:{...DEFAULT_SETTINGS.localization,...(s.localization||{})},storefront:{...DEFAULT_SETTINGS.storefront,...(s.storefront||{})},shippingRules:{...DEFAULT_SETTINGS.shippingRules,...(s.shippingRules||{})},invoice:{...DEFAULT_SETTINGS.invoice,...(s.invoice||{})},inventory:{...DEFAULT_SETTINGS.inventory,...(s.inventory||{})},marketing:{...DEFAULT_SETTINGS.marketing,...(s.marketing||{})},accessibility:{...DEFAULT_SETTINGS.accessibility,...(s.accessibility||{})},security:{...DEFAULT_SETTINGS.security,...(s.security||{})},customCopy:{en:{...(DEFAULT_SETTINGS.customCopy.en||{}),...(s.customCopy?.en||{})},ar:{...(DEFAULT_SETTINGS.customCopy.ar||{}),...(s.customCopy?.ar||{})}},appearance:{...DEFAULT_SETTINGS.appearance,...(s.appearance||{})},footer:{...DEFAULT_SETTINGS.footer,...(s.footer||{})},content:{...DEFAULT_SETTINGS.content,...(s.content||{})},shippingZones:{...DEFAULT_SETTINGS.shippingZones,...(s.shippingZones||{})}})); }
+  function updateCmsGroup(group,field,val){ setSettings(s=>({...s,[group]:{...(s[group]||{}),[field]:val}})); }
+  function addCustomCopy(locale){ const id="copy-"+Date.now(); setSettings(s=>({...s,customCopy:{...(s.customCopy||{}),[locale]:{...(s.customCopy?.[locale]||{}),[id]:""}}})); }
+  function deleteCustomCopy(locale,key){ setSettings(s=>({...s,customCopy:{...(s.customCopy||{}),[locale]:Object.fromEntries(Object.entries(s.customCopy?.[locale]||{}).filter(([k])=>k!==key))}})); }
+  function addNavItem(){ const id="nav-"+Date.now(); setSettings(s=>({...s,navigation:{...(s.navigation||{}),items:[...(s.navigation?.items||[]),{id,labelEn:"New Link",labelAr:"رابط جديد",href:"#",active:true,order:(s.navigation?.items||[]).length+1}]}})); }
+  function updateNavItem(id,field,val){ setSettings(s=>({...s,navigation:{...(s.navigation||{}),items:(s.navigation?.items||[]).map(x=>x.id===id?{...x,[field]:val}:x)}})); }
+  function deleteNavItem(id){ setSettings(s=>({...s,navigation:{...(s.navigation||{}),items:(s.navigation?.items||[]).filter(x=>x.id!==id)}})); }
+  function addLanguage(){ setSettings(s=>({...s,localization:{...(s.localization||{}),enabledLanguages:[...(s.localization?.enabledLanguages||[]),"new"]}})); }
+  function removeLanguage(lang){ setSettings(s=>({...s,localization:{...(s.localization||{}),enabledLanguages:(s.localization?.enabledLanguages||[]).filter(x=>x!==lang)}})); }
   function exportData(){ const data={products,settings,orders,wishlist,exportedAt:new Date().toISOString()}; const a=document.createElement("a"); a.href="data:application/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(data,null,2)); a.download="huda-abaya-backup.json"; a.click(); }
 
   function placeOrder(ppDetails=null){
@@ -373,8 +440,12 @@ export default function App() {
       id:"ORD-"+Date.now(),
       date:new Date().toLocaleDateString(),
       items:[...cart],
-      shipping:shippingForm,
+      shipping:{...shippingForm},
+      subtotal:cartTotal.toFixed(2),
+      shippingCost:shippingCost.toFixed(2),
+      tax:tax.toFixed(2),
       total:orderTotal.toFixed(2),
+      shippingMethod:settings.shippingMethod||"Standard Shipping",
       status:"pending",
       paypal:ppDetails,
     };
@@ -388,8 +459,32 @@ export default function App() {
     setPage("confirm");
   }
 
+  function printInvoice(order){
+    if(!order || settings.invoice?.enabled===false) return;
+    const inv = settings.invoice || {};
+    const ar = lang === "ar";
+    const esc = (v)=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+    const itemRows = (order.items||[]).map(item=>{
+      const product = products.find(p=>p.id===item.id) || item;
+      const qty = Number(item.qty||1);
+      const unit = Number(calcPrice(product,settings,qty)||0);
+      return `<tr><td>${esc(lang==="ar"?(product.nameAr||product.name):product.name)}</td><td>${qty}</td><td>$${unit.toFixed(2)}</td><td>$${(unit*qty).toFixed(2)}</td></tr>`;
+    }).join("");
+    const shippingFee = Number(order.shippingCost ?? shippingCost ?? 0);
+    const taxAmount = Number(order.tax ?? 0);
+    const subtotal = Number(order.subtotal ?? 0);
+    const total = Number(order.total ?? 0);
+    const address = [order.shipping?.addr1,order.shipping?.addr2,order.shipping?.city,order.shipping?.state,order.shipping?.zip].filter(Boolean).join(", ");
+    const title = ar ? "الفاتورة" : "INVOICE";
+    const labels = ar ? {date:"التاريخ",order:"رقم الطلب",customer:"العميل",address:"عنوان الشحن",items:"المنتجات",qty:"الكمية",unit:"السعر",amount:"المبلغ",subtotal:"المجموع الفرعي",shipping:"رسوم الشحن",tax:"الضريبة",total:"الإجمالي"} : {date:"Date",order:"Order ID",customer:"Customer",address:"Shipping Address",items:"Items",qty:"Qty",unit:"Unit Price",amount:"Amount",subtotal:"Subtotal",shipping:"Shipping Fee",tax:"Tax",total:"Total"};
+    const footer = ar ? (inv.footerAr||"شكراً لطلبكم.") : (inv.footerEn||"Thank you for your order.");
+    const html=`<!doctype html><html lang="${ar?'ar':'en'}" dir="${ar?'rtl':'ltr'}"><head><meta charset="utf-8"><title>${title} - ${esc(order.id)}</title><style>body{font-family:Arial,sans-serif;margin:0;background:#f5f2ec;color:#222}.invoice{max-width:820px;margin:30px auto;background:#fff;padding:42px;box-shadow:0 8px 30px rgba(0,0,0,.08)}.top{display:flex;justify-content:space-between;gap:20px;border-bottom:1px solid #ddd;padding-bottom:22px}.brand{font-size:25px;font-weight:700}.muted{color:#777;font-size:13px;line-height:1.7}h1{font-size:30px;margin:0}.meta{margin:24px 0;display:grid;grid-template-columns:1fr 1fr;gap:20px}.box{background:#faf8f4;padding:15px;border-radius:10px}.label{font-size:11px;color:#888;text-transform:uppercase;margin-bottom:5px}table{width:100%;border-collapse:collapse;margin-top:20px}th,td{padding:11px 8px;border-bottom:1px solid #eee;text-align:${ar?'right':'left'};font-size:13px}th{color:#777;font-weight:600}.totals{margin-top:20px;margin-${ar?'left':'right'}:0;width:300px;max-width:100%}.row{display:flex;justify-content:space-between;padding:7px 0}.grand{font-weight:700;font-size:18px;border-top:2px solid #222;margin-top:7px;padding-top:12px}.footer{margin-top:35px;padding-top:20px;border-top:1px solid #ddd;text-align:center;color:#777;font-size:13px}@media print{body{background:#fff}.invoice{margin:0;box-shadow:none;max-width:none}button{display:none}}</style></head><body><div class="invoice"><div class="top"><div><div class="brand">${esc(inv.storeName||settings.storeName||"Huda’s Abaya Boutique")}</div><div class="muted">${esc(inv.storeEmail||settings.email||"")} ${inv.storePhone?" · "+esc(inv.storePhone):""}</div></div><div style="text-align:${ar?'left':'right'}"><h1>${title}</h1><div class="muted">${labels.order}: ${esc(order.id)}<br>${labels.date}: ${esc(order.date)}</div></div></div><div class="meta"><div class="box"><div class="label">${labels.customer}</div><strong>${esc(order.shipping?.name||"")}</strong><div class="muted">${esc(order.shipping?.email||"")}${inv.includeCustomerPhone&&order.shipping?.phone?"<br>"+esc(order.shipping.phone):""}</div></div>${inv.includeShippingAddress?`<div class="box"><div class="label">${labels.address}</div><div class="muted">${esc(address)}</div></div>`:""}</div><table><thead><tr><th>${labels.items}</th><th>${labels.qty}</th><th>${labels.unit}</th><th>${labels.amount}</th></tr></thead><tbody>${itemRows}</tbody></table><div class="totals"><div class="row"><span>${labels.subtotal}</span><span>$${subtotal.toFixed(2)}</span></div><div class="row"><span>${labels.shipping}</span><span>$${inv.includeShippingFee!==false?shippingFee.toFixed(2):"0.00"}</span></div>${inv.includeTax?`<div class="row"><span>${labels.tax}</span><span>$${taxAmount.toFixed(2)}</span></div>`:""}<div class="row grand"><span>${labels.total}</span><span>$${total.toFixed(2)}</span></div></div><div class="footer">${esc(footer)}</div><button onclick="window.print()" style="margin-top:25px;padding:10px 18px;border:0;border-radius:8px;background:#222;color:#fff">${ar?'طباعة':'Print'}</button></div></body></html>`;
+    const w=window.open("","_blank","width=900,height=800");
+    if(w){w.document.write(html);w.document.close();setTimeout(()=>w.focus(),100);}
+  }
+
   function exportCSV(){
-    const rows=[["Order ID","Date","Name","City","Total","Status"],...orders.map(o=>[o.id,o.date,o.shipping?.name,o.shipping?.city,o.total,o.status])];
+    const rows=[["Order ID","Date","Name","City","State","Subtotal","Shipping Fee","Tax","Total","Status"],...orders.map(o=>[o.id,o.date,o.shipping?.name,o.shipping?.city,o.shipping?.state,o.subtotal||"",o.shippingCost||"0.00",o.tax||"0.00",o.total,o.status])];
     const csv=rows.map(r=>r.join(",")).join("\n");
     const a=document.createElement("a"); a.href="data:text/csv,"+encodeURIComponent(csv); a.download="orders.csv"; a.click();
   }
@@ -532,7 +627,7 @@ export default function App() {
         {/* Hero */}
         <div style={styles.hero}>
           {heroImages.map((img,i)=>(
-            <img key={img} src={img} alt="" loading={i===0?"eager":"lazy"} decoding="async" style={{...styles.heroBg, ...(i===heroImgIdx?styles.heroBgActive:{})}} />
+            <img key={img} src={img} alt="" loading={i===0?"eager":"lazy"} decoding="async" style={{...styles.heroBg, ...(i===heroImgIdx?styles.heroBgActive:{}), ...(settings.heroKenBurns!==false && i===heroImgIdx ? {transform:"scale(1.06)"}:{})}} />
           ))}
           <div style={styles.heroOverlay}></div>
           <div style={styles.heroContent}>
@@ -559,6 +654,12 @@ export default function App() {
             ? <div style={{gridColumn:"1/-1",textAlign:"center",padding:60,color:"#999"}}>{t.noResults}</div>
             : visibleProducts.map(p=><ProductCard key={p.id} p={p}/>)}
         </div>
+        {(settings.homepageSections||[]).filter(s=>s.active!==false).sort((a,b)=>(a.order||0)-(b.order||0)).map(sec=><section key={sec.id} style={{padding:"55px 22px",background:sec.order%2===0?"#fbfaf7":"#fff",textAlign:"center"}}>
+          {sec.image && <img src={sec.image} alt={lang==='ar'?sec.titleAr:sec.title} onError={onImgErr} loading="lazy" style={{width:"100%",maxWidth:900,maxHeight:420,objectFit:"cover",borderRadius:16,margin:"0 auto 24px",display:"block"}}/>}
+          <h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"clamp(1.6rem,4vw,2.5rem)",marginBottom:10}}>{lang==='ar'?sec.titleAr:sec.title}</h2>
+          {(lang==='ar'?sec.bodyAr:sec.body) && <p style={{maxWidth:720,margin:"0 auto 20px",color:"#666",lineHeight:1.8}}>{lang==='ar'?sec.bodyAr:sec.body}</p>}
+          {(lang==='ar'?sec.buttonTextAr:sec.buttonText) && <button style={styles.shopBtn} onClick={()=>{const link=sec.buttonLink||'#shop-grid'; if(link.startsWith('#')) document.getElementById(link.slice(1))?.scrollIntoView({behavior:'smooth'}); else window.location.href=link;}}>{lang==='ar'?sec.buttonTextAr:sec.buttonText}</button>}
+        </section>
       </>
     );
   }
@@ -643,7 +744,8 @@ export default function App() {
             <div style={{background:"#fff",borderRadius:12,padding:16,boxShadow:"0 1px 8px rgba(0,0,0,.06)"}}>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}><span>{t.subtotal}</span><span>${cartTotal.toFixed(2)}</span></div>
               {tax>0&&<div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}><span>Tax</span><span>${tax.toFixed(2)}</span></div>}
-              <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}><span>{t.shipping}</span><span>{shippingCost===0?t.freeShip:`$${shippingCost.toFixed(2)}`}</span></div>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}><span>{t.shipping}</span><span>{`$${shippingCost.toFixed(2)}`}</span></div>
+              {shippingForm.state && <div style={{fontSize:".72rem",color:"#777",marginBottom:8}}>Estimated delivery: {settings.shippingEtaMin||3}-{settings.shippingEtaMax||7} business days to {shippingForm.state}</div>}
               <div style={{display:"flex",justifyContent:"space-between",fontWeight:700,fontSize:"1.1rem",borderTop:"1px solid #eee",paddingTop:8}}>
                 <span>{t.total}</span><span>${orderTotal.toFixed(2)}</span>
               </div>
@@ -658,14 +760,22 @@ export default function App() {
   function CheckoutPage(){
     const sf = shippingForm;
     const setSF = (k,v) => setShippingForm(f=>({...f,[k]:v}));
-    function validate(){ return sf.name&&sf.email&&sf.addr1&&sf.city&&sf.zip; }
+    function validate(){ return sf.name&&sf.email&&sf.addr1&&sf.city&&sf.state&&sf.zip; }
     return (
       <div style={styles.checkoutWrap}>
         <button style={{...styles.navBtn,padding:"16px 0"}} onClick={()=>setPage("cart")}>← {t.back}</button>
         <h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1.8rem",marginBottom:20}}>{t.shippingInfo}</h2>
-        {[["name",t.fullName],["email",t.email],["phone",t.phone],["addr1",t.addr1],["addr2",t.addr2],["city",t.city],["state",t.state],["zip",t.zip]].map(([k,label])=>(
+        {[["name",t.fullName],["email",t.email],["phone",t.phone],["addr1",t.addr1],["addr2",t.addr2],["city",t.city]].map(([k,label])=>(
           <input key={k} style={styles.input} placeholder={label} value={sf[k]} onChange={e=>setSF(k,e.target.value)} />
         ))}
+        <select style={styles.input} value={sf.state} onChange={e=>setSF("state",e.target.value)}>
+          <option value="">{t.state}</option>
+          {US_STATES.map(([code,name])=><option key={code} value={code}>{name}</option>)}
+        </select>
+        <input style={styles.input} placeholder={t.zip} value={sf.zip} onChange={e=>setSF("zip",e.target.value)} />
+        <div style={{background:"#f7f3eb",border:"1px solid #e8ddc9",borderRadius:10,padding:12,marginBottom:14,fontSize:".8rem",color:"#5f574b"}}>
+          <strong>{settings.shippingMethod||"Standard Shipping"}</strong> · {settings.shippingEtaMin||3}-{settings.shippingEtaMax||7} business days · Shipping available across all 50 U.S. states.
+        </div>
         {formError && <div style={{color:"#e53935",marginBottom:10,fontSize:".85rem"}}>{formError}</div>}
         <div style={{background:"#fff",borderRadius:12,padding:16,marginBottom:16,boxShadow:"0 1px 8px rgba(0,0,0,.06)"}}>
           <div style={{display:"flex",justifyContent:"space-between",fontWeight:700}}><span>{t.total}</span><span>${orderTotal.toFixed(2)}</span></div>
@@ -697,7 +807,8 @@ export default function App() {
         <h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"2rem",color:"#2d7a2d"}}>{t.thankYou}</h2>
         <p style={{color:"#666"}}>{t.orderConf}</p>
         {o && <p style={{color:"#999",fontSize:".85rem"}}>Order ID: {o.id}</p>}
-        <button style={{...styles.shopBtn,marginTop:24}} onClick={()=>setPage("shop")}>{t.continueShopping}</button>
+        {o && settings.invoice?.enabled!==false && <button style={{...styles.shopBtn,marginTop:12,background:"#fff",color:"#222",border:"1px solid #ddd"}} onClick={()=>printInvoice(o)}>{t.printInvoice}</button>}
+        <button style={{...styles.shopBtn,marginTop:12}} onClick={()=>setPage("shop")}>{t.continueShopping}</button>
       </div>
     );
   }
@@ -721,7 +832,7 @@ export default function App() {
         </div>
       );
     }
-    const tabs=["dashboard","homepage","products","categories","banners","pricing","orders","customers","content","media","settings"];
+    const tabs=["dashboard","homepage","sections","products","categories","banners","pricing","shipping","orders","customers","analytics","marketing","content","language","media","seo","navigation","checkoutSettings","notifications","policies","integrations","localization","access","control","advanced","settings"];
     const activeProducts=products.filter(p=>p.active).length;
     const revenue=orders.reduce((sum,o)=>sum+(parseFloat(o.total)||0),0);
     const customers=[...new Map(orders.map(o=>[o.shipping?.email||o.shipping?.phone||o.shipping?.name||o.id,o.shipping||{}])).values()];
@@ -738,7 +849,20 @@ export default function App() {
 
         {adminTab==="dashboard" && <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",gap:12}}>
           {[["Products",products.length],["Active Products",activeProducts],["Orders",orders.length],["Customers",customers.length],["Revenue",`$${revenue.toFixed(2)}`],["Out of Stock",products.filter(p=>(p.stock??99)<=0).length]].map(([label,value])=><div key={label} style={styles.pricingCard}><div style={{fontSize:".78rem",color:"#888"}}>{label}</div><div style={{fontSize:"1.8rem",fontWeight:700,marginTop:8}}>{value}</div></div>)}
-          <div style={{...styles.pricingCard,gridColumn:"1/-1"}}><h3>Quick Controls</h3><p style={{color:"#777",fontSize:".85rem",lineHeight:1.6}}>Manage the homepage, images, banners, products, categories, promotions, orders and customer-facing content from this panel. All CMS settings are saved locally in the current app storage.</p></div>
+          <div style={{...styles.pricingCard,gridColumn:"1/-1"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,flexWrap:"wrap"}}>
+              <div><h3 style={{marginBottom:4}}>Store Command Center</h3><p style={{color:"#777",fontSize:".82rem",margin:0}}>Live operational view based on your current store data.</p></div>
+              <span style={{fontSize:".72rem",padding:"6px 10px",borderRadius:99,background:"#eef8f0",color:"#2e7d32",fontWeight:700}}>● SYSTEM READY</span>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(170px,1fr))",gap:10,marginTop:16}}>
+              {[
+                ["Catalog Health",products.length?Math.round(activeProducts/products.length*100):0,"% active"],
+                ["Shipping Coverage",50,"US states"],
+                ["Inventory Health",products.length?Math.round(products.filter(p=>(p.stock??99)>0).length/products.length*100):0,"% in stock"],
+                ["Order Fulfillment",orders.length?Math.round(orders.filter(o=>["delivered","shipped"].includes(o.status)).length/orders.length*100):0,"% shipped/delivered"]
+              ].map(([label,val,suffix])=><div key={label} style={{padding:12,border:"1px solid #eee",borderRadius:10,background:"#fcfbf9"}}><div style={{fontSize:".72rem",color:"#888"}}>{label}</div><div style={{fontSize:"1.35rem",fontWeight:700,marginTop:5}}>{val}{suffix}</div><div style={{height:5,background:"#eee",borderRadius:99,marginTop:8,overflow:"hidden"}}><div style={{width:`${Math.min(100,Number(val))}%`,height:"100%",background:"#c4a56a"}}/></div></div>)}
+            </div>
+          </div>
         </div>}
 
         {adminTab==="homepage" && <div>
@@ -746,11 +870,23 @@ export default function App() {
             <h3 style={{marginBottom:16}}>Hero / Homepage</h3>
             {[['heroTitle','Hero Title'],['heroTitleAr','Hero Title Arabic'],['heroSubtitle','Hero Subtitle'],['heroSubtitleAr','Hero Subtitle Arabic'],['heroButtonText','Button Text'],['heroButtonTextAr','Button Text Arabic'],['heroButtonLink','Button Link'],['announcementText','Announcement Bar']].map(([k,label])=><div key={k} style={styles.pricingRow}><span style={styles.pricingLabel}>{label}</span><input style={{...styles.adminInput,width:"min(100%,430px)"}} value={settings[k]||""} onChange={e=>updateSetting(k,e.target.value)}/></div>)}
             <div style={styles.pricingRow}><span style={styles.pricingLabel}>Hero Interval (ms)</span><input type="number" style={styles.adminInput} value={settings.heroInterval||2200} min={500} onChange={e=>updateSetting("heroInterval",parseInt(e.target.value)||2200)}/></div>
+            <div style={styles.pricingRow}><span style={styles.pricingLabel}>Hero Ken Burns Effect</span><Toggle on={settings.heroKenBurns!==false} onToggle={()=>updateSetting("heroKenBurns",settings.heroKenBurns===false)}/></div>
+            <div style={styles.pricingRow}><span style={styles.pricingLabel}>Announcement Bar</span><Toggle on={settings.announcementActive!==false} onToggle={()=>updateSetting("announcementActive",settings.announcementActive===false)}/></div>
             <button style={styles.saveBtn} onClick={()=>saveField("homepage")}>{savedMsg.homepage?t.saved:t.save}</button>
           </div>
           <div style={styles.pricingCard}><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}><h3>Hero Images</h3><button style={styles.saveBtn} onClick={addHeroImage}>+ Add Image</button></div>
             {(settings.heroImages||[]).map((img,i)=><div key={i} style={{display:"flex",gap:8,alignItems:"center",marginBottom:10}}><input style={{...styles.adminInput,flex:1}} placeholder="Image URL" value={img} onChange={e=>updateHeroImage(i,e.target.value)}/>{img&&<img src={img} onError={onImgErr} alt="" style={{width:52,height:52,objectFit:"cover",borderRadius:6}}/>}<button style={{...styles.navBtn,color:"#e53935"}} onClick={()=>deleteHeroImage(i)}>Delete</button></div>)}
             <div style={{fontSize:".75rem",color:"#888"}}>If no custom hero images are added, the current product-based hero images remain as fallback.</div>
+          </div>
+          <div style={styles.pricingCard}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}><div><h3>Homepage Sections</h3><p style={{color:"#777",fontSize:".78rem",margin:0}}>Build the homepage like a visual CMS. Every section supports English and Arabic content.</p></div><button style={styles.saveBtn} onClick={addHomepageSection}>+ Add Section</button></div>
+            {(settings.homepageSections||[]).sort((a,b)=>(a.order||0)-(b.order||0)).map((sec,i)=><div key={sec.id} style={{border:"1px solid #eee",borderRadius:12,padding:14,marginBottom:12}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,marginBottom:10}}><strong>#{i+1} · {sec.id}</strong><div style={{display:"flex",gap:6}}><button style={styles.navBtn} onClick={()=>moveHomepageSection(sec.id,'up')}>↑</button><button style={styles.navBtn} onClick={()=>moveHomepageSection(sec.id,'down')}>↓</button><Toggle on={sec.active!==false} onToggle={()=>updateHomepageSection(sec.id,'active',sec.active===false)}/><button style={{...styles.navBtn,color:"#e53935"}} onClick={()=>deleteHomepageSection(sec.id)}>Delete</button></div></div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+                {[["title","English Title"],["titleAr","Arabic Title"],["body","English Body"],["bodyAr","Arabic Body"],["image","Image URL"],["buttonText","English Button"],["buttonTextAr","Arabic Button"],["buttonLink","Button Link"]].map(([k,l])=><div key={k}><label style={{display:"block",fontSize:".72rem",fontWeight:700,marginBottom:4}}>{l}</label>{k.includes('body')?<textarea style={{...styles.adminInput,width:"100%",minHeight:70}} value={sec[k]||""} onChange={e=>updateHomepageSection(sec.id,k,e.target.value)}/>:<input style={{...styles.adminInput,width:"100%"}} value={sec[k]||""} onChange={e=>updateHomepageSection(sec.id,k,e.target.value)}/>}</div>)}
+              </div>
+            </div>)}
+            <button style={styles.saveBtn} onClick={()=>{saveField('homepageSections');addAudit('Updated homepage sections','Homepage visual CMS content');}}>{savedMsg.homepageSections?t.saved:t.save}</button>
           </div>
         </div>}
 
@@ -773,19 +909,120 @@ export default function App() {
           <div style={styles.pricingCard}><h3 style={{marginBottom:16}}>Category Discounts</h3>{(settings.categories||[]).map(cat=><div key={cat.id} style={styles.pricingRow}><span style={styles.pricingLabel}>{lang==="ar"?cat.nameAr:cat.name}</span><input type="number" style={styles.adminInput} min={0} max={100} value={settings.categoryDiscounts?.[cat.id]||0} onChange={e=>updateCatDisc(cat.id,parseFloat(e.target.value)||0)}/><span>%</span></div>)}</div>
           <div style={styles.pricingCard}><h3>{t.couponCode}</h3><div style={styles.pricingRow}><span style={styles.pricingLabel}>{t.couponCode}</span><input style={styles.adminInput} value={settings.couponCode||""} onChange={e=>updateSetting("couponCode",e.target.value)}/></div><div style={styles.pricingRow}><span style={styles.pricingLabel}>{t.couponDiscount}</span><input type="number" style={styles.adminInput} value={settings.couponDiscount||0} onChange={e=>updateSetting("couponDiscount",parseFloat(e.target.value)||0)}/><span>%</span><Toggle on={!!settings.couponActive} onToggle={()=>updateSetting("couponActive",!settings.couponActive)}/></div></div>
           <div style={styles.pricingCard}><h3>{t.buyX}</h3><div style={styles.pricingRow}><span style={styles.pricingLabel}>{t.buyXQty}</span><input type="number" style={styles.adminInput} value={settings.buyXQty||2} onChange={e=>updateSetting("buyXQty",parseInt(e.target.value)||2)}/></div><div style={styles.pricingRow}><span style={styles.pricingLabel}>{t.buyXDisc}</span><input type="number" style={styles.adminInput} value={settings.buyXDisc||0} onChange={e=>updateSetting("buyXDisc",parseFloat(e.target.value)||0)}/><span>%</span><Toggle on={!!settings.buyXActive} onToggle={()=>updateSetting("buyXActive",!settings.buyXActive)}/></div></div>
-          <div style={styles.pricingCard}><h3>{t.shipping}</h3><div style={styles.pricingRow}><span className="pricingLabel">{t.shipping_price}</span><input type="number" style={styles.adminInput} value={settings.shippingPrice||0} onChange={e=>updateSetting("shippingPrice",parseFloat(e.target.value)||0)}/></div><div style={styles.pricingRow}><span style={styles.pricingLabel}>{t.freeShipOver}</span><input type="number" style={styles.adminInput} value={settings.freeShipOver||0} onChange={e=>updateSetting("freeShipOver",parseFloat(e.target.value)||0)}/></div><div style={styles.pricingRow}><span style={styles.pricingLabel}>{t.taxRate}</span><input type="number" style={styles.adminInput} value={settings.taxRate||0} onChange={e=>updateSetting("taxRate",parseFloat(e.target.value)||0)}/><span>%</span></div></div>
+          <div style={styles.pricingCard}><h3>{t.shipping}</h3><div style={{color:"#777",fontSize:".8rem",marginBottom:10}}>Shipping prices and all 50 state rates are managed in the Shipping tab.</div><div style={styles.pricingRow}><span style={styles.pricingLabel}>{t.shipping_price}</span><input type="number" style={styles.adminInput} value={settings.shippingPrice||0} onChange={e=>updateSetting("shippingPrice",parseFloat(e.target.value)||0)}/></div><div style={styles.pricingRow}><span style={styles.pricingLabel}>{t.taxRate}</span><input type="number" style={styles.adminInput} value={settings.taxRate||0} onChange={e=>updateSetting("taxRate",parseFloat(e.target.value)||0)}/><span>%</span></div></div>
         </div>}
 
-        {adminTab==="orders" && <div>{orders.length===0?<div style={{textAlign:"center",padding:60,color:"#999"}}>{t.noOrders}</div>:<><button style={{...styles.saveBtn,marginBottom:16}} onClick={exportCSV}>{t.exportCSV}</button><div style={{overflowX:"auto"}}><table style={styles.table}><thead><tr>{[t.orderId,t.orderDate,"Customer","Email","Total",t.orderStatus].map(h=><th key={h} style={styles.th}>{h}</th>)}</tr></thead><tbody>{orders.map(o=><tr key={o.id}><td style={styles.td}>{o.id}</td><td style={styles.td}>{o.date}</td><td style={styles.td}>{o.shipping?.name}</td><td style={styles.td}>{o.shipping?.email}</td><td style={styles.td}>${o.total}</td><td style={styles.td}><select value={o.status} onChange={e=>setOrders(os=>os.map(x=>x.id===o.id?{...x,status:e.target.value}:x))} style={{border:"1px solid #ddd",borderRadius:6,padding:"4px 8px",fontSize:".8rem"}}><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="processing">Processing</option><option value="shipped">Shipped</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select></td></tr>)}</tbody></table></div></>}</div>}
+        {adminTab==="shipping" && <div>
+          <div style={styles.pricingCard}>
+            <h3 style={{marginBottom:8}}>Shipping Command Center</h3>
+            <p style={{color:"#777",fontSize:".82rem",lineHeight:1.5}}>Shipping is available across all 50 U.S. states and is paid by the customer. Set the exact shipping price for every state and manage delivery expectations.</p>
+            <div style={{marginTop:16,padding:14,border:"1px solid #e7e0d5",borderRadius:10,background:"#fbfaf7"}}><strong>Invoice & Shipping Fee</strong><p style={{color:"#777",fontSize:".78rem",lineHeight:1.5,margin:"6px 0 10px"}}>The shipping fee selected for the customer’s state is automatically stored on the order and included on the invoice.</p><div style={styles.pricingRow}><span style={styles.pricingLabel}>Enable Invoice</span><Toggle on={settings.invoice?.enabled!==false} onToggle={()=>updateNestedSetting("invoice","enabled",settings.invoice?.enabled===false)}/></div><div style={styles.pricingRow}><span style={styles.pricingLabel}>Show Shipping Fee on Invoice</span><Toggle on={settings.invoice?.includeShippingFee!==false} onToggle={()=>updateNestedSetting("invoice","includeShippingFee",settings.invoice?.includeShippingFee===false)}/></div><div style={styles.pricingRow}><span style={styles.pricingLabel}>Invoice Store Name</span><input style={{...styles.adminInput,width:"min(100%,430px)"}} value={settings.invoice?.storeName||""} onChange={e=>updateNestedSetting("invoice","storeName",e.target.value)}/></div><div style={styles.pricingRow}><span style={styles.pricingLabel}>Invoice Email</span><input style={{...styles.adminInput,width:"min(100%,430px)"}} value={settings.invoice?.storeEmail||""} onChange={e=>updateNestedSetting("invoice","storeEmail",e.target.value)}/></div><div style={styles.pricingRow}><span style={styles.pricingLabel}>Invoice Phone</span><input style={{...styles.adminInput,width:"min(100%,430px)"}} value={settings.invoice?.storePhone||""} onChange={e=>updateNestedSetting("invoice","storePhone",e.target.value)}/></div></div>
+            {[['shippingMethod','Shipping Method'],['shippingEtaMin','Minimum Delivery Days'],['shippingEtaMax','Maximum Delivery Days'],['handlingDays','Handling Days'],['trackingUrlTemplate','Tracking URL Template']].map(([k,label])=><div key={k} style={styles.pricingRow}><span style={styles.pricingLabel}>{label}</span><input type={k.includes('Days')?'number':'text'} style={{...styles.adminInput,width:"min(100%,430px)"}} value={settings[k]??""} onChange={e=>updateSetting(k,k.includes('Days')?parseInt(e.target.value)||0:e.target.value)}/></div>)}
+            <div style={{fontSize:".78rem",color:"#6f675d",marginTop:10,padding:10,background:"#f7f3eb",borderRadius:8}}>Customer-paid shipping is enabled. There is no free-shipping option in the storefront.</div>
+          </div>
+          <div style={styles.pricingCard}><h3 style={{marginBottom:14}}>All 50 U.S. States</h3><div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(170px,1fr))",gap:8}}>{US_STATES.map(([code,name])=><div key={code} style={{border:"1px solid #eee",borderRadius:9,padding:10,display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}><span style={{fontSize:".78rem"}}><strong>{code}</strong> {name}</span><div style={{display:"flex",alignItems:"center",gap:3}}><span style={{color:"#888",fontSize:".72rem"}}>$</span><input type="number" step="0.01" min="0" style={{...styles.adminInput,width:72,padding:"6px 7px"}} value={settings.shippingZones?.[code]??settings.shippingPrice??0} onChange={e=>updateShippingZone(code,e.target.value)}/></div></div>)}</div></div>
+        </div>}
+
+        {adminTab==="orders" && <div>{orders.length===0?<div style={{textAlign:"center",padding:60,color:"#999"}}>{t.noOrders}</div>:<><button style={{...styles.saveBtn,marginBottom:16}} onClick={exportCSV}>{t.exportCSV}</button><div style={{overflowX:"auto"}}><table style={styles.table}><thead><tr>{[t.orderId,t.orderDate,"Customer","Email","Shipping","Total",t.orderStatus,t.invoice].map(h=><th key={h} style={styles.th}>{h}</th>)}</tr></thead><tbody>{orders.map(o=><tr key={o.id}><td style={styles.td}>{o.id}</td><td style={styles.td}>{o.date}</td><td style={styles.td}>{o.shipping?.name}</td><td style={styles.td}>{o.shipping?.email}</td><td style={styles.td}>${Number(o.shippingCost||0).toFixed(2)}</td><td style={styles.td}>${o.total}</td><td style={styles.td}><select value={o.status} onChange={e=>setOrders(os=>os.map(x=>x.id===o.id?{...x,status:e.target.value}:x))} style={{border:"1px solid #ddd",borderRadius:6,padding:"4px 8px",fontSize:".8rem"}}><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="processing">Processing</option><option value="shipped">Shipped</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select></td><td style={styles.td}><button style={{...styles.saveBtn,padding:"6px 9px",fontSize:".72rem"}} onClick={()=>printInvoice(o)}>{t.printInvoice}</button></td></tr>)}</tbody></table></div></>}</div>}
 
         {adminTab==="customers" && <div style={{overflowX:"auto"}}><table style={styles.table}><thead><tr>{["Name","Email","Phone","City","Orders"].map(h=><th key={h} style={styles.th}>{h}</th>)}</tr></thead><tbody>{customers.map((c,i)=><tr key={i}><td style={styles.td}>{c.name||"-"}</td><td style={styles.td}>{c.email||"-"}</td><td style={styles.td}>{c.phone||"-"}</td><td style={styles.td}>{c.city||"-"}</td><td style={styles.td}>{orders.filter(o=>(o.shipping?.email||o.shipping?.phone||o.shipping?.name)===(c.email||c.phone||c.name)).length}</td></tr>)}</tbody></table></div>}
 
+        {adminTab==="analytics" && <div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:12}}>
+            {[['Average Order Value',orders.length?`$${(revenue/orders.length).toFixed(2)}`:'$0.00'],['Pending Orders',orders.filter(o=>o.status==='pending').length],['Delivered Orders',orders.filter(o=>o.status==='delivered').length],['Wishlist Saves',wishlist.length]].map(([label,val])=><div key={label} style={styles.pricingCard}><div style={{fontSize:".72rem",color:"#888"}}>{label}</div><div style={{fontSize:"1.55rem",fontWeight:700,marginTop:7}}>{val}</div></div>)}
+          </div>
+          <div style={styles.pricingCard}><h3>Top Products by Order Quantity</h3>{products.map(p=>({...p,ordered:orders.reduce((n,o)=>n+(o.items||[]).filter(i=>i.id===p.id).reduce((q,i)=>q+(i.qty||0),0),0)})).sort((a,b)=>b.ordered-a.ordered).slice(0,8).map(p=><div key={p.id} style={{display:"flex",justifyContent:"space-between",padding:"9px 0",borderBottom:"1px solid #eee",fontSize:".82rem"}}><span>{p.name}</span><strong>{p.ordered}</strong></div>)}</div>
+        </div>}
+
+        {adminTab==="marketing" && <div>
+          <div style={styles.pricingCard}><h3>Conversion & Merchandising Tools</h3><p style={{color:"#777",fontSize:".82rem",lineHeight:1.5}}>Control modern storefront behaviors without changing the code.</p>
+            {[['wishlistEnabled','Wishlist'],['quickViewEnabled','Quick View'],['recentlyViewedEnabled','Recently Viewed'],['backInStockEnabled','Back-in-Stock Alerts'],['lowStockEnabled','Low Stock Labels'],['reviewsEnabled','Product Reviews'],['sizeGuideEnabled','Size Guide'],['compareEnabled','Product Compare']].map(([k,label])=><div key={k} style={styles.pricingRow}><span style={styles.pricingLabel}>{label}</span><Toggle on={settings[k]!==false} onToggle={()=>updateSetting(k,settings[k]===false)}/></div>)}
+          </div>
+          <div style={styles.pricingCard}><h3>Campaign Banner</h3>{[['campaignTitle','Campaign Title'],['campaignSubtitle','Campaign Subtitle'],['campaignButton','Button Text'],['campaignLink','Button Link']].map(([k,l])=><div key={k} style={styles.pricingRow}><span style={styles.pricingLabel}>{l}</span><input style={{...styles.adminInput,width:"min(100%,430px)"}} value={settings[k]||""} onChange={e=>updateSetting(k,e.target.value)}/></div>)}<div style={styles.pricingRow}><span style={styles.pricingLabel}>Campaign Active</span><Toggle on={!!settings.campaignActive} onToggle={()=>updateSetting("campaignActive",!settings.campaignActive)}/></div></div>
+        </div>}
+
+        {adminTab==="seo" && <div>
+          <div style={styles.pricingCard}><h3>SEO & Social Preview</h3>{[['seoTitle','SEO Title'],['seoDescription','Meta Description'],['seoKeywords','Keywords'],['ogImage','Social Share Image'],['canonicalUrl','Canonical URL']].map(([k,l])=><div key={k} style={styles.pricingRow}><span style={styles.pricingLabel}>{l}</span>{k==='seoDescription'?<textarea style={{...styles.adminInput,width:"min(100%,430px)",minHeight:80}} value={settings[k]||""} onChange={e=>updateSetting(k,e.target.value)}/>:<input style={{...styles.adminInput,width:"min(100%,430px)"}} value={settings[k]||""} onChange={e=>updateSetting(k,e.target.value)}/>}</div>)}<button style={styles.saveBtn} onClick={()=>saveField('seo')}>{savedMsg.seo?t.saved:t.save}</button></div>
+          <div style={styles.pricingCard}><h3>Accessibility & Performance</h3>{[['reducedMotion','Respect Reduced Motion'],['lazyImages','Lazy-load Images'],['highContrast','High Contrast Mode']].map(([k,l])=><div key={k} style={styles.pricingRow}><span style={styles.pricingLabel}>{l}</span><Toggle on={settings[k]!==false} onToggle={()=>updateSetting(k,settings[k]===false)}/></div>)}</div>
+        </div>}
+
         {adminTab==="content" && <div style={styles.pricingCard}>{Object.keys(settings.content||{}).map(k=><div key={k} style={{marginBottom:16}}><label style={{display:"block",fontSize:".82rem",fontWeight:700,marginBottom:6}}>{k}</label><textarea style={{...styles.adminInput,width:"100%",minHeight:100,resize:"vertical"}} value={settings.content?.[k]||""} onChange={e=>updateNestedSetting("content",k,e.target.value)}/></div>)}<div style={{display:"flex",gap:8}}><button style={styles.saveBtn} onClick={()=>saveField("content")}>{savedMsg.content?t.saved:t.save}</button></div></div>}
+
+        {adminTab==="language" && <div>
+          <div style={styles.pricingCard}><h3>Language & Translation Studio</h3><p style={{color:"#777",fontSize:".82rem",lineHeight:1.5}}>Edit every customer-facing UI label in English and Arabic. Changes override the built-in translations immediately and are saved in the CMS.</p>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}><div><strong>English</strong></div><div dir="rtl"><strong>العربية</strong></div></div>
+            <div style={{maxHeight:520,overflow:"auto",borderTop:"1px solid #eee"}}>
+              {Object.keys(T.en).map(key=><div key={key} style={{display:"grid",gridTemplateColumns:"120px 1fr 1fr",gap:8,alignItems:"start",padding:"9px 0",borderBottom:"1px solid #f0f0f0"}}>
+                <code style={{fontSize:".65rem",color:"#777",wordBreak:"break-word"}}>{key}</code>
+                <input style={styles.adminInput} value={settings.translations?.en?.[key] ?? T.en[key] ?? ""} onChange={e=>updateTranslation('en',key,e.target.value)}/>
+                <input dir="rtl" style={styles.adminInput} value={settings.translations?.ar?.[key] ?? T.ar[key] ?? ""} onChange={e=>updateTranslation('ar',key,e.target.value)}/>
+              </div>)}
+            </div>
+            <button style={{...styles.saveBtn,marginTop:14}} onClick={()=>{saveField('language');addAudit('Updated translations','English and Arabic UI labels');}}>{savedMsg.language?t.saved:t.save}</button>
+          </div>
+          <div style={styles.pricingCard}><h3>Bilingual Section Copy</h3><p style={{color:"#777",fontSize:".78rem"}}>Every homepage section can be corrected or rewritten independently in English and Arabic.</p>{(settings.homepageSections||[]).map(sec=><div key={sec.id} style={{border:"1px solid #eee",borderRadius:10,padding:12,marginTop:10}}><strong>{sec.id}</strong><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginTop:8}}><input style={styles.adminInput} value={sec.title||""} onChange={e=>updateHomepageSection(sec.id,"title",e.target.value)} placeholder="English title"/><input dir="rtl" style={styles.adminInput} value={sec.titleAr||""} onChange={e=>updateHomepageSection(sec.id,"titleAr",e.target.value)} placeholder="Arabic title"/><textarea style={{...styles.adminInput,minHeight:80}} value={sec.body||""} onChange={e=>updateHomepageSection(sec.id,"body",e.target.value)} placeholder="English body"/><textarea dir="rtl" style={{...styles.adminInput,minHeight:80}} value={sec.bodyAr||""} onChange={e=>updateHomepageSection(sec.id,"bodyAr",e.target.value)} placeholder="Arabic body"/></div></div>)}</div>
+          <div style={styles.pricingCard}><h3>Language Experience</h3>
+            <div style={styles.pricingRow}><span style={styles.pricingLabel}>Default Store Language</span><select style={styles.adminInput} value={settings.defaultLanguage||'en'} onChange={e=>updateSetting('defaultLanguage',e.target.value)}><option value="en">English</option><option value="ar">Arabic</option></select></div>
+            <div style={styles.pricingRow}><span style={styles.pricingLabel}>Allow Language Switcher</span><Toggle on={settings.languageSwitcher!==false} onToggle={()=>updateSetting('languageSwitcher',settings.languageSwitcher===false)}/></div>
+            <div style={styles.pricingRow}><span style={styles.pricingLabel}>Arabic RTL</span><Toggle on={settings.arabicRTL!==false} onToggle={()=>updateSetting('arabicRTL',settings.arabicRTL===false)}/></div>
+          </div>
+        </div>}
 
         {adminTab==="media" && <div style={styles.pricingCard}><h3>Media Library</h3><p style={{color:"#777",fontSize:".85rem"}}>This browser-only version stores image URLs. Use the Homepage, Banner and Product image controls to add or replace media.</p><div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(120px,1fr))",gap:10,marginTop:16}}>{[...new Set([...products.map(p=>p.image),...(settings.heroImages||[]),...(settings.banners||[]).map(b=>b.image)].filter(Boolean))].map((img,i)=><div key={i} style={{border:"1px solid #eee",padding:6,borderRadius:8}}><img src={img} alt="" onError={onImgErr} style={{width:"100%",height:120,objectFit:"cover",borderRadius:5}}/><div style={{fontSize:".6rem",wordBreak:"break-all",marginTop:5,color:"#777"}}>{img}</div></div>)}</div></div>}
 
+        {adminTab==="navigation" && <div>
+          <div style={styles.pricingCard}><div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}><div><h3>Navigation & Menus</h3><p style={{color:"#777",fontSize:".78rem"}}>Control every menu label, destination, visibility and order in English and Arabic.</p></div><button style={styles.saveBtn} onClick={addNavItem}>+ Add Link</button></div>
+            {(settings.navigation?.items||[]).sort((a,b)=>(a.order||0)-(b.order||0)).map(item=><div key={item.id} style={{border:"1px solid #eee",borderRadius:10,padding:12,marginTop:10}}><div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1.2fr 80px auto",gap:8,alignItems:"center"}}><input style={styles.adminInput} value={item.labelEn||""} onChange={e=>updateNavItem(item.id,"labelEn",e.target.value)} placeholder="English label"/><input dir="rtl" style={styles.adminInput} value={item.labelAr||""} onChange={e=>updateNavItem(item.id,"labelAr",e.target.value)} placeholder="Arabic label"/><input style={styles.adminInput} value={item.href||""} onChange={e=>updateNavItem(item.id,"href",e.target.value)} placeholder="Link / URL"/><Toggle on={item.active!==false} onToggle={()=>updateNavItem(item.id,"active",item.active===false)}/><button style={{...styles.navBtn,color:"#e53935"}} onClick={()=>deleteNavItem(item.id)}>Delete</button></div></div>)}
+            <button style={{...styles.saveBtn,marginTop:14}} onClick={()=>{saveField("navigation");addAudit("Updated navigation","English and Arabic menu structure");}}>{savedMsg.navigation?t.saved:t.save}</button>
+          </div>
+        </div>}
+
+        {adminTab==="checkoutSettings" && <div>
+          <div style={styles.pricingCard}><h3>Checkout & Customer Experience</h3>{Object.entries(settings.checkout||{}).map(([k,v])=><div key={k} style={styles.pricingRow}><span style={styles.pricingLabel}>{k}</span>{typeof v==="boolean"?<Toggle on={v} onToggle={()=>updateCmsGroup("checkout",k,!v)}/>:<input style={{...styles.adminInput,width:"min(100%,520px)"}} value={v??""} onChange={e=>updateCmsGroup("checkout",k,e.target.value)}/>}</div>)}<button style={styles.saveBtn} onClick={()=>saveField("checkoutSettings")}>{savedMsg.checkoutSettings?t.saved:t.save}</button></div>
+          <div style={styles.pricingCard}><h3>Storefront Features</h3>{Object.entries(settings.customerExperience||{}).map(([k,v])=><div key={k} style={styles.pricingRow}><span style={styles.pricingLabel}>{k}</span>{typeof v==="boolean"?<Toggle on={v} onToggle={()=>updateCmsGroup("customerExperience",k,!v)}/>:<input style={{...styles.adminInput,width:"min(100%,520px)"}} value={v??""} onChange={e=>updateCmsGroup("customerExperience",k,e.target.value)}/>}</div>)}</div>
+        </div>}
+
+        {adminTab==="notifications" && <div><div style={styles.pricingCard}><h3>Notifications & Email Templates</h3>{Object.entries(settings.notifications||{}).filter(([k])=>k!=="templates").map(([k,v])=><div key={k} style={styles.pricingRow}><span style={styles.pricingLabel}>{k}</span>{typeof v==="boolean"?<Toggle on={v} onToggle={()=>updateCmsGroup("notifications",k,!v)}/>:<input style={{...styles.adminInput,width:"min(100%,520px)"}} value={v??""} onChange={e=>updateCmsGroup("notifications",k,e.target.value)}/>}</div>)}</div><div style={styles.pricingCard}><h3>Templates — English / Arabic</h3>{Object.entries(settings.notifications?.templates||{}).map(([k,v])=><div key={k} style={{marginBottom:12}}><label style={{fontSize:".75rem",fontWeight:700}}>{k}</label><textarea style={{...styles.adminInput,width:"100%",minHeight:70}} value={v||""} onChange={e=>setSettings(s=>({...s,notifications:{...s.notifications,templates:{...s.notifications.templates,[k]:e.target.value}}}))}/></div>)}<button style={styles.saveBtn} onClick={()=>saveField("notifications")}>{savedMsg.notifications?t.saved:t.save}</button></div></div>}
+
+        {adminTab==="policies" && <div><div style={styles.pricingCard}><h3>Policies, Legal & Customer Information</h3>{Object.entries(settings.policies||{}).map(([k,v])=><div key={k} style={{marginBottom:14}}><label style={{display:"block",fontSize:".76rem",fontWeight:700,marginBottom:5}}>{k}</label><textarea style={{...styles.adminInput,width:"100%",minHeight:100}} value={v||""} onChange={e=>updateCmsGroup("policies",k,e.target.value)}/></div>)}<button style={styles.saveBtn} onClick={()=>saveField("policies")}>{savedMsg.policies?t.saved:t.save}</button></div></div>}
+
+        {adminTab==="integrations" && <div><div style={styles.pricingCard}><h3>Integrations, Analytics & Tracking</h3><p style={{color:"#777",fontSize:".78rem"}}>Keep third-party IDs and URLs editable without touching source code.</p>{Object.entries(settings.integrations||{}).map(([k,v])=><div key={k} style={styles.pricingRow}><span style={styles.pricingLabel}>{k}</span><input style={{...styles.adminInput,width:"min(100%,520px)"}} value={v||""} onChange={e=>updateCmsGroup("integrations",k,e.target.value)}/></div>)}<button style={styles.saveBtn} onClick={()=>saveField("integrations")}>{savedMsg.integrations?t.saved:t.save}</button></div></div>}
+
+        {adminTab==="localization" && <div><div style={styles.pricingCard}><h3>Localization & Internationalization</h3>{Object.entries(settings.localization||{}).filter(([k])=>k!=="enabledLanguages").map(([k,v])=><div key={k} style={styles.pricingRow}><span style={styles.pricingLabel}>{k}</span>{typeof v==="boolean"?<Toggle on={v} onToggle={()=>updateCmsGroup("localization",k,!v)}/>:<input style={{...styles.adminInput,width:"min(100%,520px)"}} value={Array.isArray(v)?v.join(", "):v??""} onChange={e=>updateCmsGroup("localization",k,e.target.value)}/>}</div>)}<div style={{marginTop:16}}><strong>Enabled Languages</strong><div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:8}}>{(settings.localization?.enabledLanguages||[]).map(lang=><div key={lang} style={{display:"flex",gap:6,alignItems:"center",border:"1px solid #ddd",borderRadius:20,padding:"5px 9px"}}><input style={{border:0,outline:0,width:90}} value={lang} onChange={e=>{const next=(settings.localization?.enabledLanguages||[]).map(x=>x===lang?e.target.value:x);updateCmsGroup("localization","enabledLanguages",next)}}/><button style={{border:0,background:"none",cursor:"pointer"}} onClick={()=>removeLanguage(lang)}>×</button></div>)}<button style={styles.navBtn} onClick={addLanguage}>+ Language</button></div></div><button style={{...styles.saveBtn,marginTop:14}} onClick={()=>saveField("localization")}>{savedMsg.localization?t.saved:t.save}</button></div></div>}
+
+        {adminTab==="control" && <div>
+          <div style={styles.pricingCard}><h3>Everything Control Center</h3><p style={{color:"#777",fontSize:".82rem",lineHeight:1.55}}>Super Admin workspace for every operational, visual, language, legal, marketing, checkout and customer-facing setting. If a value is stored in the CMS, you can change it here or through the dedicated section.</p></div>
+          {["siteMeta","storefront","shippingRules","inventory","marketing","accessibility","security"].map(group=><div key={group} style={styles.pricingCard}><h3>{group}</h3>{Object.entries(settings[group]||{}).map(([k,v])=><div key={k} style={styles.pricingRow}><span style={styles.pricingLabel}>{k}</span>{typeof v==="boolean"?<Toggle on={v} onToggle={()=>updateCmsGroup(group,k,!v)}/>:Array.isArray(v)?<input style={{...styles.adminInput,width:"min(100%,520px)"}} value={v.join(", ")} onChange={e=>updateCmsGroup(group,k,e.target.value.split(",").map(x=>x.trim()).filter(Boolean))}/>:typeof v==="object"&&v!==null?<textarea style={{...styles.adminInput,width:"min(100%,520px)",minHeight:90,fontFamily:"monospace",direction:"ltr"}} value={JSON.stringify(v,null,2)} onChange={e=>{try{updateCmsGroup(group,k,JSON.parse(e.target.value))}catch{}}}/>:<input style={{...styles.adminInput,width:"min(100%,520px)"}} value={v??""} onChange={e=>updateCmsGroup(group,k,e.target.value)}/>}</div>)}<button style={styles.saveBtn} onClick={()=>saveField(group)}>{savedMsg[group]?t.saved:t.save}</button></div>)}
+          <div style={styles.pricingCard}><h3>Custom Copy Dictionary</h3><p style={{color:"#777",fontSize:".78rem"}}>Create additional English/Arabic phrases without changing the source code.</p>{["en","ar"].map(locale=><div key={locale} style={{marginTop:14}}><h4>{locale==="en"?"English":"العربية"}</h4>{Object.entries(settings.customCopy?.[locale]||{}).map(([key,val])=><div key={key} style={{display:"grid",gridTemplateColumns:"180px 1fr auto",gap:8,marginBottom:8}}><input style={styles.adminInput} value={key} readOnly/><input dir={locale==="ar"?"rtl":"ltr"} style={styles.adminInput} value={val||""} onChange={e=>setSettings(s=>({...s,customCopy:{...s.customCopy,[locale]:{...s.customCopy[locale],[key]:e.target.value}}}))}/><button style={{...styles.navBtn,color:"#e53935"}} onClick={()=>deleteCustomCopy(locale,key)}>Delete</button></div>)}<button style={styles.navBtn} onClick={()=>addCustomCopy(locale)}>+ Add Copy</button></div>)}<button style={{...styles.saveBtn,marginTop:14}} onClick={()=>{saveField("control");addAudit("Updated universal CMS controls","Global settings and custom copy");}}>{savedMsg.control?t.saved:t.save}</button></div>
+        </div>}
+
+        {adminTab==="advanced" && <div>
+          <div style={styles.pricingCard}><h3>Admin Command Center</h3><p style={{color:"#777",fontSize:".82rem"}}>Super Admin controls for the complete storefront. This local build keeps everything in the browser storage; connect these structures to your backend when moving to production.</p>
+            {[['maintenanceMode','Maintenance Mode'],['storefrontPublished','Storefront Published'],['allowGuestCheckout','Guest Checkout'],['showAdminShortcut','Show Admin Shortcut'],['enableAuditLog','Enable Audit Log'],['enableDraftPreview','Draft Preview']].map(([k,l])=><div key={k} style={styles.pricingRow}><span style={styles.pricingLabel}>{l}</span><Toggle on={settings[k]!==false} onToggle={()=>updateSetting(k,settings[k]===false)}/></div>)}
+          </div>
+          <div style={styles.pricingCard}><h3>Admin Roles & Permissions</h3>{(settings.adminRoles||[]).map(role=><div key={role.id} style={{border:"1px solid #eee",borderRadius:10,padding:12,marginBottom:10}}><div style={{display:"flex",justifyContent:"space-between",gap:8}}><input style={styles.adminInput} value={role.name||""} onChange={e=>setSettings(s=>({...s,adminRoles:s.adminRoles.map(r=>r.id===role.id?{...r,name:e.target.value}:r)}))}/><button style={{...styles.navBtn}} onClick={()=>setSettings(s=>({...s,adminRoles:s.adminRoles.filter(r=>r.id!==role.id)}))}>Remove</button></div><div style={{fontSize:".7rem",color:"#777",marginTop:7}}>Permissions: {role.permissions?.join(', ')}</div></div>)}
+            <button style={styles.saveBtn} onClick={()=>{saveField('advanced');addAudit('Updated admin roles','Admin permissions configuration');}}>{savedMsg.advanced?t.saved:t.save}</button>
+          </div>
+          <div style={styles.pricingCard}><h3>Audit Log</h3>{(settings.adminAuditLog||[]).slice(0,50).map(item=><div key={item.id} style={{padding:"9px 0",borderBottom:"1px solid #eee",fontSize:".75rem"}}><strong>{item.action}</strong><div style={{color:"#777"}}>{item.details} · {new Date(item.at).toLocaleString()}</div></div>)}</div>
+          <div style={styles.pricingCard}><h3>Global Customer-Facing Text</h3><p style={{color:"#777",fontSize:".78rem"}}>Use the Language tab for every UI label, and this Content tab for longer editorial pages. Never hard-code customer-facing wording when it can be managed here.</p><button style={styles.saveBtn} onClick={()=>setAdminTab('language')}>Open Translation Studio</button></div>
+        </div>}
+
+        {adminTab==="sections" && <div>
+          <div style={styles.pricingCard}><div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}><h3>Sections & Pages Manager</h3><button style={styles.saveBtn} onClick={addHomepageSection}>+ Add Section</button></div>
+            <p style={{color:"#777",fontSize:".8rem"}}>Control every custom homepage section in both English and Arabic. Change wording, images, CTA links, order, and visibility.</p>
+            {(settings.homepageSections||[]).sort((a,b)=>(a.order||0)-(b.order||0)).map(sec=><div key={sec.id} style={{border:"1px solid #eee",borderRadius:10,padding:12,marginTop:10}}><div style={{display:"grid",gridTemplateColumns:"1fr 1fr 90px 90px",gap:8}}><input style={styles.adminInput} placeholder="English title" value={sec.title||""} onChange={e=>updateHomepageSection(sec.id,"title",e.target.value)}/><input dir="rtl" style={styles.adminInput} placeholder="Arabic title" value={sec.titleAr||""} onChange={e=>updateHomepageSection(sec.id,"titleAr",e.target.value)}/><input type="number" style={styles.adminInput} value={sec.order||0} onChange={e=>updateHomepageSection(sec.id,"order",Number(e.target.value)||0)}/><Toggle on={sec.active!==false} onToggle={()=>updateHomepageSection(sec.id,"active",sec.active===false)}/></div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginTop:8}}><textarea style={{...styles.adminInput,minHeight:70}} placeholder="English body" value={sec.body||""} onChange={e=>updateHomepageSection(sec.id,"body",e.target.value)}/><textarea dir="rtl" style={{...styles.adminInput,minHeight:70}} placeholder="Arabic body" value={sec.bodyAr||""} onChange={e=>updateHomepageSection(sec.id,"bodyAr",e.target.value)}/></div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr auto",gap:8,marginTop:8}}><input style={styles.adminInput} placeholder="Image URL" value={sec.image||""} onChange={e=>updateHomepageSection(sec.id,"image",e.target.value)}/><input style={styles.adminInput} placeholder="Button text" value={sec.buttonText||""} onChange={e=>updateHomepageSection(sec.id,"buttonText",e.target.value)}/><input style={styles.adminInput} placeholder="Button link" value={sec.buttonLink||""} onChange={e=>updateHomepageSection(sec.id,"buttonLink",e.target.value)}/><button style={{...styles.navBtn,color:"#e53935"}} onClick={()=>deleteHomepageSection(sec.id)}>Delete</button></div></div>)}
+            <button style={{...styles.saveBtn,marginTop:12}} onClick={()=>{saveField("sections");addAudit("Updated homepage sections","Section copy, order and visibility");}}>{savedMsg.sections?t.saved:t.save}</button>
+          </div>
+        </div>}
+        {adminTab==="access" && <div>
+          <div style={styles.pricingCard}><h3>Admin Roles & Permissions</h3><p style={{color:"#777",fontSize:".8rem"}}>Define which areas each role can access. Super Admin should remain unrestricted.</p>{(settings.adminRoles||[]).map(role=><div key={role.id} style={{border:"1px solid #eee",borderRadius:10,padding:12,marginBottom:10}}><div style={{display:"flex",gap:8,alignItems:"center"}}><input style={{...styles.adminInput,flex:1}} value={role.name||""} onChange={e=>setSettings(s=>({...s,adminRoles:s.adminRoles.map(r=>r.id===role.id?{...r,name:e.target.value}:r)}))}/><button style={styles.navBtn} onClick={()=>setSettings(s=>({...s,adminRoles:s.adminRoles.filter(r=>r.id!==role.id)}))}>Remove</button></div><div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:8,marginTop:10}}>{["dashboard","homepage","sections","products","categories","banners","pricing","shipping","orders","customers","analytics","marketing","content","language","media","seo","settings","advanced"].map(permission=><label key={permission} style={{display:"flex",justifyContent:"space-between",padding:8,border:"1px solid #eee",borderRadius:7,fontSize:".72rem"}}>{permission}<Toggle on={role.permissions?.includes(permission)} onToggle={()=>setSettings(s=>({...s,adminRoles:s.adminRoles.map(r=>{if(r.id!==role.id)return r; const p=r.permissions||[]; return {...r,permissions:p.includes(permission)?p.filter(x=>x!==permission):[...p,permission]};})}))}/></label>)}</div></div>)}
+            <button style={styles.saveBtn} onClick={()=>{saveField("access");addAudit("Updated admin permissions","Role access matrix");}}>{savedMsg.access?t.saved:t.save}</button>
+          </div>
+          <div style={styles.pricingCard}><h3>Storefront Feature Switchboard</h3>{[["wishlistEnabled","Wishlist"],["quickViewEnabled","Quick View"],["recentlyViewedEnabled","Recently Viewed"],["backInStockEnabled","Back in Stock"],["lowStockEnabled","Low Stock"],["reviewsEnabled","Reviews"],["sizeGuideEnabled","Size Guide"],["compareEnabled","Product Compare"],["stickyHeader","Sticky Header"],["smoothScroll","Smooth Scroll"],["productHoverZoom","Product Hover Zoom"],["showTrustBadges","Trust Badges"],["showShippingEta","Shipping ETA"],["languageSwitcher","Language Switcher"],["arabicRTL","Arabic RTL"],["enableDraftPreview","Draft Preview"],["maintenanceMode","Maintenance Mode"]].map(([k,l])=><div key={k} style={styles.pricingRow}><span style={styles.pricingLabel}>{l}</span><Toggle on={settings[k]!==false} onToggle={()=>updateSetting(k,settings[k]===false)}/></div>)}</div>
+        </div>}
         {adminTab==="settings" && <div>
           <div style={styles.pricingCard}>{[["storeName","Store Name"],["storeTagline","Tagline"],["paypalClientId","PayPal Client ID"],["whatsapp","WhatsApp Number"],["instagram","Instagram"],["snapchat","Snapchat"],["tiktok","TikTok"],["adminPassword","Admin Password"]].map(([k,label])=><div key={k} style={styles.pricingRow}><span style={styles.pricingLabel}>{label}</span><input type={k==="adminPassword"?"password":"text"} style={{...styles.adminInput,width:260}} value={settings[k]||""} onChange={e=>updateSetting(k,e.target.value)}/></div>)}<button style={styles.saveBtn} onClick={()=>saveField("settings")}>{savedMsg.settings?t.saved:t.save}</button></div>
+          <div style={styles.pricingCard}><h3>Storefront Experience</h3><p style={{color:"#777",fontSize:".76rem"}}>For complete control, use the Everything Control tab. It exposes additional operational, localization, security and customer-experience settings.</p>{[['stickyHeader','Sticky Header'],['smoothScroll','Smooth Scrolling'],['productHoverZoom','Product Image Hover Zoom'],['showTrustBadges','Trust Badges'],['showShippingEta','Show Delivery Estimate']].map(([k,l])=><div key={k} style={styles.pricingRow}><span style={styles.pricingLabel}>{l}</span><Toggle on={settings[k]!==false} onToggle={()=>updateSetting(k,settings[k]===false)}/></div>)}</div>
           <div style={styles.pricingCard}><h3>Appearance</h3>{[["primaryColor","Primary Color"],["secondaryColor","Secondary Color"]].map(([k,l])=><div key={k} style={styles.pricingRow}><span style={styles.pricingLabel}>{l}</span><input type="color" value={settings.appearance?.[k]||"#000000"} onChange={e=>updateNestedSetting("appearance",k,e.target.value)} /><input style={styles.adminInput} value={settings.appearance?.[k]||""} onChange={e=>updateNestedSetting("appearance",k,e.target.value)}/></div>)}<div style={styles.pricingRow}><span style={styles.pricingLabel}>Button Radius</span><input type="number" style={styles.adminInput} value={settings.appearance?.buttonRadius||8} onChange={e=>updateNestedSetting("appearance","buttonRadius",parseInt(e.target.value)||0)}/></div></div>
           <div style={styles.pricingCard}><h3>Footer</h3>{Object.keys(settings.footer||{}).map(k=><div key={k} style={styles.pricingRow}><span style={styles.pricingLabel}>{k}</span><input style={{...styles.adminInput,width:"min(100%,420px)"}} value={settings.footer?.[k]||""} onChange={e=>updateNestedSetting("footer",k,e.target.value)}/></div>)}</div>
           <div style={{display:"flex",gap:8}}><button style={{...styles.saveBtn,background:"#9b2c2c"}} onClick={resetCmsSettings}>Reset CMS Defaults</button></div>
