@@ -20,7 +20,7 @@ const T = {
     ppNotConf:"PayPal Not Configured", ppHint:"Go to Admin → Settings and enter your PayPal Client ID.",
     allCategories:"All", hijabMagnets:"Hijab Magnets", printedModal:"Printed Modal Hijab",
     noResults:"No products found", filterBy:"Filter by",
-    adminPanel:"Admin Panel", dashboard:"Dashboard", homepage:"Homepage", products:"Products", categories:"Categories", banners:"Banners", pricing:"Pricing & Discounts", shipping:"Shipping",
+    adminPanel:"Admin Panel", dashboard:"Dashboard", homepage:"Homepage", products:"Products", categories:"Categories", banners:"Banners", pricing:"Pricing & Discounts",
     orders:"Orders", customers:"Customers", analytics:"Analytics", marketing:"Marketing", content:"Content", media:"Media", seo:"SEO", settings:"Settings", language:"Language & Copy", sections:"Sections & Pages", access:"Admin Access", advanced:"Advanced Control", control:"Everything Control", navigation:"Navigation", checkoutSettings:"Checkout & Customer Experience", notifications:"Notifications & Emails", policies:"Policies & Legal", integrations:"Integrations & Tracking", localization:"Localization", logout:"Logout",
     productName:"Product Name", price:"Price ($)", discount:"Discount (%)",
     discountExpiry:"Discount Expiry", categoryDiscount:"Category Discount (%)",
@@ -37,6 +37,8 @@ const T = {
     pending:"Pending", shipped:"Shipped", delivered:"Delivered",
     exportCSV:"Export CSV", noOrders:"No orders yet", invoice:"Invoice", printInvoice:"Print / Save Invoice", shippingFee:"Shipping Fee", subtotalLabel:"Subtotal", taxLabel:"Tax",
     completeLook:"Complete the Look", completeLookSub:"You may also like this:",
+    addedToBagTitle:"Added to your bag", viewBag:"View Bag", miniCheckout:"Checkout", itemsInBag:"items in your bag",
+    bestSeller:"Bestseller", onlyLeft:"Only", leftLabel:"left", secureCheckout:"Secure checkout", easyDelivery:"Easy delivery", premiumQuality:"Premium quality",
     yesAdd:"Yes, add it", noThanks:"No thanks",
   },
   ar: {
@@ -57,7 +59,7 @@ const T = {
     ppNotConf:"PayPal غير مُفعّل", ppHint:"اذهبي إلى الإدارة ← الإعدادات وأدخلي Client ID الخاص بـ PayPal.",
     allCategories:"الكل", hijabMagnets:"مغناطيسات الحجاب", printedModal:"حجاب مودال مطبوع",
     noResults:"لا توجد منتجات", filterBy:"تصفية",
-    adminPanel:"لوحة التحكم", dashboard:"لوحة المعلومات", homepage:"الصفحة الرئيسية", products:"المنتجات", categories:"الفئات", banners:"البانرات", pricing:"التسعير والخصومات", shipping:"الشحن",
+    adminPanel:"لوحة التحكم", dashboard:"لوحة المعلومات", homepage:"الصفحة الرئيسية", products:"المنتجات", categories:"الفئات", banners:"البانرات", pricing:"التسعير والخصومات",
     orders:"الطلبات", customers:"العملاء", analytics:"التحليلات", marketing:"التسويق", content:"المحتوى", media:"الوسائط", seo:"SEO", settings:"الإعدادات", language:"اللغة والنصوص", sections:"الأقسام والصفحات", access:"صلاحيات الإدارة", advanced:"تحكم متقدم", control:"تحكم شامل", navigation:"التنقل والقوائم", checkoutSettings:"الدفع وتجربة العميل", notifications:"الإشعارات والبريد", policies:"السياسات والقانونيات", integrations:"التكاملات والتتبع", localization:"التوطين", logout:"خروج",
     productName:"اسم المنتج", price:"السعر ($)", discount:"الخصم (%)",
     discountExpiry:"انتهاء الخصم", categoryDiscount:"خصم الفئة (%)",
@@ -74,6 +76,8 @@ const T = {
     pending:"قيد المعالجة", shipped:"تم الشحن", delivered:"تم التسليم",
     exportCSV:"تصدير CSV", noOrders:"لا توجد طلبات بعد", invoice:"الفاتورة", printInvoice:"طباعة / حفظ الفاتورة", shippingFee:"رسوم الشحن", subtotalLabel:"المجموع الفرعي", taxLabel:"الضريبة",
     completeLook:"كمّلي الإطلالة", completeLookSub:"تريدين تضيفين هذا معه؟",
+    addedToBagTitle:"تمت الإضافة إلى السلة", viewBag:"عرض السلة", miniCheckout:"إتمام الطلب", itemsInBag:"قطع في سلتك",
+    bestSeller:"الأكثر مبيعاً", onlyLeft:"متبقي", leftLabel:"قطعة", secureCheckout:"دفع آمن", easyDelivery:"توصيل سهل", premiumQuality:"جودة فاخرة",
     yesAdd:"أي، ضيفيه", noThanks:"لا شكراً",
   }
 };
@@ -254,33 +258,6 @@ function calcPrice(product, settings, qty=1, coupon="") {
 function AdminPasswordInput({styles, placeholder, onSubmit}){
   const [val, setVal] = useState("");
   return (
-    <>
-      <style>{`
-        @keyframes hudaFlyToBag {
-          0% { opacity:1; transform:translate3d(0,0,0) scale(1) rotate(0deg); }
-          45% { opacity:.96; transform:translate3d(calc(var(--bag-dx) * .42),calc(var(--bag-dy) * .28 - 18px),0) scale(.72) rotate(-4deg); }
-          100% { opacity:.12; transform:translate3d(var(--bag-dx),var(--bag-dy),0) scale(.18) rotate(8deg); }
-        }
-        @keyframes hudaBagPulse {
-          0%{transform:scale(1)}
-          45%{transform:scale(1.16)}
-          100%{transform:scale(1)}
-        }
-      `}</style>
-      {flyingItem && (
-        <div aria-hidden="true" style={{
-          position:"fixed", left:0, top:0, width:flyingItem.size, height:flyingItem.size,
-          borderRadius:14, overflow:"hidden", pointerEvents:"none", zIndex:99999,
-          boxShadow:"0 12px 35px rgba(0,0,0,.22)", border:"2px solid rgba(255,255,255,.9)",
-          background:"#fff",
-          transform:`translate3d(${flyingItem.x-flyingItem.size/2}px,${flyingItem.y-flyingItem.size/2}px,0)`,
-          animation:"hudaFlyToBag .78s cubic-bezier(.2,.75,.2,1) forwards",
-          "--bag-dx":`${flyingItem.dx}px`, "--bag-dy":`${flyingItem.dy}px`
-        }}>
-          <img src={flyingItem.image} alt="" style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}} />
-        </div>
-      )}
-
     <input
       type="password"
       autoFocus
@@ -305,6 +282,7 @@ export default function App() {
   const t = useMemo(()=>({...T[lang], ...(settings?.translations?.[lang]||{})}),[lang,settings?.translations]);
   const [orders, setOrders] = useState(()=>LS.get("huda_orders",[]));
   const [cart, setCart] = useState([]);
+  const [miniCartOpen, setMiniCartOpen] = useState(false);
   const [wishlist, setWishlist] = useState(()=>LS.get("huda_wishlist",[]));
   const [page, setPage] = useState("shop"); // shop | product | cart | checkout | confirm | admin
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -331,6 +309,7 @@ export default function App() {
   const onImgErr = (e)=>{ if(e.currentTarget.src!==IMG_FALLBACK){ e.currentTarget.src = IMG_FALLBACK; } };
   const [addedMap, setAddedMap] = useState({});
   const [confirmOrder, setConfirmOrder] = useState(null);
+  const [crossSell, setCrossSell] = useState(null);
   const [winWidth, setWinWidth] = useState(typeof window!=="undefined"?window.innerWidth:375);
   const [heroImgIdx, setHeroImgIdx] = useState(0);
   const heroImages = (settings.heroImages && settings.heroImages.length ? settings.heroImages : products.filter(p=>p.category==="printedModal").slice(0,4).map(p=>p.image));
@@ -356,39 +335,13 @@ export default function App() {
   useEffect(()=>{ LS.set("huda_wishlist",wishlist); },[wishlist]);
 
   const cartTotal = cart.reduce((s,i)=>s+calcPrice(products.find(p=>p.id===i.id)||{price:0,discount:0,category:""},settings,i.qty,couponInput)*i.qty,0);
-  const hasShippingState = Boolean(shippingForm.state);
-  const shippingCost = !settings.shippingMethod ? 0 : (
-    hasShippingState
-      ? Number(settings.shippingZones?.[shippingForm.state] ?? settings.shippingPrice ?? 0)
-      : null
-  );
+  const shippingCost = !settings.shippingMethod ? 0 : Number(settings.shippingZones?.[shippingForm.state] ?? settings.shippingPrice ?? 0);
   const tax = cartTotal*(settings.taxRate||0)/100;
-  const calculatedShippingCost = shippingCost === null ? 0 : shippingCost;
-  const orderTotal = cartTotal+calculatedShippingCost+tax;
+  const orderTotal = cartTotal+shippingCost+tax;
 
+  const [flyItem, setFlyItem] = useState(null); // {img, x, y, tx, ty}
   const [cartPulse, setCartPulse] = useState(false);
-  const [flyingItem, setFlyingItem] = useState(null);
-
-  function flyToBag(prod, sourceEl) {
-    const img = sourceEl?.querySelector?.("img") || sourceEl;
-    const bag = document.querySelector("[data-bag-target]");
-    if (!img || !bag) return;
-    const from = img.getBoundingClientRect();
-    const to = bag.getBoundingClientRect();
-    setFlyingItem({
-      id: Date.now(),
-      image: prod.image,
-      x: from.left + from.width/2,
-      y: from.top + from.height/2,
-      dx: (to.left + to.width/2) - (from.left + from.width/2),
-      dy: (to.top + to.height/2) - (from.top + from.height/2),
-      size: Math.min(110, Math.max(64, from.width * .34))
-    });
-    setCartPulse(false);
-    setTimeout(()=>setCartPulse(true),650);
-    setTimeout(()=>setFlyingItem(null),800);
-    setTimeout(()=>setCartPulse(false),1100);
-  }
+  const cartBtnRef = useRef(null);
 
   function addToCart(prod, evt=null, sourceEl=null) {
     setCart(c=>{
@@ -397,9 +350,45 @@ export default function App() {
       return [...c,{id:prod.id,qty:1}];
     });
     setAddedMap(m=>({...m,[prod.id]:true}));
-    setCartPulse(true);
+    setMiniCartOpen(true);
     setTimeout(()=>setAddedMap(m=>({...m,[prod.id]:false})),1500);
-    setTimeout(()=>setCartPulse(false),380);
+    if(prod.category==="printedModal"){
+      const magnetHasNone = !cart.some(c=>{
+        const cp = products.find(x=>x.id===c.id);
+        return cp && cp.category==="hijabMagnets";
+      });
+      if(magnetHasNone){
+        const magnets = products.filter(p=>p.active && p.category==="hijabMagnets" && !cart.find(c=>c.id===p.id));
+        if(magnets.length>0) setCrossSell(magnets[Math.floor(Math.random()*magnets.length)]);
+      }
+    }
+    // Fly-to-cart animation — origin is the actual product image the person clicked from
+    let imgEl = sourceEl || null;
+    if(!imgEl && evt){
+      const cardEl = evt.currentTarget.closest("[data-card]") || evt.currentTarget;
+      imgEl = (cardEl.tagName==="IMG") ? cardEl : (cardEl.querySelector ? cardEl.querySelector("img") : null) || cardEl;
+    }
+    if(imgEl && cartBtnRef.current){
+      const startRect = imgEl.getBoundingClientRect();
+      const endRect = cartBtnRef.current.getBoundingClientRect();
+      const size = 52;
+      const flyId = Date.now();
+      setFlyItem({
+        id:flyId, img:prod.image,
+        x:startRect.left+startRect.width/2-size/2,
+        y:startRect.top+startRect.height/2-size/2,
+        tx:(endRect.left+endRect.width/2)-(startRect.left+startRect.width/2),
+        ty:(endRect.top+endRect.height/2)-(startRect.top+startRect.height/2),
+      });
+      setTimeout(()=>{
+        setFlyItem(f=>f&&f.id===flyId?null:f);
+        setCartPulse(true);
+        setTimeout(()=>setCartPulse(false), 380);
+      }, 580);
+    } else {
+      setCartPulse(true);
+      setTimeout(()=>setCartPulse(false), 380);
+    }
   }
 
   function removeFromCart(id){ setCart(c=>c.filter(x=>x.id!==id)); }
@@ -459,7 +448,7 @@ export default function App() {
       items:[...cart],
       shipping:{...shippingForm},
       subtotal:cartTotal.toFixed(2),
-      shippingCost:calculatedShippingCost.toFixed(2),
+      shippingCost:shippingCost.toFixed(2),
       tax:tax.toFixed(2),
       total:orderTotal.toFixed(2),
       shippingMethod:settings.shippingMethod||"Standard Shipping",
@@ -481,46 +470,22 @@ export default function App() {
     const inv = settings.invoice || {};
     const ar = lang === "ar";
     const esc = (v)=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
-    const productName = (product)=>ar ? (product.nameAr||product.name) : product.name;
     const itemRows = (order.items||[]).map(item=>{
       const product = products.find(p=>p.id===item.id) || item;
       const qty = Number(item.qty||1);
       const unit = Number(calcPrice(product,settings,qty)||0);
-      const sku = product.sku || product.id || "—";
-      return `<tr><td class="item"><strong>${esc(productName(product))}</strong><span class="sku">${ar?"رمز المنتج":"SKU"}: ${esc(sku)}</span></td><td class="num">${qty}</td><td class="num">$${unit.toFixed(2)}</td><td class="num">$${(unit*qty).toFixed(2)}</td></tr>`;
+      return `<tr><td>${esc(lang==="ar"?(product.nameAr||product.name):product.name)}</td><td>${qty}</td><td>$${unit.toFixed(2)}</td><td>$${(unit*qty).toFixed(2)}</td></tr>`;
     }).join("");
-    const shippingFee = Number(order.shippingCost ?? 0);
+    const shippingFee = Number(order.shippingCost ?? shippingCost ?? 0);
     const taxAmount = Number(order.tax ?? 0);
     const subtotal = Number(order.subtotal ?? 0);
     const total = Number(order.total ?? 0);
     const address = [order.shipping?.addr1,order.shipping?.addr2,order.shipping?.city,order.shipping?.state,order.shipping?.zip].filter(Boolean).join(", ");
     const title = ar ? "الفاتورة" : "INVOICE";
-    const labels = ar
-      ? {date:"التاريخ",order:"رقم الطلب",customer:"العميل",billTo:"بيانات العميل",shipTo:"عنوان الشحن",items:"تفاصيل الطلب",qty:"الكمية",unit:"سعر الوحدة",amount:"المبلغ",subtotal:"المجموع الفرعي",shipping:"الشحن",tax:"الضريبة",total:"الإجمالي",status:"الحالة",payment:"طريقة الدفع",currency:"العملة",notes:"ملاحظات"}
-      : {date:"Date",order:"Order Number",customer:"Customer",billTo:"Bill To",shipTo:"Ship To",items:"Order Details",qty:"Qty",unit:"Unit Price",amount:"Amount",subtotal:"Subtotal",shipping:"Shipping",tax:"Tax",total:"Total",status:"Status",payment:"Payment Method",currency:"Currency",notes:"Notes"};
+    const labels = ar ? {date:"التاريخ",order:"رقم الطلب",customer:"العميل",address:"عنوان الشحن",items:"المنتجات",qty:"الكمية",unit:"السعر",amount:"المبلغ",subtotal:"المجموع الفرعي",shipping:"رسوم الشحن",tax:"الضريبة",total:"الإجمالي"} : {date:"Date",order:"Order ID",customer:"Customer",address:"Shipping Address",items:"Items",qty:"Qty",unit:"Unit Price",amount:"Amount",subtotal:"Subtotal",shipping:"Shipping Fee",tax:"Tax",total:"Total"};
     const footer = ar ? (inv.footerAr||"شكراً لطلبكم.") : (inv.footerEn||"Thank you for your order.");
-    const paymentMethod = order.paypal ? "PayPal" : (ar ? "Store Checkout" : "Store Checkout");
-    const status = order.status || "pending";
-    const dateValue = order.date || new Date().toLocaleDateString();
-    const customerPhone = inv.includeCustomerPhone && order.shipping?.phone ? `<br>${esc(order.shipping.phone)}` : "";
-    const storeEmail = inv.storeEmail || settings.email || "";
-    const storePhone = inv.storePhone || settings.whatsapp || "";
-    const html=`<!doctype html><html lang="${ar?'ar':'en'}" dir="${ar?'rtl':'ltr'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title} - ${esc(order.id)}</title>
-<style>
-*{box-sizing:border-box}@page{size:Letter;margin:.45in}body{margin:0;background:#f3f1ed;color:#171717;font-family:Inter,Arial,Helvetica,sans-serif;font-size:12px;line-height:1.5}.invoice{width:100%;max-width:850px;margin:28px auto;background:#fff;padding:42px 46px;box-shadow:0 12px 45px rgba(0,0,0,.08)}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:28px;padding-bottom:24px;border-bottom:2px solid #1d1d1d}.brand{font-family:Georgia,'Times New Roman',serif;font-size:25px;letter-spacing:.03em;font-weight:700}.brandSub{margin-top:5px;color:#777;font-size:11px}.invoiceTitle{text-align:${ar?'left':'right'}}h1{margin:0;font-family:Georgia,'Times New Roman',serif;font-size:31px;letter-spacing:.08em;font-weight:600}.muted{color:#777;font-size:11px}.metaGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:24px 0}.metaBox{border:1px solid #e6e1d8;border-radius:8px;padding:14px 16px;min-height:88px}.metaLabel{text-transform:uppercase;letter-spacing:.08em;font-size:9px;color:#8a847b;font-weight:700;margin-bottom:7px}.metaValue{font-size:12px;font-weight:600}.metaValue .muted{font-weight:400}.statusLine{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.pill{display:inline-block;border:1px solid #ddd5c8;border-radius:99px;padding:3px 8px;font-size:9px;color:#5f584e}.sectionTitle{font-size:10px;text-transform:uppercase;letter-spacing:.1em;font-weight:800;color:#777;margin:22px 0 9px}table{width:100%;border-collapse:collapse}th{background:#f7f5f1;color:#6e685f;text-transform:uppercase;letter-spacing:.05em;font-size:9px;font-weight:800;padding:10px 9px;border-top:1px solid #e5e0d7;border-bottom:1px solid #e5e0d7;text-align:${ar?'right':'left'}}td{padding:12px 9px;border-bottom:1px solid #eee8df;font-size:11px;vertical-align:top;text-align:${ar?'right':'left'}}th.num,td.num{text-align:${ar?'left':'right'}}td.item{width:48%}.sku{display:block;color:#999;font-size:9px;margin-top:3px;font-weight:400}.summaryWrap{display:flex;justify-content:flex-end;margin-top:18px}.summary{width:330px;max-width:100%}.summaryRow{display:flex;justify-content:space-between;gap:20px;padding:6px 0;color:#4d4943}.summaryRow.total{margin-top:7px;padding:12px 0;border-top:2px solid #1d1d1d;color:#111;font-size:17px;font-weight:800}.summaryRow.total span:last-child{font-family:Georgia,'Times New Roman',serif}.notes{margin-top:24px;border-top:1px solid #e5e0d7;padding-top:14px;color:#777;font-size:10px}.footer{margin-top:32px;padding-top:18px;border-top:1px solid #e5e0d7;text-align:center;color:#777;font-size:10px}.printBtn{display:block;margin:22px auto 0;border:0;background:#1b1b1b;color:#fff;padding:10px 20px;border-radius:6px;font-size:11px;cursor:pointer}@media(max-width:650px){.invoice{margin:0;padding:24px 18px;box-shadow:none}.top{flex-direction:column}.invoiceTitle{text-align:${ar?'right':'left'}}.metaGrid{grid-template-columns:1fr}}@media print{body{background:#fff}.invoice{max-width:none;margin:0;padding:0;box-shadow:none}.printBtn{display:none}}
-</style></head><body><div class="invoice">
-<div class="top"><div><div class="brand">${esc(inv.storeName||settings.storeName||"Huda’s Abaya Boutique")}</div><div class="brandSub">${esc(storeEmail)}${storePhone?" · "+esc(storePhone):""}</div></div><div class="invoiceTitle"><h1>${title}</h1><div class="muted" style="margin-top:5px">${labels.order}: <strong>${esc(order.id)}</strong></div><div class="muted">${labels.date}: ${esc(dateValue)}</div></div></div>
-<div class="metaGrid">
-<div class="metaBox"><div class="metaLabel">${labels.billTo}</div><div class="metaValue">${esc(order.shipping?.name||"")}</div><div class="muted">${esc(order.shipping?.email||"")}${customerPhone}</div></div>
-${inv.includeShippingAddress!==false?`<div class="metaBox"><div class="metaLabel">${labels.shipTo}</div><div class="muted">${esc(address||"—")}</div></div>`:""}
-<div class="metaBox"><div class="metaLabel">${labels.payment}</div><div class="metaValue">${esc(paymentMethod)}</div><div class="statusLine"><span class="pill">${labels.status}: ${esc(status)}</span><span class="pill">${labels.currency}: USD</span></div></div>
-<div class="metaBox"><div class="metaLabel">${labels.order}</div><div class="metaValue">${esc(order.id)}</div><div class="muted">${esc(order.shippingMethod||settings.shippingMethod||"Standard Shipping")}</div></div>
-</div>
-<div class="sectionTitle">${labels.items}</div><table><thead><tr><th>${labels.items}</th><th class="num">${labels.qty}</th><th class="num">${labels.unit}</th><th class="num">${labels.amount}</th></tr></thead><tbody>${itemRows}</tbody></table>
-<div class="summaryWrap"><div class="summary"><div class="summaryRow"><span>${labels.subtotal}</span><span>$${subtotal.toFixed(2)}</span></div><div class="summaryRow"><span>${labels.shipping}</span><span>$${shippingFee.toFixed(2)}</span></div>${inv.includeTax!==false?`<div class="summaryRow"><span>${labels.tax}</span><span>$${taxAmount.toFixed(2)}</span></div>`:""}<div class="summaryRow total"><span>${labels.total}</span><span>$${total.toFixed(2)}</span></div></div></div>
-<div class="notes"><strong>${labels.notes}:</strong> ${esc(ar?"يرجى الاحتفاظ بهذه الفاتورة لسجلاتك.":"Please retain this invoice for your records.")}</div><div class="footer">${esc(footer)}</div><button class="printBtn" onclick="window.print()">${ar?'طباعة / حفظ PDF':'Print / Save PDF'}</button>
-</div></body></html>`;
-    const w=window.open("","_blank","width=950,height=900");
+    const html=`<!doctype html><html lang="${ar?'ar':'en'}" dir="${ar?'rtl':'ltr'}"><head><meta charset="utf-8"><title>${title} - ${esc(order.id)}</title><style>body{font-family:Arial,sans-serif;margin:0;background:#f5f2ec;color:#222}.invoice{max-width:820px;margin:30px auto;background:#fff;padding:42px;box-shadow:0 8px 30px rgba(0,0,0,.08)}.top{display:flex;justify-content:space-between;gap:20px;border-bottom:1px solid #ddd;padding-bottom:22px}.brand{font-size:25px;font-weight:700}.muted{color:#777;font-size:13px;line-height:1.7}h1{font-size:30px;margin:0}.meta{margin:24px 0;display:grid;grid-template-columns:1fr 1fr;gap:20px}.box{background:#faf8f4;padding:15px;border-radius:10px}.label{font-size:11px;color:#888;text-transform:uppercase;margin-bottom:5px}table{width:100%;border-collapse:collapse;margin-top:20px}th,td{padding:11px 8px;border-bottom:1px solid #eee;text-align:${ar?'right':'left'};font-size:13px}th{color:#777;font-weight:600}.totals{margin-top:20px;margin-${ar?'left':'right'}:0;width:300px;max-width:100%}.row{display:flex;justify-content:space-between;padding:7px 0}.grand{font-weight:700;font-size:18px;border-top:2px solid #222;margin-top:7px;padding-top:12px}.footer{margin-top:35px;padding-top:20px;border-top:1px solid #ddd;text-align:center;color:#777;font-size:13px}@media print{body{background:#fff}.invoice{margin:0;box-shadow:none;max-width:none}button{display:none}}</style></head><body><div class="invoice"><div class="top"><div><div class="brand">${esc(inv.storeName||settings.storeName||"Huda’s Abaya Boutique")}</div><div class="muted">${esc(inv.storeEmail||settings.email||"")} ${inv.storePhone?" · "+esc(inv.storePhone):""}</div></div><div style="text-align:${ar?'left':'right'}"><h1>${title}</h1><div class="muted">${labels.order}: ${esc(order.id)}<br>${labels.date}: ${esc(order.date)}</div></div></div><div class="meta"><div class="box"><div class="label">${labels.customer}</div><strong>${esc(order.shipping?.name||"")}</strong><div class="muted">${esc(order.shipping?.email||"")}${inv.includeCustomerPhone&&order.shipping?.phone?"<br>"+esc(order.shipping.phone):""}</div></div>${inv.includeShippingAddress?`<div class="box"><div class="label">${labels.address}</div><div class="muted">${esc(address)}</div></div>`:""}</div><table><thead><tr><th>${labels.items}</th><th>${labels.qty}</th><th>${labels.unit}</th><th>${labels.amount}</th></tr></thead><tbody>${itemRows}</tbody></table><div class="totals"><div class="row"><span>${labels.subtotal}</span><span>$${subtotal.toFixed(2)}</span></div><div class="row"><span>${labels.shipping}</span><span>$${inv.includeShippingFee!==false?shippingFee.toFixed(2):"0.00"}</span></div>${inv.includeTax?`<div class="row"><span>${labels.tax}</span><span>$${taxAmount.toFixed(2)}</span></div>`:""}<div class="row grand"><span>${labels.total}</span><span>$${total.toFixed(2)}</span></div></div><div class="footer">${esc(footer)}</div><button onclick="window.print()" style="margin-top:25px;padding:10px 18px;border:0;border-radius:8px;background:#222;color:#fff">${ar?'طباعة':'Print'}</button></div></body></html>`;
+    const w=window.open("","_blank","width=900,height=800");
     if(w){w.document.write(html);w.document.close();setTimeout(()=>w.focus(),100);}
   }
 
@@ -551,6 +516,10 @@ ${inv.includeShippingAddress!==false?`<div class="metaBox"><div class="metaLabel
     heroBgActive:{ opacity:.38, transform:"scale(1)" },
     heroOverlay:{ position:"absolute", inset:0, background:"linear-gradient(180deg,rgba(15,12,10,.55) 0%,rgba(15,12,10,.75) 60%,rgba(15,12,10,.95) 100%)" },
     heroContent:{ position:"relative", zIndex:2 },
+     editorialIntro:{padding:"64px 22px 40px",textAlign:"center",background:"#fff"},
+     eyebrow:{fontSize:".65rem",letterSpacing:".28em",color:"#b08d55",fontWeight:700,marginBottom:10},
+     trustStrip:{display:"grid",gridTemplateColumns:"repeat(3,1fr)",background:"#f7f3eb",borderTop:"1px solid #eee4d4",borderBottom:"1px solid #eee4d4"},
+     trustItem:{padding:"16px 10px",textAlign:"center",fontSize:".72rem",letterSpacing:".04em",color:"#51483d"},
     heroTitle:{ fontFamily:"'Cormorant Garamond',serif", fontSize:"clamp(2rem,5vw,3.5rem)", letterSpacing:".15em", color:"#c4a56a", marginBottom:8 },
     heroSub:{ fontSize:".75rem", letterSpacing:".2em", color:"#aaa", marginBottom:30 },
     shopBtn:{ background:"linear-gradient(135deg,#c4a56a,#d4b57a)", color:"#fff", border:"none", borderRadius:30, padding:"12px 32px", fontSize:"1rem", cursor:"pointer", letterSpacing:".1em" },
@@ -568,7 +537,8 @@ ${inv.includeShippingAddress!==false?`<div class="metaBox"><div class="metaLabel
     addBtn:{ width:"100%", background:"#1a1a1a", color:"#fff", border:"none", borderRadius:5, padding:"5px", cursor:"pointer", fontSize:".64rem", fontWeight:700, letterSpacing:".02em", marginTop:5 },
     addBtnAdded:{ background:"#2d7a2d" },
     badge:{ position:"absolute", top:8, left:8, background:"#c4a56a", color:"#fff", fontSize:".65rem", padding:"2px 8px", borderRadius:10, fontWeight:700 },
-    saleBadge:{ position:"absolute", top:8, right:8, background:"#e53935", color:"#fff", fontSize:".65rem", padding:"2px 8px", borderRadius:10, fontWeight:700 },
+    stockBadge:{ position:"absolute", left:8, background:"rgba(26,26,26,.88)", color:"#fff", fontSize:".62rem", padding:"3px 8px", borderRadius:10, fontWeight:700 },
+     saleBadge:{ position:"absolute", top:8, right:8, background:"#e53935", color:"#fff", fontSize:".65rem", padding:"2px 8px", borderRadius:10, fontWeight:700 },
     wishBtn:{ position:"absolute", top:8, right:8, background:"rgba(255,255,255,.9)", border:"none", borderRadius:50, width:30, height:30, cursor:"pointer", fontSize:".9rem", display:"flex", alignItems:"center", justifyContent:"center" },
     // Product detail
     detailWrap:{ maxWidth:900, margin:"0 auto", padding:20, display:"grid", gridTemplateColumns:"1fr 1fr", gap:30 },
@@ -623,6 +593,7 @@ ${inv.includeShippingAddress!==false?`<div class="metaBox"><div class="metaLabel
         <div style={{position:"relative"}} onClick={()=>{setSelectedProduct(p);setPage("product");window.scrollTo({top:0,behavior:"smooth"});}}>
           <img src={p.image} alt={getProdName(p)} style={styles.cardImg} loading="lazy" onError={onImgErr} />
           {p.newArrival && <span style={styles.badge}>{t.newArrival}</span>}
+          {p.stock>0 && p.stock<=5 && <span style={{...styles.stockBadge,top:p.newArrival?36:8}}>{t.onlyLeft} {p.stock} {t.leftLabel}</span>}
           {hasDisc && p.price>0 && <span style={styles.saleBadge}>{t.sale}</span>}
         </div>
         <button style={{...styles.wishBtn, right:isRTL?undefined:8, left:isRTL?8:undefined, top:hasDisc&&p.price>0?36:8}}
@@ -679,6 +650,14 @@ ${inv.includeShippingAddress!==false?`<div class="metaBox"><div class="metaLabel
             <button style={styles.shopBtn} onClick={()=>{ const link=settings.heroButtonLink||"#shop-grid"; if(link.startsWith("#")) document.getElementById(link.slice(1))?.scrollIntoView({behavior:"smooth"}); else window.location.href=link; }}>{lang==="ar" ? (settings.heroButtonTextAr || settings.heroButtonText) : (settings.heroButtonText || t.collection)}</button>
           </div>
         </div>
+        <section style={styles.editorialIntro}>
+          <div style={styles.eyebrow}>HUDA’S ABAYA BOUTIQUE</div>
+          <h2>{lang==="ar"?"أناقة مصممة لتبقى":"Elegance, Designed to Last"}</h2>
+          <p>{lang==="ar"?"اكتشفي قطعاً مختارة بعناية تجمع بين الاحتشام والفخامة والسهولة اليومية.":"Discover carefully selected pieces that bring together modesty, elegance and effortless everyday style."}</p>
+        </section>
+        <div style={styles.trustStrip}>
+          {[t.premiumQuality,t.easyDelivery,t.secureCheckout].map((x,i)=><div key={x} style={styles.trustItem}><span>{["✦","◇","✓"][i]}</span>{x}</div>)}
+        </div>
         {/* Filter Bar */}
         <div style={styles.filterBar}>
           <input style={styles.searchInput} placeholder={t.search} value={search} onChange={e=>setSearch(e.target.value)} />
@@ -705,6 +684,7 @@ ${inv.includeShippingAddress!==false?`<div class="metaBox"><div class="metaLabel
     );
   }
 
+  const detailImgRef = useRef(null);
   function ProductPage(){
     const p = selectedProduct;
     if(!p) return null;
@@ -715,7 +695,7 @@ ${inv.includeShippingAddress!==false?`<div class="metaBox"><div class="metaLabel
       <div>
         <button style={{...styles.navBtn, padding:"16px 20px"}} onClick={()=>setPage("shop")}>← {t.back}</button>
         <div style={{...styles.detailWrap, gridTemplateColumns:window.innerWidth<600?"1fr":"1fr 1fr"}}>
-          <img src={p.image} alt={getProdName(p)} style={styles.detailImg} loading="eager" decoding="async" onError={onImgErr} />
+          <img ref={detailImgRef} src={p.image} alt={getProdName(p)} style={styles.detailImg} loading="eager" decoding="async" onError={onImgErr} />
           <div>
             <div style={styles.detailName}>{getProdName(p)}</div>
             <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16}}>
@@ -727,8 +707,8 @@ ${inv.includeShippingAddress!==false?`<div class="metaBox"><div class="metaLabel
               ) : <span style={{color:"#999"}}>Price TBD</span>}
             </div>
             <button style={{...styles.detailAddBtn,...(addedMap[p.id]?{background:"#2d7a2d"}:{})}}
-              onClick={()=>{ if(p.stock===0) return; addToCart(p,e,document.querySelector("[data-product-hero]") || e.currentTarget); setPage("cart"); window.scrollTo({top:0,behavior:"smooth"}); }}>
-              {p.stock===0 ? t.outOfStock : t.addToCart}
+              onClick={(e)=>addToCart(p,e,detailImgRef.current)}>
+              {addedMap[p.id]?t.addedToCart:t.addToCart}
             </button>
             <button style={{...styles.detailAddBtn,background:"none",color:"#1a1a1a",border:"1px solid #ddd",marginTop:8}}
               onClick={()=>toggleWishlist(p.id)}>
@@ -746,51 +726,83 @@ ${inv.includeShippingAddress!==false?`<div class="metaBox"><div class="metaLabel
     );
   }
 
+  function MiniCart(){
+    if(!miniCartOpen) return null;
+    const itemCount=cart.reduce((s,i)=>s+i.qty,0);
+    return (
+      <>
+        <div onClick={()=>setMiniCartOpen(false)} style={{position:"fixed",inset:0,background:"rgba(20,16,12,.28)",backdropFilter:"blur(2px)",zIndex:180}} />
+        <aside style={{position:"fixed",top:0,right:isRTL?"auto":0,left:isRTL?0:"auto",width:"min(420px,94vw)",height:"100dvh",background:"#fff",zIndex:190,boxShadow:"-18px 0 60px rgba(0,0,0,.18)",display:"flex",flexDirection:"column",animation:"huda-drawer .32s cubic-bezier(.22,1,.36,1)"}} dir={isRTL?"rtl":"ltr"}>
+          <div style={{padding:"22px 22px 16px",borderBottom:"1px solid #eee",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <div><div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1.55rem"}}>{t.addedToBagTitle}</div><div style={{fontSize:".75rem",color:"#888",marginTop:3}}>{itemCount} {t.itemsInBag}</div></div>
+            <button onClick={()=>setMiniCartOpen(false)} aria-label="Close" style={{border:0,background:"#f7f4ef",width:36,height:36,borderRadius:"50%",fontSize:"1.2rem",cursor:"pointer"}}>×</button>
+          </div>
+          <div style={{flex:1,overflowY:"auto",padding:18}}>
+            {cart.map(item=>{ const p=products.find(x=>x.id===item.id); if(!p)return null; const fp=getFinalPrice(p,item.qty); return (
+              <div key={item.id} style={{display:"flex",gap:12,padding:"0 0 16px",marginBottom:16,borderBottom:"1px solid #eee"}}>
+                <img src={p.image} alt={getProdName(p)} onError={onImgErr} style={{width:78,height:98,objectFit:"cover",borderRadius:8}} />
+                <div style={{flex:1}}><div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1rem",fontWeight:600}}>{getProdName(p)}</div><div style={{fontSize:".82rem",color:"#9c7d45",fontWeight:700,marginTop:4}}>${fp.toFixed(2)}</div><div style={{display:"flex",alignItems:"center",gap:8,marginTop:9}}><button style={styles.qtyBtn} onClick={()=>updateQty(item.id,item.qty-1)}>−</button><span>{item.qty}</span><button style={styles.qtyBtn} onClick={()=>updateQty(item.id,item.qty+1)}>+</button></div></div>
+              </div>
+            );})}
+            {cart.length===0 && <div style={{textAlign:"center",padding:"70px 20px",color:"#888"}}>{t.emptyBag}</div>}
+          </div>
+          {cart.length>0 && <div style={{padding:18,borderTop:"1px solid #eee",background:"#fff"}}>
+            <div style={{display:"flex",justifyContent:"space-between",fontSize:"1rem",fontWeight:700,marginBottom:14}}><span>{t.total}</span><span>${orderTotal.toFixed(2)}</span></div>
+            <button style={{...styles.checkoutBtn,marginTop:0}} onClick={()=>{setMiniCartOpen(false);setPage("cart");window.scrollTo({top:0,behavior:"smooth"})}}>{t.viewBag}</button>
+            <button style={{...styles.checkoutBtn,marginTop:8,background:"#fff",color:"#1a1a1a",border:"1px solid #1a1a1a"}} onClick={()=>{setMiniCartOpen(false);setPage("checkout");window.scrollTo({top:0,behavior:"smooth"})}}>{t.miniCheckout}</button>
+          </div>}
+        </aside>
+      </>
+    );
+  }
+
   function CartPage(){
-    const canCheckout = cart.length>0 && hasShippingState;
     return (
       <div style={styles.cartWrap}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"end",gap:12,marginBottom:18}}>
-          <div><div style={{fontSize:".68rem",letterSpacing:".12em",textTransform:"uppercase",color:"#9a9388",fontWeight:700}}>Shopping Bag</div><h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"2rem",margin:"2px 0 0"}}>{t.shoppingBag}</h2></div>
-          {cart.length>0&&<div style={{fontSize:".78rem",color:"#777"}}>{cart.reduce((n,i)=>n+i.qty,0)} {cart.reduce((n,i)=>n+i.qty,0)===1?"item":"items"}</div>}
-        </div>
+        <h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1.8rem",marginBottom:20}}>{t.shoppingBag}</h2>
         {cart.length===0
-          ? <div style={{textAlign:"center",padding:60,color:"#999",background:"#fff",borderRadius:14}}><div style={{fontSize:"2rem",marginBottom:12}}>🛍️</div><div>{t.emptyBag}</div><button style={{...styles.shopBtn,marginTop:20}} onClick={()=>setPage("shop")}>{t.continueShopping}</button></div>
+          ? <div style={{textAlign:"center",padding:60,color:"#999"}}>
+              <div style={{fontSize:"2rem",marginBottom:12}}>🛍️</div>
+              <div>{t.emptyBag}</div>
+              <button style={{...styles.shopBtn,marginTop:20}} onClick={()=>setPage("shop")}>{t.continueShopping}</button>
+            </div>
           : <>
             {cart.map(item=>{
               const p=products.find(x=>x.id===item.id); if(!p) return null;
               const fp=getFinalPrice(p,item.qty);
-              return <div key={item.id} style={styles.cartItem}>
-                <img src={p.image} alt={getProdName(p)} style={styles.cartImg} loading="lazy" decoding="async" onError={onImgErr}/>
-                <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1.05rem",fontWeight:700,marginBottom:3}}>{getProdName(p)}</div>
-                  <div style={{fontSize:".72rem",color:"#888",marginBottom:5}}>SKU: {p.sku||p.id}</div>
-                  <div style={{color:"#a88952",fontWeight:800}}>{p.price>0?`$${fp.toFixed(2)}`:"Price TBD"}</div>
-                  <div style={{display:"flex",alignItems:"center",gap:8,marginTop:8}}><button style={styles.qtyBtn} onClick={()=>updateQty(item.id,item.qty-1)}>−</button><span style={{minWidth:20,textAlign:"center"}}>{item.qty}</span><button style={styles.qtyBtn} onClick={()=>updateQty(item.id,item.qty+1)}>+</button></div>
+              return (
+                <div key={item.id} style={styles.cartItem}>
+                  <img src={p.image} alt={getProdName(p)} style={styles.cartImg} loading="lazy" decoding="async" onError={onImgErr} />
+                  <div style={{flex:1}}>
+                    <div style={{fontWeight:600,marginBottom:4}}>{getProdName(p)}</div>
+                    <div style={{color:"#c4a56a",fontWeight:700}}>{p.price>0?`$${fp.toFixed(2)}`:"Price TBD"}</div>
+                    <div style={{display:"flex",alignItems:"center",gap:8,marginTop:8}}>
+                      <button style={styles.qtyBtn} onClick={()=>updateQty(item.id,item.qty-1)}>−</button>
+                      <span style={{minWidth:20,textAlign:"center"}}>{item.qty}</span>
+                      <button style={styles.qtyBtn} onClick={()=>updateQty(item.id,item.qty+1)}>+</button>
+                    </div>
+                  </div>
+                  <button style={{background:"none",border:"none",color:"#999",cursor:"pointer",fontSize:"1.2rem"}} onClick={()=>removeFromCart(item.id)}>✕</button>
                 </div>
-                <button style={{background:"none",border:"none",color:"#999",cursor:"pointer",fontSize:"1.2rem"}} onClick={()=>removeFromCart(item.id)}>✕</button>
-              </div>
+              );
             })}
-            <div style={{...styles.pricingCard,marginTop:16,border:"1px solid #e7dfd2",boxShadow:"none"}}>
-              <div style={{fontWeight:800,marginBottom:5}}>Shipping estimate</div>
-              <div style={{fontSize:".78rem",color:"#777",lineHeight:1.55,marginBottom:12}}>Shipping is calculated by delivery state. Select your state now so the final amount is clear before checkout.</div>
-              <select style={styles.input} value={shippingForm.state} onChange={e=>setShippingForm(f=>({...f,state:e.target.value}))}>
-                <option value="">Select delivery state</option>
-                {US_STATES.map(([code,name])=><option key={code} value={code}>{name}</option>)}
-              </select>
-              {hasShippingState&&<div style={{display:"flex",justifyContent:"space-between",fontSize:".82rem",paddingTop:4}}><span>Estimated shipping to {shippingForm.state}</span><strong>${shippingCost.toFixed(2)}</strong></div>}
+            {/* Coupon - always available */}
+            <div style={{display:"flex",gap:8,marginBottom:16}}>
+              <input style={{...styles.input,marginBottom:0}} placeholder={t.couponCode} value={couponInput} onChange={e=>setCouponInput(e.target.value)} />
             </div>
-            <div style={{...styles.pricingCard,marginTop:12}}>
-              <div style={{display:"flex",gap:8,marginBottom:16}}><input style={{...styles.input,marginBottom:0}} placeholder={t.couponCode} value={couponInput} onChange={e=>setCouponInput(e.target.value)}/></div>
-              <div style={{fontSize:".68rem",letterSpacing:".1em",textTransform:"uppercase",color:"#8d867c",fontWeight:800,marginBottom:12}}>Order Summary</div>
-              <div style={{display:"flex",justifyContent:"space-between",marginBottom:9}}><span>{t.subtotal}</span><span>${cartTotal.toFixed(2)}</span></div>
-              {tax>0&&<div style={{display:"flex",justifyContent:"space-between",marginBottom:9}}><span>Tax</span><span>${tax.toFixed(2)}</span></div>}
-              <div style={{display:"flex",justifyContent:"space-between",marginBottom:9}}><span>{t.shipping}</span><span>{hasShippingState?`$${shippingCost.toFixed(2)}`:"Select state"}</span></div>
-              {!hasShippingState&&<div style={{fontSize:".73rem",color:"#9a6f24",background:"#fbf6eb",padding:"9px 10px",borderRadius:7,marginBottom:10}}>Shipping is not included in the total until a delivery state is selected.</div>}
-              <div style={{display:"flex",justifyContent:"space-between",fontWeight:800,fontSize:"1.15rem",borderTop:"1px solid #eee",paddingTop:12,marginTop:5}}><span>{t.total}</span><span>${orderTotal.toFixed(2)}</span></div>
-              <button style={{...styles.checkoutBtn,marginTop:16,opacity:canCheckout?1:.5}} disabled={!canCheckout} onClick={()=>setPage("checkout")}>{t.checkout}</button>
+            {/* Summary */}
+            <div style={{background:"#fff",borderRadius:12,padding:16,boxShadow:"0 1px 8px rgba(0,0,0,.06)"}}>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}><span>{t.subtotal}</span><span>${cartTotal.toFixed(2)}</span></div>
+              {tax>0&&<div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}><span>Tax</span><span>${tax.toFixed(2)}</span></div>}
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}><span>{t.shipping}</span><span>{`$${shippingCost.toFixed(2)}`}</span></div>
+              {shippingForm.state && <div style={{fontSize:".72rem",color:"#777",marginBottom:8}}>Estimated delivery: {settings.shippingEtaMin||3}-{settings.shippingEtaMax||7} business days to {shippingForm.state}</div>}
+              <div style={{display:"flex",justifyContent:"space-between",fontWeight:700,fontSize:"1.1rem",borderTop:"1px solid #eee",paddingTop:8}}>
+                <span>{t.total}</span><span>${orderTotal.toFixed(2)}</span>
+              </div>
+              <button style={{...styles.checkoutBtn,marginTop:16}} onClick={()=>setPage("checkout")}>{t.checkout}</button>
             </div>
-          </>}
+          </>
+        }
       </div>
     );
   }
@@ -801,7 +813,7 @@ ${inv.includeShippingAddress!==false?`<div class="metaBox"><div class="metaLabel
     function validate(){ return sf.name&&sf.email&&sf.addr1&&sf.city&&sf.state&&sf.zip; }
     return (
       <div style={styles.checkoutWrap}>
-        <button style={{...styles.navBtn,padding:"16px 0"}} data-bag-target="true" onClick={()=>setPage("cart")} style={{...(styles.bagIcon||{}),...(cartPulse?{animation:"hudaBagPulse .42s ease"}:{})}}>← {t.back}</button>
+        <button style={{...styles.navBtn,padding:"16px 0"}} onClick={()=>setPage("cart")}>← {t.back}</button>
         <h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1.8rem",marginBottom:20}}>{t.shippingInfo}</h2>
         {[["name",t.fullName],["email",t.email],["phone",t.phone],["addr1",t.addr1],["addr2",t.addr2],["city",t.city]].map(([k,label])=>(
           <input key={k} style={styles.input} placeholder={label} value={sf[k]} onChange={e=>setSF(k,e.target.value)} />
@@ -811,18 +823,13 @@ ${inv.includeShippingAddress!==false?`<div class="metaBox"><div class="metaLabel
           {US_STATES.map(([code,name])=><option key={code} value={code}>{name}</option>)}
         </select>
         <input style={styles.input} placeholder={t.zip} value={sf.zip} onChange={e=>setSF("zip",e.target.value)} />
-        <div style={{background:"#f7f3eb",border:"1px solid #e8ddc9",borderRadius:10,padding:14,marginBottom:14,fontSize:".8rem",color:"#5f574b"}}>
-          <div style={{fontWeight:800,marginBottom:4}}>{settings.shippingMethod||"Standard Shipping"}</div>
-          <div>{settings.shippingEtaMin||3}-{settings.shippingEtaMax||7} business days · Shipping available across all 50 U.S. states.</div>
-          <div style={{marginTop:6,fontWeight:700}}>Shipping to: {sf.state} · ${calculatedShippingCost.toFixed(2)}</div>
+        <div style={{background:"#f7f3eb",border:"1px solid #e8ddc9",borderRadius:10,padding:12,marginBottom:14,fontSize:".8rem",color:"#5f574b"}}>
+          <strong>{settings.shippingMethod||"Standard Shipping"}</strong> · {settings.shippingEtaMin||3}-{settings.shippingEtaMax||7} business days · Shipping available across all 50 U.S. states.
         </div>
         {formError && <div style={{color:"#e53935",marginBottom:10,fontSize:".85rem"}}>{formError}</div>}
-        <div style={{background:"#fff",borderRadius:12,padding:18,marginBottom:16,boxShadow:"0 1px 8px rgba(0,0,0,.06)"}}>
-          <div style={{fontSize:".68rem",letterSpacing:".1em",textTransform:"uppercase",color:"#8d867c",fontWeight:800,marginBottom:12}}>Order Summary</div>
-          <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}><span>{t.subtotal}</span><span>${cartTotal.toFixed(2)}</span></div>
-          <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}><span>{t.shipping}</span><span>${calculatedShippingCost.toFixed(2)}</span></div>
-          {tax>0&&<div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}><span>Tax</span><span>${tax.toFixed(2)}</span></div>}
-          <div style={{display:"flex",justifyContent:"space-between",fontWeight:800,fontSize:"1.15rem",borderTop:"1px solid #eee",paddingTop:10,marginTop:4}}><span>{t.total}</span><span>${orderTotal.toFixed(2)}</span></div>
+        <div style={{background:"#fff",borderRadius:12,padding:16,marginBottom:16,boxShadow:"0 1px 8px rgba(0,0,0,.06)"}}>
+          <div style={{fontSize:".72rem",letterSpacing:".12em",color:"#888",marginBottom:10}}>{lang==="ar"?"ملخص الطلب":"ORDER SUMMARY"}</div>
+          <div style={{display:"flex",justifyContent:"space-between",fontWeight:700}}><span>{t.total}</span><span>${orderTotal.toFixed(2)}</span></div>
         </div>
         {settings.paypalClientId ? (
           <div>
@@ -846,20 +853,13 @@ ${inv.includeShippingAddress!==false?`<div class="metaBox"><div class="metaLabel
   function ConfirmPage(){
     const o = confirmOrder;
     return (
-      <div style={{maxWidth:620,margin:"55px auto",padding:20}}>
-        <div style={{background:"#fff",borderRadius:16,padding:"38px 30px",textAlign:"center",boxShadow:"0 6px 30px rgba(0,0,0,.06)"}}>
-          <div style={{width:58,height:58,borderRadius:"50%",margin:"0 auto 16px",display:"flex",alignItems:"center",justifyContent:"center",background:"#f1f7f1",color:"#2d7a2d",fontSize:"1.7rem"}}>✓</div>
-          <h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"2.2rem",margin:"0 0 7px"}}>{t.thankYou}</h2>
-          <p style={{color:"#666",margin:"0 0 20px"}}>{t.orderConf}</p>
-          {o&&<div style={{textAlign:"left",borderTop:"1px solid #eee",borderBottom:"1px solid #eee",padding:"18px 0",marginBottom:18}}>
-            <div style={{display:"flex",justifyContent:"space-between",marginBottom:9}}><span>Order Number</span><strong>{o.id}</strong></div>
-            <div style={{display:"flex",justifyContent:"space-between",marginBottom:9}}><span>Date</span><span>{o.date}</span></div>
-            <div style={{display:"flex",justifyContent:"space-between",marginBottom:9}}><span>Shipping</span><span>${Number(o.shippingCost||0).toFixed(2)}</span></div>
-            <div style={{display:"flex",justifyContent:"space-between",fontWeight:800,fontSize:"1.1rem",paddingTop:10,borderTop:"1px solid #eee"}}><span>Total</span><span>${Number(o.total||0).toFixed(2)}</span></div>
-          </div>}
-          {o&&settings.invoice?.enabled!==false&&<button style={{...styles.shopBtn,marginTop:4,width:"100%"}} onClick={()=>printInvoice(o)}>{t.printInvoice}</button>}
-          <button style={{...styles.shopBtn,marginTop:10,width:"100%",background:"#fff",color:"#222",border:"1px solid #ddd"}} onClick={()=>setPage("shop")}>{t.continueShopping}</button>
-        </div>
+      <div style={{maxWidth:500,margin:"60px auto",padding:20,textAlign:"center"}}>
+        <div style={{fontSize:"3rem",marginBottom:16}}>✅</div>
+        <h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"2rem",color:"#2d7a2d"}}>{t.thankYou}</h2>
+        <p style={{color:"#666"}}>{t.orderConf}</p>
+        {o && <><p style={{color:"#999",fontSize:".85rem"}}>Order ID: {o.id}</p><div style={{margin:"18px auto",padding:"16px 20px",background:"#f7f3eb",borderRadius:12,maxWidth:280}}><div style={{fontSize:".68rem",letterSpacing:".12em",color:"#888"}}>{t.total}</div><strong style={{fontSize:"1.5rem"}}>${Number(o.total||0).toFixed(2)}</strong></div></>}
+        {o && settings.invoice?.enabled!==false && <button style={{...styles.shopBtn,marginTop:12,background:"#fff",color:"#222",border:"1px solid #ddd"}} onClick={()=>printInvoice(o)}>{t.printInvoice}</button>}
+        <button style={{...styles.shopBtn,marginTop:12}} onClick={()=>setPage("shop")}>{t.continueShopping}</button>
       </div>
     );
   }
@@ -1103,13 +1103,19 @@ ${inv.includeShippingAddress!==false?`<div class="metaBox"><div class="metaLabel
       <div style={styles.header}>
         <style>{`
           @keyframes huda-marquee{0%{transform:translateX(0)}100%{transform:translateX(-100%)}}
+          @keyframes huda-fly{
+            0%{ transform:translate(0,0) scale(1); opacity:1; }
+            65%{ opacity:1; }
+            100%{ transform:translate(var(--tx),var(--ty)) scale(.1); opacity:.3; }
+          }
           @keyframes huda-cart-pulse{
             0%{ transform:scale(1); }
             30%{ transform:scale(1.35); }
             55%{ transform:scale(.92); }
             100%{ transform:scale(1); }
           }
-          @keyframes huda-shine{
+          @keyframes huda-drawer{from{transform:translateX(100%);opacity:.7}to{transform:translateX(0);opacity:1}}
+           @keyframes huda-shine{
             0%{ background-position:150% 0; }
             55%{ background-position:150% 0; }
             100%{ background-position:-60% 0; }
@@ -1136,7 +1142,7 @@ ${inv.includeShippingAddress!==false?`<div class="metaBox"><div class="metaLabel
           <div style={{display:"flex",gap:10,alignItems:"center"}}>
             <button style={styles.navBtn} onClick={()=>setLang(l=>l==="en"?"ar":"en")}>{t.langBtn}</button>
             <div style={{position:"relative"}}>
-              <button
+              <button ref={cartBtnRef}
                 style={{
                   ...styles.cartBtn,
                   transform:`scale(${(cartPulse?1.12:1) * Math.min(1+cart.reduce((s,i)=>s+i.qty,0)*0.02,1.15)})`,
@@ -1169,7 +1175,7 @@ ${inv.includeShippingAddress!==false?`<div class="metaBox"><div class="metaLabel
           </div>
         )}
         <div style={styles.headerBottom}>
-          {[["shop",t.store],["cart",t.shoppingBag],["admin",t.admin]].map(([p2,label])=>(
+          {[["shop",t.store],["cart",t.shoppingBag],...(settings.showAdminShortcut!==false?[["admin",t.admin]]:[])].map(([p2,label])=>(
             <button key={p2} style={{...styles.navBtn,...(page===p2||( p2==="shop"&&["shop","product"].includes(page))?styles.navBtnActive:{})}}
               onClick={()=>setPage(p2)}>{label}</button>
           ))}
@@ -1218,6 +1224,45 @@ ${inv.includeShippingAddress!==false?`<div class="metaBox"><div class="metaLabel
         {page==="confirm" && <ConfirmPage/>}
         {page==="admin" && <AdminPage/>}
       </div>
+      <MiniCart />
+      {/* Fly-to-cart animation */}
+      {flyItem && (
+        <img src={flyItem.img} alt=""
+          style={{
+            position:"fixed", left:flyItem.x, top:flyItem.y, width:52, height:52, objectFit:"cover",
+            borderRadius:"50%", zIndex:300, pointerEvents:"none", border:"2px solid #c4a56a", boxShadow:"0 6px 20px rgba(0,0,0,.35)",
+            "--tx":flyItem.tx+"px", "--ty":flyItem.ty+"px",
+            animation:"huda-fly .62s cubic-bezier(.3,0,.6,1) forwards",
+          }}
+        />
+      )}
+      {/* Cross-sell modal */}
+      {crossSell && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.5)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,padding:20}}
+          onClick={()=>setCrossSell(null)}>
+          <div style={{background:"#fff",borderRadius:16,padding:24,maxWidth:340,width:"100%",textAlign:"center",boxShadow:"0 20px 60px rgba(0,0,0,.3)"}}
+            onClick={e=>e.stopPropagation()}>
+            <h3 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1.3rem",marginBottom:4}}>{t.completeLook}</h3>
+            <p style={{color:"#777",fontSize:".85rem",marginBottom:18}}>{t.completeLookSub}</p>
+            <div style={{width:140,height:140,margin:"0 auto 18px",borderRadius:"50%",position:"relative",padding:4,
+              background:"#c4a56a", boxShadow:"0 0 16px rgba(196,165,106,.6)"}}>
+              <div style={{width:"100%",height:"100%",borderRadius:"50%",overflow:"hidden",background:"#fff",padding:3,position:"relative"}}>
+                <img src={crossSell.image} alt="" style={{width:"100%",height:"100%",objectFit:"cover",borderRadius:"50%"}} onError={onImgErr} />
+                <div style={{
+                  position:"absolute", inset:0, borderRadius:"50%", overflow:"hidden", pointerEvents:"none",
+                  background:"linear-gradient(115deg, transparent 30%, rgba(255,255,255,.75) 48%, transparent 66%)",
+                  backgroundSize:"260% 100%", backgroundPosition:"150% 0",
+                  animation:"huda-shine 2.6s ease-in-out infinite",
+                }}/>
+              </div>
+            </div>
+            <div style={{display:"flex",gap:10}}>
+              <button style={{...styles.detailAddBtn,marginTop:0,flex:1}} onClick={()=>{ addToCart(crossSell); setCrossSell(null); }}>{t.yesAdd}</button>
+              <button style={{...styles.detailAddBtn,marginTop:0,flex:1,background:"none",color:"#1a1a1a",border:"1px solid #ddd"}} onClick={()=>setCrossSell(null)}>{t.noThanks}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
