@@ -260,7 +260,10 @@ export default function App() {
   const tax = cartTotal*(settings.taxRate||0)/100;
   const orderTotal = cartTotal+shippingCost+tax;
 
-  function addToCart(prod) {
+  const [flyItem, setFlyItem] = useState(null); // {img, x, y, tx, ty}
+  const cartBtnRef = useRef(null);
+
+  function addToCart(prod, evt=null) {
     setCart(c=>{
       const ex=c.find(x=>x.id===prod.id);
       if(ex) return c.map(x=>x.id===prod.id?{...x,qty:x.qty+1}:x);
@@ -271,6 +274,20 @@ export default function App() {
     if(prod.category==="printedModal"){
       const magnets = products.filter(p=>p.active && p.category==="hijabMagnets" && !cart.find(c=>c.id===p.id));
       if(magnets.length>0) setCrossSell(magnets[Math.floor(Math.random()*magnets.length)]);
+    }
+    // Fly-to-cart animation
+    if(evt && cartBtnRef.current){
+      const cardEl = evt.currentTarget.closest("[data-card]") || evt.currentTarget;
+      const startRect = cardEl.getBoundingClientRect();
+      const endRect = cartBtnRef.current.getBoundingClientRect();
+      const flyId = Date.now();
+      setFlyItem({
+        id:flyId, img:prod.image,
+        x:startRect.left+startRect.width/2-24, y:startRect.top,
+        tx:endRect.left+endRect.width/2-24-(startRect.left+startRect.width/2-24),
+        ty:endRect.top-startRect.top,
+      });
+      setTimeout(()=>setFlyItem(f=>f&&f.id===flyId?null:f), 700);
     }
   }
 
@@ -409,7 +426,7 @@ export default function App() {
     const hasDisc = p.discount>0 || (settings.categoryDiscounts?.[p.category]||0)>0;
     const inWishlist = wishlist.includes(p.id);
     return (
-      <div style={{...styles.card, position:"relative"}}
+      <div data-card style={{...styles.card, position:"relative"}}
         onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-4px)";e.currentTarget.style.boxShadow="0 8px 24px rgba(0,0,0,.12)";}}
         onMouseLeave={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="0 2px 12px rgba(0,0,0,.06)";}}>
         <div style={{position:"relative"}} onClick={()=>{setSelectedProduct(p);setPage("product");window.scrollTo({top:0,behavior:"smooth"});}}>
@@ -433,7 +450,7 @@ export default function App() {
           </div>
           <button
             style={{...styles.addBtn, ...(addedMap[p.id]?styles.addBtnAdded:{})}}
-            onClick={()=>{ if(p.stock>0) addToCart(p); }}>
+            onClick={(e)=>{ if(p.stock>0) addToCart(p,e); }}>
             {p.stock===0 ? t.outOfStock : addedMap[p.id] ? t.addedToCart : t.addToCart}
           </button>
         </div>
@@ -488,7 +505,7 @@ export default function App() {
       <div>
         <button style={{...styles.navBtn, padding:"16px 20px"}} onClick={()=>setPage("shop")}>← {t.back}</button>
         <div style={{...styles.detailWrap, gridTemplateColumns:window.innerWidth<600?"1fr":"1fr 1fr"}}>
-          <img src={p.image} alt={getProdName(p)} style={styles.detailImg} loading="eager" decoding="async" />
+          <img data-card src={p.image} alt={getProdName(p)} style={styles.detailImg} loading="eager" decoding="async" />
           <div>
             <div style={styles.detailName}>{getProdName(p)}</div>
             <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16}}>
@@ -500,7 +517,7 @@ export default function App() {
               ) : <span style={{color:"#999"}}>Price TBD</span>}
             </div>
             <button style={{...styles.detailAddBtn,...(addedMap[p.id]?{background:"#2d7a2d"}:{})}}
-              onClick={()=>addToCart(p)}>
+              onClick={(e)=>addToCart(p,e)}>
               {addedMap[p.id]?t.addedToCart:t.addToCart}
             </button>
             <button style={{...styles.detailAddBtn,background:"none",color:"#1a1a1a",border:"1px solid #ddd",marginTop:8}}
@@ -863,6 +880,11 @@ export default function App() {
       <div style={styles.header}>
         <style>{`
           @keyframes huda-marquee{0%{transform:translateX(0)}100%{transform:translateX(-100%)}}
+          @keyframes huda-fly{
+            0%{ transform:translate(0,0) scale(1); opacity:1; }
+            70%{ opacity:1; }
+            100%{ transform:translate(var(--tx),var(--ty)) scale(.15); opacity:0; }
+          }
           @media (prefers-reduced-motion: reduce) {
             *{animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important;}
           }
@@ -882,7 +904,7 @@ export default function App() {
           </div>
           <div style={{display:"flex",gap:10,alignItems:"center"}}>
             <button style={styles.navBtn} onClick={()=>setLang(l=>l==="en"?"ar":"en")}>{t.langBtn}</button>
-            <button style={styles.cartBtn} onClick={()=>{setPage("cart");window.scrollTo({top:0,behavior:"smooth"});}}>
+            <button ref={cartBtnRef} style={styles.cartBtn} onClick={()=>{setPage("cart");window.scrollTo({top:0,behavior:"smooth"});}}>
               🛍️ {cart.reduce((s,i)=>s+i.qty,0)}
             </button>
           </div>
@@ -914,6 +936,17 @@ export default function App() {
         {page==="confirm" && <ConfirmPage/>}
         {page==="admin" && <AdminPage/>}
       </div>
+      {/* Fly-to-cart animation */}
+      {flyItem && (
+        <img src={flyItem.img} alt=""
+          style={{
+            position:"fixed", left:flyItem.x, top:flyItem.y, width:48, height:60, objectFit:"cover",
+            borderRadius:8, zIndex:300, pointerEvents:"none",
+            "--tx":flyItem.tx+"px", "--ty":flyItem.ty+"px",
+            animation:"huda-fly .65s cubic-bezier(.3,0,.6,1) forwards",
+          }}
+        />
+      )}
       {/* Cross-sell modal */}
       {crossSell && (
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.5)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,padding:20}}
