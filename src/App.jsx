@@ -261,6 +261,7 @@ export default function App() {
   const orderTotal = cartTotal+shippingCost+tax;
 
   const [flyItem, setFlyItem] = useState(null); // {img, x, y, tx, ty}
+  const [cartPulse, setCartPulse] = useState(false);
   const cartBtnRef = useRef(null);
 
   function addToCart(prod, evt=null) {
@@ -275,19 +276,29 @@ export default function App() {
       const magnets = products.filter(p=>p.active && p.category==="hijabMagnets" && !cart.find(c=>c.id===p.id));
       if(magnets.length>0) setCrossSell(magnets[Math.floor(Math.random()*magnets.length)]);
     }
-    // Fly-to-cart animation
+    // Fly-to-cart animation — origin is the actual product image the person clicked from
     if(evt && cartBtnRef.current){
       const cardEl = evt.currentTarget.closest("[data-card]") || evt.currentTarget;
-      const startRect = cardEl.getBoundingClientRect();
+      const imgEl = cardEl.querySelector ? (cardEl.querySelector("img") || cardEl) : cardEl;
+      const startRect = imgEl.getBoundingClientRect();
       const endRect = cartBtnRef.current.getBoundingClientRect();
+      const size = 52;
       const flyId = Date.now();
       setFlyItem({
         id:flyId, img:prod.image,
-        x:startRect.left+startRect.width/2-24, y:startRect.top,
-        tx:endRect.left+endRect.width/2-24-(startRect.left+startRect.width/2-24),
-        ty:endRect.top-startRect.top,
+        x:startRect.left+startRect.width/2-size/2,
+        y:startRect.top+startRect.height/2-size/2,
+        tx:(endRect.left+endRect.width/2)-(startRect.left+startRect.width/2),
+        ty:(endRect.top+endRect.height/2)-(startRect.top+startRect.height/2),
       });
-      setTimeout(()=>setFlyItem(f=>f&&f.id===flyId?null:f), 700);
+      setTimeout(()=>{
+        setFlyItem(f=>f&&f.id===flyId?null:f);
+        setCartPulse(true);
+        setTimeout(()=>setCartPulse(false), 420);
+      }, 620);
+    } else {
+      setCartPulse(true);
+      setTimeout(()=>setCartPulse(false), 420);
     }
   }
 
@@ -882,8 +893,14 @@ export default function App() {
           @keyframes huda-marquee{0%{transform:translateX(0)}100%{transform:translateX(-100%)}}
           @keyframes huda-fly{
             0%{ transform:translate(0,0) scale(1); opacity:1; }
-            70%{ opacity:1; }
-            100%{ transform:translate(var(--tx),var(--ty)) scale(.15); opacity:0; }
+            65%{ opacity:1; }
+            100%{ transform:translate(var(--tx),var(--ty)) scale(.1); opacity:.3; }
+          }
+          @keyframes huda-cart-pulse{
+            0%{ transform:scale(1); }
+            30%{ transform:scale(1.35); }
+            55%{ transform:scale(.92); }
+            100%{ transform:scale(1); }
           }
           @media (prefers-reduced-motion: reduce) {
             *{animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important;}
@@ -940,10 +957,10 @@ export default function App() {
       {flyItem && (
         <img src={flyItem.img} alt=""
           style={{
-            position:"fixed", left:flyItem.x, top:flyItem.y, width:48, height:60, objectFit:"cover",
-            borderRadius:8, zIndex:300, pointerEvents:"none",
+            position:"fixed", left:flyItem.x, top:flyItem.y, width:52, height:52, objectFit:"cover",
+            borderRadius:"50%", zIndex:300, pointerEvents:"none", border:"2px solid #c4a56a", boxShadow:"0 6px 20px rgba(0,0,0,.35)",
             "--tx":flyItem.tx+"px", "--ty":flyItem.ty+"px",
-            animation:"huda-fly .65s cubic-bezier(.3,0,.6,1) forwards",
+            animation:"huda-fly .62s cubic-bezier(.3,0,.6,1) forwards",
           }}
         />
       )}
