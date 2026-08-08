@@ -93,7 +93,7 @@ const DEFAULT_PRODUCTS = [
       "https://i.ibb.co/xtm1HY7m/e7676763-8d38-47e9-a8e8-04aef4396567.jpg",
       "https://i.ibb.co/FkhTQpPf/932ab27d-0f0e-471c-a833-3f6c7b500a0f.jpg",
     ][i],
-    price:0, discount:0, active:true, newArrival:true, stock:99,
+    price:5, discount:0, active:true, newArrival:true, stock:99,
   })),
   // Printed Modal Hijab
   ...Array.from({length:56}, (_,i) => ({
@@ -157,7 +157,7 @@ const DEFAULT_PRODUCTS = [
       "https://i.ibb.co/5m9t5g9/0b889236-99da-41df-a18b-3a36d05da210.jpg",
       "https://i.ibb.co/SDjdK4Mh/3cd4cd1c-6002-463e-8098-fbac85d984e6.jpg",
     ][i],
-    price:0, discount:0, active:true, newArrival:false, stock:99,
+    price:20, discount:0, active:true, newArrival:false, stock:99,
   })),
 ];
 
@@ -229,8 +229,13 @@ export default function App() {
   const [couponInput, setCouponInput] = useState("");
   const [savedMsg, setSavedMsg] = useState({});
   const [addedMap, setAddedMap] = useState({});
-  const [confirmOrder, setConfirmOrder] = useState(null);
-  const [crossSell, setCrossSell] = useState(null); // product just added, show magnet suggestion
+  const [winWidth, setWinWidth] = useState(typeof window!=="undefined"?window.innerWidth:375);
+  useEffect(()=>{
+    const onResize=()=>setWinWidth(window.innerWidth);
+    window.addEventListener("resize",onResize);
+    return ()=>window.removeEventListener("resize",onResize);
+  },[]);
+  const gridCols = winWidth<640 ? 2 : winWidth<1000 ? 3 : 4;
 
   useEffect(()=>{ LS.set("huda_products",products); },[products]);
   useEffect(()=>{ LS.set("huda_settings",settings); },[settings]);
@@ -310,7 +315,7 @@ export default function App() {
     header:{ background:"#1a1a1a", color:"#fff", padding:"0 20px", position:"sticky", top:0, zIndex:100 },
     headerTop:{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"12px 0", borderBottom:"1px solid #333" },
     headerBottom:{ display:"flex", gap:20, padding:"10px 0", overflowX:"auto" },
-    logo:{ fontFamily:"'Cormorant Garamond',serif", fontSize:"1.6rem", letterSpacing:".12em", fontWeight:600, color:"#c4a56a" },
+    logo:{ fontFamily:"'Cormorant Garamond',serif", fontSize:"clamp(1.1rem,4vw,1.6rem)", letterSpacing:".08em", fontWeight:600, color:"#c4a56a", whiteSpace:"nowrap" },
     tagline:{ fontSize:".6rem", color:"#888", letterSpacing:".2em", marginTop:2 },
     navBtn:{ background:"none", border:"none", color:"#ccc", cursor:"pointer", fontSize:".85rem", letterSpacing:".08em", padding:"4px 8px", whiteSpace:"nowrap" },
     navBtnActive:{ color:"#c4a56a", borderBottom:"2px solid #c4a56a" },
@@ -323,14 +328,14 @@ export default function App() {
     filterBtn:{ background:"none", border:"1px solid #ddd", borderRadius:20, padding:"6px 14px", cursor:"pointer", fontSize:".8rem", whiteSpace:"nowrap" },
     filterBtnActive:{ background:"#1a1a1a", color:"#fff", border:"1px solid #1a1a1a" },
     searchInput:{ border:"1px solid #ddd", borderRadius:20, padding:"6px 16px", fontSize:".85rem", outline:"none", minWidth:180 },
-    grid:{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))", gap:20, padding:20 },
+    grid:{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:12, padding:14 },
     card:{ background:"#fff", borderRadius:12, overflow:"hidden", boxShadow:"0 2px 12px rgba(0,0,0,.06)", cursor:"pointer", transition:"transform .2s,box-shadow .2s" },
     cardImg:{ width:"100%", aspectRatio:"3/4", objectFit:"cover" },
-    cardBody:{ padding:"12px" },
-    cardName:{ fontFamily:"'Cormorant Garamond',serif", fontSize:"1rem", fontWeight:600, marginBottom:4, color:"#1a1a1a" },
-    cardPrice:{ color:"#c4a56a", fontWeight:700, fontSize:"1rem" },
-    cardPriceOrig:{ color:"#999", textDecoration:"line-through", fontSize:".85rem", marginLeft:6 },
-    addBtn:{ width:"100%", background:"#1a1a1a", color:"#fff", border:"none", borderRadius:8, padding:"8px", cursor:"pointer", fontSize:".85rem", marginTop:8 },
+    cardBody:{ padding:"9px" },
+    cardName:{ fontFamily:"'Cormorant Garamond',serif", fontSize:".85rem", fontWeight:600, marginBottom:3, color:"#1a1a1a", lineHeight:1.2 },
+    cardPrice:{ color:"#c4a56a", fontWeight:700, fontSize:".85rem" },
+    cardPriceOrig:{ color:"#999", textDecoration:"line-through", fontSize:".72rem", marginLeft:5 },
+    addBtn:{ width:"100%", background:"#1a1a1a", color:"#fff", border:"none", borderRadius:6, padding:"6px", cursor:"pointer", fontSize:".72rem", marginTop:6 },
     addBtnAdded:{ background:"#2d7a2d" },
     badge:{ position:"absolute", top:8, left:8, background:"#c4a56a", color:"#fff", fontSize:".65rem", padding:"2px 8px", borderRadius:10, fontWeight:700 },
     saleBadge:{ position:"absolute", top:8, right:8, background:"#e53935", color:"#fff", fontSize:".65rem", padding:"2px 8px", borderRadius:10, fontWeight:700 },
@@ -384,7 +389,7 @@ export default function App() {
       <div style={{...styles.card, position:"relative"}}
         onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-4px)";e.currentTarget.style.boxShadow="0 8px 24px rgba(0,0,0,.12)";}}
         onMouseLeave={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="0 2px 12px rgba(0,0,0,.06)";}}>
-        <div style={{position:"relative"}} onClick={()=>{setSelectedProduct(p);setPage("product");}}>
+        <div style={{position:"relative"}} onClick={()=>{setSelectedProduct(p);setPage("product");window.scrollTo({top:0,behavior:"smooth"});}}>
           <img src={p.image} alt={getProdName(p)} style={styles.cardImg} loading="lazy" />
           {p.newArrival && <span style={styles.badge}>{t.newArrival}</span>}
           {hasDisc && p.price>0 && <span style={styles.saleBadge}>{t.sale}</span>}
@@ -434,7 +439,7 @@ export default function App() {
           ))}
         </div>
         {/* Grid */}
-        <div id="shop-grid" style={styles.grid}>
+        <div id="shop-grid" style={{...styles.grid, gridTemplateColumns:`repeat(${gridCols},1fr)`}}>
           {visibleProducts.length===0
             ? <div style={{gridColumn:"1/-1",textAlign:"center",padding:60,color:"#999"}}>{t.noResults}</div>
             : visibleProducts.map(p=><ProductCard key={p.id} p={p}/>)}
@@ -835,7 +840,7 @@ export default function App() {
           </div>
           <div style={{display:"flex",gap:10,alignItems:"center"}}>
             <button style={styles.navBtn} onClick={()=>setLang(l=>l==="en"?"ar":"en")}>{t.langBtn}</button>
-            <button style={styles.cartBtn} onClick={()=>setPage("cart")}>
+            <button style={styles.cartBtn} onClick={()=>{setPage("cart");window.scrollTo({top:0,behavior:"smooth"});}}>
               🛍️ {cart.reduce((s,i)=>s+i.qty,0)}
             </button>
           </div>
