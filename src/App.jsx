@@ -929,9 +929,10 @@ export default function App() {
             55%{ transform:scale(.92); }
             100%{ transform:scale(1); }
           }
-          @keyframes huda-spin-glow{
-            0%{ transform:rotate(0deg); filter:drop-shadow(0 0 12px rgba(196,165,106,.75)); }
-            100%{ transform:rotate(360deg); filter:drop-shadow(0 0 12px rgba(196,165,106,.75)); }
+          @keyframes huda-shine{
+            0%{ background-position:150% 0; }
+            55%{ background-position:150% 0; }
+            100%{ background-position:-60% 0; }
           }
           @media (prefers-reduced-motion: reduce) {
             *{animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important;}
@@ -1057,10 +1058,15 @@ export default function App() {
             <h3 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1.3rem",marginBottom:4}}>{t.completeLook}</h3>
             <p style={{color:"#777",fontSize:".85rem",marginBottom:18}}>{t.completeLookSub}</p>
             <div style={{width:140,height:140,margin:"0 auto 18px",borderRadius:"50%",position:"relative",padding:4,
-              background:"conic-gradient(from 0deg,#c4a56a,#f4e4c1,#c4a56a,#8a7047,#c4a56a)",
-              animation:"huda-spin-glow 3s linear infinite"}}>
-              <div style={{width:"100%",height:"100%",borderRadius:"50%",overflow:"hidden",background:"#fff",padding:3}}>
+              background:"#c4a56a", boxShadow:"0 0 16px rgba(196,165,106,.6)"}}>
+              <div style={{width:"100%",height:"100%",borderRadius:"50%",overflow:"hidden",background:"#fff",padding:3,position:"relative"}}>
                 <img src={crossSell.image} alt="" style={{width:"100%",height:"100%",objectFit:"cover",borderRadius:"50%"}} onError={onImgErr} />
+                <div style={{
+                  position:"absolute", inset:0, borderRadius:"50%", overflow:"hidden", pointerEvents:"none",
+                  background:"linear-gradient(115deg, transparent 30%, rgba(255,255,255,.75) 48%, transparent 66%)",
+                  backgroundSize:"260% 100%", backgroundPosition:"150% 0",
+                  animation:"huda-shine 2.6s ease-in-out infinite",
+                }}/>
               </div>
             </div>
             <div style={{display:"flex",gap:10}}>
