@@ -78,7 +78,7 @@ const T = {
     completeLook:"كمّلي الإطلالة", completeLookSub:"تريدين تضيفين هذا معه؟",
     addedToBagTitle:"تمت الإضافة إلى السلة", viewBag:"عرض السلة", miniCheckout:"إتمام الطلب", itemsInBag:"قطع في سلتك",
     bestSeller:"الأكثر مبيعاً", onlyLeft:"متبقي", leftLabel:"قطعة", secureCheckout:"دفع آمن", easyDelivery:"توصيل سهل", premiumQuality:"جودة فاخرة",
-    yesAdd:"أي، ضيفيه", noThanks:"لا شكراً",
+    yesAdd:"أي، ضيفيه", noThanks:"لا شكراً", newArrivals:"وصل حديثاً", bestSellers:"الأكثر مبيعاً", memberTitle:"عضوية HUDA", memberBody:"وصول مبكر · مجموعات حصرية · مكافآت للأعضاء", shopNow:"تسوقي الآن", filters:"تصفية", sort:"ترتيب", recommended:"مقترح", newest:"الأحدث", priceLow:"السعر: من الأقل للأعلى", priceHigh:"السعر: من الأعلى للأقل", discountSort:"أعلى خصم", rating:"الأعلى تقييماً", details:"التفاصيل", materials:"الخامات", returns:"الشحن والإرجاع", quickView:"عرض سريع", featured:"مميز", delivery:"موعد التوصيل المتوقع",
   }
 };
 
@@ -97,7 +97,7 @@ const DEFAULT_PRODUCTS = [
       "https://i.ibb.co/xtm1HY7m/e7676763-8d38-47e9-a8e8-04aef4396567.jpg",
       "https://i.ibb.co/FkhTQpPf/932ab27d-0f0e-471c-a833-3f6c7b500a0f.jpg",
     ][i],
-    price:5, discount:0, active:true, newArrival:true, stock:99,
+    price:5, discount:0, active:true, newArrival:true, bestSeller:i<3, featured:i<5, rating:4.8, stock:99,
   })),
   // Printed Modal Hijab
   ...Array.from({length:56}, (_,i) => ({
@@ -161,7 +161,7 @@ const DEFAULT_PRODUCTS = [
       "https://i.ibb.co/5m9t5g9/0b889236-99da-41df-a18b-3a36d05da210.jpg",
       "https://i.ibb.co/SDjdK4Mh/3cd4cd1c-6002-463e-8098-fbac85d984e6.jpg",
     ][i],
-    price:20, discount:0, active:true, newArrival:false, stock:99,
+    price:20, discount:0, active:true, newArrival:i<8, bestSeller:i<10, featured:i<14, rating:4.7, stock:99,
   })),
 ];
 
@@ -200,6 +200,7 @@ const DEFAULT_SETTINGS = {
   footer:{about:"",phone:"",email:"",address:"",copyright:""},
   heroKenBurns:true, announcementActive:true, defaultLanguage:"en", languageSwitcher:true, arabicRTL:true, maintenanceMode:false, storefrontPublished:true, allowGuestCheckout:true, showAdminShortcut:true, enableAuditLog:true, enableDraftPreview:true,
   wishlistEnabled:true, quickViewEnabled:true, recentlyViewedEnabled:true, backInStockEnabled:true, lowStockEnabled:true, reviewsEnabled:true, sizeGuideEnabled:true, compareEnabled:false,
+  advancedFilters:true, sortEnabled:true, showRatings:true, showBestSellerBadges:true, showFeaturedSections:true, memberBannerEnabled:true, memberBannerTitleEn:"HUDA MEMBERS", memberBannerTitleAr:"عضوية HUDA", memberBannerBodyEn:"Early access · Exclusive edits · Member-only rewards", memberBannerBodyAr:"وصول مبكر · مجموعات حصرية · مكافآت للأعضاء",
   campaignActive:false, campaignTitle:"", campaignSubtitle:"", campaignButton:"Shop Now", campaignLink:"#shop-grid",
   stickyHeader:true, smoothScroll:true, productHoverZoom:true, showTrustBadges:true, showShippingEta:true,
   seoTitle:"Huda’s Abaya Boutique", seoDescription:"Premium modest fashion and abayas with shipping across all 50 U.S. states.", seoKeywords:"abaya, modest fashion, hijab, premium abaya", ogImage:"", canonicalUrl:"",
@@ -288,6 +289,9 @@ export default function App() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("recommended");
+  const [priceCap, setPriceCap] = useState(0);
+  const [wishlistOpen, setWishlistOpen] = useState(false);
   const [adminTab, setAdminTab] = useState("products");
   const [adminLoggedIn, setAdminLoggedIn] = useState(false);
   const [adminPass, setAdminPass] = useState("");
@@ -397,13 +401,22 @@ export default function App() {
   const visibleProducts = products.filter(p=>{
     if(!p.active) return false;
     if(categoryFilter!=="all" && p.category!==categoryFilter) return false;
+    if(priceCap>0 && Number(p.price||0)>priceCap) return false;
     if(search) {
-      const s=search.toLowerCase();
+      const q=search.toLowerCase();
       const nm=(lang==="ar"?p.nameAr:p.name).toLowerCase();
-      if(!nm.includes(s)) return false;
+      if(!nm.includes(q)) return false;
     }
     return true;
+  }).sort((a,b)=>{
+    if(sortBy==="newest") return Number(b.newArrival)-Number(a.newArrival);
+    if(sortBy==="priceLow") return Number(a.price||0)-Number(b.price||0);
+    if(sortBy==="priceHigh") return Number(b.price||0)-Number(a.price||0);
+    if(sortBy==="discount") return Number(b.discount||0)-Number(a.discount||0);
+    if(sortBy==="rating") return Number(b.rating||0)-Number(a.rating||0);
+    return (Number(b.featured)-Number(a.featured)) || (Number(b.bestSeller)-Number(a.bestSeller));
   });
+  const wishlistProducts = products.filter(p=>wishlist.includes(p.id));
 
   function saveAdmin(key,val){ setSavedMsg(m=>({...m,[key]:true})); setTimeout(()=>setSavedMsg(m=>({...m,[key]:false})),2000); }
 
@@ -523,6 +536,13 @@ export default function App() {
     heroSub:{ fontSize:".75rem", letterSpacing:".2em", color:"#aaa", marginBottom:30 },
     shopBtn:{ background:"linear-gradient(135deg,#c4a56a,#d4b57a)", color:"#fff", border:"none", borderRadius:30, padding:"12px 32px", fontSize:"1rem", cursor:"pointer", letterSpacing:".1em" },
     filterBar:{ display:"flex", gap:10, padding:"16px 20px", background:"#fff", borderBottom:"1px solid #eee", overflowX:"auto", alignItems:"center", flexWrap:"wrap" },
+    controlBar:{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,padding:"12px 20px",background:"#faf9f7",borderBottom:"1px solid #eee",flexWrap:"wrap"},
+    sortSelect:{border:"1px solid #ddd",borderRadius:20,padding:"7px 12px",background:"#fff",fontSize:".72rem",outline:"none"},
+    merchRail:{padding:"42px 20px 20px",background:"#fff"},
+    railTitle:{fontFamily:"'Cormorant Garamond',serif",fontSize:"2rem",margin:"4px 0 18px"},
+    railGrid:{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12},
+    memberBanner:{margin:"34px 20px",padding:"38px 30px",borderRadius:18,background:"linear-gradient(120deg,#1a1a1a,#302b24)",color:"#fff",display:"flex",justifyContent:"space-between",alignItems:"center",gap:20,flexWrap:"wrap"},
+    memberBtn:{background:"#c4a56a",border:0,borderRadius:30,padding:"12px 24px",fontWeight:800,cursor:"pointer"},
     filterBtn:{ background:"none", border:"1px solid #ddd", borderRadius:20, padding:"6px 14px", cursor:"pointer", fontSize:".8rem", whiteSpace:"nowrap" },
     filterBtnActive:{ background:"#1a1a1a", color:"#fff", border:"1px solid #1a1a1a" },
     searchInput:{ border:"1px solid #ddd", borderRadius:20, padding:"6px 16px", fontSize:".85rem", outline:"none", minWidth:180 },
@@ -536,6 +556,9 @@ export default function App() {
     addBtn:{ width:"100%", background:"#1a1a1a", color:"#fff", border:"none", borderRadius:5, padding:"5px", cursor:"pointer", fontSize:".64rem", fontWeight:700, letterSpacing:".02em", marginTop:5 },
     addBtnAdded:{ background:"#2d7a2d" },
     badge:{ position:"absolute", top:8, left:8, background:"#c4a56a", color:"#fff", fontSize:".65rem", padding:"2px 8px", borderRadius:10, fontWeight:700 },
+    bestBadge:{ position:"absolute", left:8, background:"#111", color:"#fff", fontSize:".58rem", padding:"3px 8px", borderRadius:10, fontWeight:700 },
+    ratingLine:{fontSize:".62rem",color:"#b08d55",letterSpacing:".05em",marginTop:3},
+    quickBtn:{width:"100%",background:"#fff",color:"#1a1a1a",border:"1px solid #ddd",borderRadius:5,padding:"5px",cursor:"pointer",fontSize:".62rem",fontWeight:700,marginTop:5},
     stockBadge:{ position:"absolute", left:8, background:"rgba(26,26,26,.88)", color:"#fff", fontSize:".62rem", padding:"3px 8px", borderRadius:10, fontWeight:700 },
      saleBadge:{ position:"absolute", top:8, right:8, background:"#e53935", color:"#fff", fontSize:".65rem", padding:"2px 8px", borderRadius:10, fontWeight:700 },
     wishBtn:{ position:"absolute", top:8, right:8, background:"rgba(255,255,255,.9)", border:"none", borderRadius:50, width:30, height:30, cursor:"pointer", fontSize:".9rem", display:"flex", alignItems:"center", justifyContent:"center" },
@@ -545,6 +568,7 @@ export default function App() {
     detailName:{ fontFamily:"'Cormorant Garamond',serif", fontSize:"2rem", marginBottom:8 },
     detailPrice:{ color:"#c4a56a", fontSize:"1.5rem", fontWeight:700 },
     detailAddBtn:{ background:"#1a1a1a", color:"#fff", border:"none", borderRadius:8, padding:"14px 32px", cursor:"pointer", fontSize:"1rem", width:"100%", marginTop:16 },
+    productMetaGrid:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginTop:18},
     // Cart
     cartWrap:{ maxWidth:600, margin:"0 auto", padding:20 },
     cartItem:{ display:"flex", gap:12, alignItems:"center", background:"#fff", borderRadius:10, padding:12, marginBottom:12, boxShadow:"0 1px 6px rgba(0,0,0,.06)" },
@@ -592,6 +616,7 @@ export default function App() {
         <div style={{position:"relative"}} onClick={()=>{setSelectedProduct(p);setPage("product");window.scrollTo({top:0,behavior:"smooth"});}}>
           <img src={p.image} alt={getProdName(p)} style={styles.cardImg} loading="lazy" onError={onImgErr} />
           {p.newArrival && <span style={styles.badge}>{t.newArrival}</span>}
+          {settings.showBestSellerBadges!==false && p.bestSeller && <span style={{...styles.bestBadge,top:p.newArrival?34:8}}>{t.bestSeller}</span>}
           {p.stock>0 && p.stock<=5 && <span style={{...styles.stockBadge,top:p.newArrival?36:8}}>{t.onlyLeft} {p.stock} {t.leftLabel}</span>}
           {hasDisc && p.price>0 && <span style={styles.saleBadge}>{t.sale}</span>}
         </div>
@@ -620,6 +645,7 @@ export default function App() {
                 <span>✓</span><span>{inCartQty}</span>
               </div>
             )}
+            <button style={styles.quickBtn} onClick={(e)=>{e.stopPropagation();setSelectedProduct(p);setPage("product");window.scrollTo({top:0,behavior:"smooth"});}}>{t.quickView}</button>
             <button
               style={{...styles.addBtn, ...(addedMap[p.id]?styles.addBtnAdded:{})}}
               onClick={(e)=>{ if(p.stock>0) addToCart(p,e); }}>
@@ -667,6 +693,25 @@ export default function App() {
             </button>
           ))}
         </div>
+        <div style={styles.controlBar}>
+          <div style={{fontSize:".72rem",color:"#777",fontWeight:700}}>{visibleProducts.length} {lang==="ar"?"منتج":"products"}</div>
+          <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
+            <select aria-label={t.sort} value={sortBy} onChange={e=>setSortBy(e.target.value)} style={styles.sortSelect}>
+              <option value="recommended">{t.recommended}</option><option value="newest">{t.newest}</option><option value="priceLow">{t.priceLow}</option><option value="priceHigh">{t.priceHigh}</option><option value="discount">{t.discountSort}</option><option value="rating">{t.rating}</option>
+            </select>
+            <select aria-label={t.filters} value={priceCap} onChange={e=>setPriceCap(Number(e.target.value)||0)} style={styles.sortSelect}>
+              <option value="0">{t.filters}: {lang==="ar"?"كل الأسعار":"All prices"}</option><option value="10">$10 {lang==="ar"?"وأقل":"and under"}</option><option value="25">$25 {lang==="ar"?"وأقل":"and under"}</option><option value="50">$50 {lang==="ar"?"وأقل":"and under"}</option><option value="100">$100 {lang==="ar"?"وأقل":"and under"}</option>
+            </select>
+          </div>
+        </div>
+        {settings.showFeaturedSections!==false && !search && categoryFilter==="all" && <div style={styles.merchRail}>
+          <div><span style={styles.eyebrow}>{t.featured}</span><h2 style={styles.railTitle}>{t.newArrivals}</h2></div>
+          <div className="huda-rail-grid" style={styles.railGrid}>{products.filter(p=>p.active&&p.newArrival).slice(0,4).map(p=><ProductCard key={p.id} p={p}/>)}</div>
+        </div>}
+        {settings.memberBannerEnabled!==false && !search && categoryFilter==="all" && <section className="huda-member" style={styles.memberBanner}>
+          <div><div style={styles.eyebrow}>HUDA</div><h2>{lang==="ar"?settings.memberBannerTitleAr:settings.memberBannerTitleEn}</h2><p>{lang==="ar"?settings.memberBannerBodyAr:settings.memberBannerBodyEn}</p></div>
+          <button style={styles.memberBtn} onClick={()=>{setCategoryFilter("all");setSearch("");setPage("shop");setTimeout(()=>document.getElementById("shop-grid")?.scrollIntoView({behavior:"smooth"}),60);}}>{t.shopNow}</button>
+        </section>}
         {/* Grid */}
         <div id="shop-grid" style={{...styles.grid, gridTemplateColumns:`repeat(${gridCols},1fr)`}}>
           {visibleProducts.length===0
@@ -713,6 +758,12 @@ export default function App() {
               onClick={()=>toggleWishlist(p.id)}>
               {wishlist.includes(p.id)?t.removeWishlist:t.addWishlist}
             </button>
+            <div className="huda-product-meta" style={styles.productMetaGrid}>
+              <div><strong>{t.details}</strong><span style={{display:"block",color:"#777",fontSize:".78rem",marginTop:5}}>{lang==="ar"?"تصميم محتشم بلمسة فاخرة للاستخدام اليومي.":"A refined modest design created for effortless everyday elegance."}</span></div>
+              <div><strong>{t.materials}</strong><span style={{display:"block",color:"#777",fontSize:".78rem",marginTop:5}}>{lang==="ar"?"خامة مختارة بعناية ولمسة ناعمة.":"Carefully selected fabric with a soft premium finish."}</span></div>
+              <div><strong>{t.delivery}</strong><span style={{display:"block",color:"#777",fontSize:".78rem",marginTop:5}}>{settings.shippingEtaMin||3}–{settings.shippingEtaMax||7} {lang==="ar"?"أيام عمل":"business days"}</span></div>
+              <div><strong>{t.returns}</strong><span style={{display:"block",color:"#777",fontSize:".78rem",marginTop:5}}>{lang==="ar"?"تُدار حسب سياسة المتجر في لوحة الإدارة.":"Managed according to the store return policy."}</span></div>
+            </div>
           </div>
         </div>
         {related.length>0 && (
@@ -723,6 +774,15 @@ export default function App() {
         )}
       </div>
     );
+  }
+
+  function WishlistDrawer(){
+    if(!wishlistOpen) return null;
+    return <><div onClick={()=>setWishlistOpen(false)} style={{position:"fixed",inset:0,background:"rgba(20,16,12,.28)",zIndex:180}}/>
+      <aside style={{position:"fixed",top:0,right:isRTL?"auto":0,left:isRTL?0:"auto",width:"min(430px,94vw)",height:"100dvh",background:"#fff",zIndex:190,boxShadow:"-18px 0 60px rgba(0,0,0,.18)",padding:22,overflowY:"auto"}} dir={isRTL?"rtl":"ltr"}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18}}><h2 style={{fontFamily:"'Cormorant Garamond',serif",margin:0}}>{t.wishlist}</h2><button onClick={()=>setWishlistOpen(false)} style={{border:0,background:"#f7f4ef",borderRadius:"50%",width:36,height:36,cursor:"pointer"}}>×</button></div>
+        {wishlistProducts.length===0?<div style={{padding:50,textAlign:"center",color:"#888"}}>{lang==="ar"?"قائمة المفضلة فارغة":"Your wishlist is empty"}</div>:wishlistProducts.map(p=><div key={p.id} style={{display:"flex",gap:12,padding:"12px 0",borderBottom:"1px solid #eee"}}><img src={p.image} alt={getProdName(p)} onError={onImgErr} style={{width:70,height:90,objectFit:"cover",borderRadius:8}}/><div style={{flex:1}}><strong>{getProdName(p)}</strong><div style={{color:"#b08d55",fontWeight:700,margin:"5px 0"}}>${getFinalPrice(p).toFixed(2)}</div><button style={styles.quickBtn} onClick={()=>{setSelectedProduct(p);setPage("product");setWishlistOpen(false);}}>View Product</button><button style={{...styles.addBtn,marginTop:5}} onClick={(e)=>addToCart(p,e)}>{t.addToCart}</button></div></div>)}
+      </aside></>;
   }
 
   function MiniCart(){
@@ -973,7 +1033,7 @@ export default function App() {
           <div style={styles.pricingCard}><h3 style={{marginBottom:14}}>All 50 U.S. States</h3><div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(170px,1fr))",gap:8}}>{US_STATES.map(([code,name])=><div key={code} style={{border:"1px solid #eee",borderRadius:9,padding:10,display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}><span style={{fontSize:".78rem"}}><strong>{code}</strong> {name}</span><div style={{display:"flex",alignItems:"center",gap:3}}><span style={{color:"#888",fontSize:".72rem"}}>$</span><input type="number" step="0.01" min="0" style={{...styles.adminInput,width:72,padding:"6px 7px"}} value={settings.shippingZones?.[code]??settings.shippingPrice??0} onChange={e=>updateShippingZone(code,e.target.value)}/></div></div>)}</div></div>
         </div>}
 
-        {adminTab==="orders" && <div>{orders.length===0?<div style={{textAlign:"center",padding:60,color:"#999"}}>{t.noOrders}</div>:<><button style={{...styles.saveBtn,marginBottom:16}} onClick={exportCSV}>{t.exportCSV}</button><div style={{overflowX:"auto"}}><table style={styles.table}><thead><tr>{[t.orderId,t.orderDate,"Customer","Email","Shipping","Total",t.orderStatus,t.invoice].map(h=><th key={h} style={styles.th}>{h}</th>)}</tr></thead><tbody>{orders.map(o=><tr key={o.id}><td style={styles.td}>{o.id}</td><td style={styles.td}>{o.date}</td><td style={styles.td}>{o.shipping?.name}</td><td style={styles.td}>{o.shipping?.email}</td><td style={styles.td}>${Number(o.shippingCost||0).toFixed(2)}</td><td style={styles.td}>${o.total}</td><td style={styles.td}><select value={o.status} onChange={e=>setOrders(os=>os.map(x=>x.id===o.id?{...x,status:e.target.value}:x))} style={{border:"1px solid #ddd",borderRadius:6,padding:"4px 8px",fontSize:".8rem"}}><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="processing">Processing</option><option value="shipped">Shipped</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select></td><td style={styles.td}><button style={{...styles.saveBtn,padding:"6px 9px",fontSize:".72rem"}} onClick={()=>printInvoice(o)}>{t.printInvoice}</button></td></tr>)}</tbody></table></div></>}</div>}
+        {adminTab==="orders" && <div>{orders.length===0?<div style={{textAlign:"center",padding:60,color:"#999"}}>{t.noOrders}</div>:<><button style={{...styles.saveBtn,marginBottom:16}} onClick={exportCSV}>{t.exportCSV}</button><div style={{overflowX:"auto"}}><table style={styles.table}><thead><tr>{[t.orderId,t.orderDate,"Customer","Email","Shipping","Total",t.orderStatus,t.invoice].map(h=><th key={h} style={styles.th}>{h}</th>)}</tr></thead><tbody>{orders.map(o=><tr key={o.id}><td style={styles.td}>{o.id}</td><td style={styles.td}>{o.date}</td><td style={styles.td}>{o.shipping?.name}</td><td style={styles.td}>{o.shipping?.email}</td><td style={styles.td}>${Number(o.shippingCost||0).toFixed(2)}</td><td style={styles.td}>${o.total}</td><td style={styles.td}><select value={o.status} onChange={e=>{const status=e.target.value;setOrders(os=>os.map(x=>x.id===o.id?{...x,status}:x));addAudit("Updated order status",`${o.id} → ${status}`);}} style={{border:"1px solid #ddd",borderRadius:6,padding:"4px 8px",fontSize:".8rem"}}><option value="pending">Pending</option><option value="confirmed">Confirmed</option><option value="processing">Processing</option><option value="shipped">Shipped</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select></td><td style={styles.td}><button style={{...styles.saveBtn,padding:"6px 9px",fontSize:".72rem"}} onClick={()=>printInvoice(o)}>{t.printInvoice}</button></td></tr>)}</tbody></table></div></>}</div>}
 
         {adminTab==="customers" && <div style={{overflowX:"auto"}}><table style={styles.table}><thead><tr>{["Name","Email","Phone","City","Orders"].map(h=><th key={h} style={styles.th}>{h}</th>)}</tr></thead><tbody>{customers.map((c,i)=><tr key={i}><td style={styles.td}>{c.name||"-"}</td><td style={styles.td}>{c.email||"-"}</td><td style={styles.td}>{c.phone||"-"}</td><td style={styles.td}>{c.city||"-"}</td><td style={styles.td}>{orders.filter(o=>(o.shipping?.email||o.shipping?.phone||o.shipping?.name)===(c.email||c.phone||c.name)).length}</td></tr>)}</tbody></table></div>}
 
@@ -1122,7 +1182,8 @@ export default function App() {
           @media (prefers-reduced-motion: reduce) {
             *{animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important;}
           }
-          html{-webkit-text-size-adjust:100%;}
+          html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;}
+           @media(max-width:760px){.huda-rail-grid{grid-template-columns:repeat(2,1fr)!important}.huda-member{padding:28px 20px!important}.huda-product-meta{grid-template-columns:1fr!important}}
           img{-webkit-user-drag:none;}
         `}</style>
         <div style={styles.headerTop}>
@@ -1180,7 +1241,7 @@ export default function App() {
           ))}
           {/* Wishlist */}
           {wishlist.length>0 && (
-            <button style={{...styles.navBtn}} onClick={()=>{ setCategoryFilter("all"); setSearch(""); setPage("shop"); }}>
+            <button style={{...styles.navBtn}} onClick={()=>setWishlistOpen(true)}>
               ♥ {t.wishlist} ({wishlist.length})
             </button>
           )}
@@ -1224,6 +1285,7 @@ export default function App() {
         {page==="admin" && <AdminPage/>}
       </div>
       <MiniCart />
+      <WishlistDrawer />
       {/* Fly-to-cart animation */}
       {flyItem && (
         <img src={flyItem.img} alt=""
