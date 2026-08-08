@@ -285,15 +285,6 @@ export default function App() {
         const magnets = products.filter(p=>p.active && p.category==="hijabMagnets" && !cart.find(c=>c.id===p.id));
         if(magnets.length>0) setCrossSell(magnets[Math.floor(Math.random()*magnets.length)]);
       }
-    } else if(prod.category==="hijabMagnets"){
-      const hijabHasNone = !cart.some(c=>{
-        const cp = products.find(x=>x.id===c.id);
-        return cp && cp.category==="printedModal";
-      });
-      if(hijabHasNone){
-        const hijabs = products.filter(p=>p.active && p.category==="printedModal" && !cart.find(c=>c.id===p.id));
-        if(hijabs.length>0) setCrossSell(hijabs[Math.floor(Math.random()*hijabs.length)]);
-      }
     }
     // Fly-to-cart animation — origin is the actual product image the person clicked from
     let imgEl = sourceEl || null;
@@ -939,9 +930,8 @@ export default function App() {
             100%{ transform:scale(1); }
           }
           @keyframes huda-spin-glow{
-            0%{ transform:rotate(0deg); filter:drop-shadow(0 0 6px rgba(196,165,106,.5)); }
-            50%{ filter:drop-shadow(0 0 14px rgba(196,165,106,.85)); }
-            100%{ transform:rotate(360deg); filter:drop-shadow(0 0 6px rgba(196,165,106,.5)); }
+            0%{ transform:rotate(0deg); filter:drop-shadow(0 0 12px rgba(196,165,106,.75)); }
+            100%{ transform:rotate(360deg); filter:drop-shadow(0 0 12px rgba(196,165,106,.75)); }
           }
           @media (prefers-reduced-motion: reduce) {
             *{animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important;}
