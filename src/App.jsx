@@ -350,7 +350,6 @@ export default function App() {
       return [...c,{id:prod.id,qty:1}];
     });
     setAddedMap(m=>({...m,[prod.id]:true}));
-    setMiniCartOpen(true);
     setTimeout(()=>setAddedMap(m=>({...m,[prod.id]:false})),1500);
     if(prod.category==="printedModal"){
       const magnetHasNone = !cart.some(c=>{
@@ -1148,7 +1147,7 @@ export default function App() {
                   transform:`scale(${(cartPulse?1.12:1) * Math.min(1+cart.reduce((s,i)=>s+i.qty,0)*0.02,1.15)})`,
                   transition: cartPulse ? "transform .18s cubic-bezier(.34,1.56,.64,1)" : "transform .35s cubic-bezier(.34,1.56,.64,1)",
                 }}
-                onClick={()=>{setPage("cart");window.scrollTo({top:0,behavior:"smooth"});}}>
+                onClick={()=>setMiniCartOpen(true)}>
                 🛍️
               </button>
               {cart.reduce((s,i)=>s+i.qty,0)>0 && (
