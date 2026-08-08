@@ -248,7 +248,7 @@ export default function App() {
     window.addEventListener("resize",onResize,{passive:true});
     return ()=>{ window.removeEventListener("resize",onResize); if(raf) cancelAnimationFrame(raf); };
   },[]);
-  const gridCols = winWidth<640 ? 2 : winWidth<1000 ? 3 : 4;
+  const gridCols = winWidth<420 ? 2 : winWidth<640 ? 3 : winWidth<1000 ? 4 : 5;
 
   useEffect(()=>{ LS.set("huda_products",products); },[products]);
   useEffect(()=>{ LS.set("huda_settings",settings); },[settings]);
@@ -382,14 +382,14 @@ export default function App() {
     filterBtn:{ background:"none", border:"1px solid #ddd", borderRadius:20, padding:"6px 14px", cursor:"pointer", fontSize:".8rem", whiteSpace:"nowrap" },
     filterBtnActive:{ background:"#1a1a1a", color:"#fff", border:"1px solid #1a1a1a" },
     searchInput:{ border:"1px solid #ddd", borderRadius:20, padding:"6px 16px", fontSize:".85rem", outline:"none", minWidth:180 },
-    grid:{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:12, padding:14 },
+    grid:{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:8, padding:10 },
     card:{ background:"#fff", borderRadius:12, overflow:"hidden", boxShadow:"0 2px 12px rgba(0,0,0,.06)", cursor:"pointer", transition:"transform .2s,box-shadow .2s" },
     cardImg:{ width:"100%", aspectRatio:"3/4", objectFit:"cover" },
-    cardBody:{ padding:"9px" },
-    cardName:{ fontFamily:"'Cormorant Garamond',serif", fontSize:".85rem", fontWeight:600, marginBottom:3, color:"#1a1a1a", lineHeight:1.2 },
-    cardPrice:{ color:"#c4a56a", fontWeight:700, fontSize:".85rem" },
+    cardBody:{ padding:"7px" },
+    cardName:{ fontFamily:"'Cormorant Garamond',serif", fontSize:".78rem", fontWeight:600, marginBottom:2, color:"#1a1a1a", lineHeight:1.15, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" },
+    cardPrice:{ color:"#c4a56a", fontWeight:700, fontSize:".78rem" },
     cardPriceOrig:{ color:"#999", textDecoration:"line-through", fontSize:".72rem", marginLeft:5 },
-    addBtn:{ width:"100%", background:"#1a1a1a", color:"#fff", border:"none", borderRadius:6, padding:"6px", cursor:"pointer", fontSize:".72rem", marginTop:6 },
+    addBtn:{ width:"100%", background:"#1a1a1a", color:"#fff", border:"none", borderRadius:5, padding:"5px", cursor:"pointer", fontSize:".64rem", fontWeight:700, letterSpacing:".02em", marginTop:5 },
     addBtnAdded:{ background:"#2d7a2d" },
     badge:{ position:"absolute", top:8, left:8, background:"#c4a56a", color:"#fff", fontSize:".65rem", padding:"2px 8px", borderRadius:10, fontWeight:700 },
     saleBadge:{ position:"absolute", top:8, right:8, background:"#e53935", color:"#fff", fontSize:".65rem", padding:"2px 8px", borderRadius:10, fontWeight:700 },
@@ -439,6 +439,7 @@ export default function App() {
     const finalPrice = getFinalPrice(p);
     const hasDisc = p.discount>0 || (settings.categoryDiscounts?.[p.category]||0)>0;
     const inWishlist = wishlist.includes(p.id);
+    const inCartQty = cart.find(x=>x.id===p.id)?.qty || 0;
     return (
       <div data-card style={{...styles.card, position:"relative"}}
         onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-4px)";e.currentTarget.style.boxShadow="0 8px 24px rgba(0,0,0,.12)";}}
@@ -447,6 +448,11 @@ export default function App() {
           <img src={p.image} alt={getProdName(p)} style={styles.cardImg} loading="lazy" />
           {p.newArrival && <span style={styles.badge}>{t.newArrival}</span>}
           {hasDisc && p.price>0 && <span style={styles.saleBadge}>{t.sale}</span>}
+          {inCartQty>0 && (
+            <div style={{position:"absolute", bottom:8, left:isRTL?undefined:8, right:isRTL?8:undefined, background:"#1a1a1a", color:"#c4a56a", fontSize:".68rem", fontWeight:800, padding:"3px 8px", borderRadius:20, display:"flex", alignItems:"center", gap:4, boxShadow:"0 2px 8px rgba(0,0,0,.3)"}}>
+              <span>✓</span><span>{inCartQty}</span>
+            </div>
+          )}
         </div>
         <button style={{...styles.wishBtn, right:isRTL?undefined:8, left:isRTL?8:undefined, top:hasDisc&&p.price>0?36:8}}
           onClick={()=>toggleWishlist(p.id)}>
@@ -928,7 +934,7 @@ export default function App() {
             <button ref={cartBtnRef}
               style={{
                 ...styles.cartBtn,
-                transform:`scale(${(cartPulse?1.4:1) * Math.min(1+cart.reduce((s,i)=>s+i.qty,0)*0.03,1.3)})`,
+                transform:`scale(${(cartPulse?1.12:1) * Math.min(1+cart.reduce((s,i)=>s+i.qty,0)*0.025,1.22)})`,
                 transition: cartPulse ? "transform .18s cubic-bezier(.34,1.56,.64,1)" : "transform .35s cubic-bezier(.34,1.56,.64,1)",
               }}
               onClick={()=>{setPage("cart");window.scrollTo({top:0,behavior:"smooth"});}}>
@@ -948,9 +954,32 @@ export default function App() {
             </button>
           )}
           {/* Social */}
-          {settings.instagram && <a href={`https://instagram.com/${settings.instagram}`} target="_blank" style={{...styles.navBtn,textDecoration:"none"}} rel="noreferrer">Instagram</a>}
-          {settings.snapchat && <a href={`https://snapchat.com/add/${settings.snapchat}`} target="_blank" style={{...styles.navBtn,textDecoration:"none"}} rel="noreferrer">Snapchat</a>}
-          {settings.tiktok && <a href={`https://tiktok.com/@${settings.tiktok}`} target="_blank" style={{...styles.navBtn,textDecoration:"none"}} rel="noreferrer">TikTok</a>}
+          {settings.instagram && (
+            <a href={`https://instagram.com/${settings.instagram}`} target="_blank" rel="noreferrer" aria-label="Instagram"
+              style={{display:"flex",alignItems:"center",justifyContent:"center",width:30,height:30}}>
+              <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#ccc" strokeWidth="1.8">
+                <rect x="2" y="2" width="20" height="20" rx="5.5"/>
+                <circle cx="12" cy="12" r="4.2"/>
+                <circle cx="17.4" cy="6.6" r="1.1" fill="#ccc" stroke="none"/>
+              </svg>
+            </a>
+          )}
+          {settings.snapchat && (
+            <a href={`https://snapchat.com/add/${settings.snapchat}`} target="_blank" rel="noreferrer" aria-label="Snapchat"
+              style={{display:"flex",alignItems:"center",justifyContent:"center",width:30,height:30}}>
+              <svg viewBox="0 0 24 24" width="19" height="19" fill="#ccc">
+                <path d="M12 2.2c-3 0-5 2.2-5 5.4 0 1 .05 1.9-.1 2.6-.5.15-1.1.2-1.6.05-.5-.15-.95.4-.6.9.5.7 1.4 1.35 2.15 1.7-.05.4-.3.85-.85 1.35-.85.75-2.1 1.1-3 1.3-.5.1-.45.85 0 1 .5.15 1.05.3 1.5.55.1.35.05.75.35 1 .5.4 1.75.15 2.6.45 1 .35 1.9 1.2 3.55 1.2s2.55-.85 3.55-1.2c.85-.3 2.1-.05 2.6-.45.3-.25.25-.65.35-1 .45-.25 1-.4 1.5-.55.45-.15.5-.9 0-1-.9-.2-2.15-.55-3-1.3-.55-.5-.8-.95-.85-1.35.75-.35 1.65-1 2.15-1.7.35-.5-.1-1.05-.6-.9-.5.15-1.1.1-1.6-.05-.15-.7-.1-1.6-.1-2.6 0-3.2-2-5.4-5-5.4z"/>
+              </svg>
+            </a>
+          )}
+          {settings.tiktok && (
+            <a href={`https://tiktok.com/@${settings.tiktok}`} target="_blank" rel="noreferrer" aria-label="TikTok"
+              style={{display:"flex",alignItems:"center",justifyContent:"center",width:30,height:30}}>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="#ccc">
+                <path d="M16.6 2h-3.2v13.4c0 1.5-1.2 2.7-2.7 2.7s-2.7-1.2-2.7-2.7 1.2-2.7 2.7-2.7c.3 0 .55.03.8.1V9.6c-.25-.03-.5-.05-.8-.05-3.2 0-5.8 2.6-5.8 5.8S8.5 21.1 11.7 21.1s5.8-2.6 5.8-5.8V8.4c1.2.9 2.65 1.4 4.2 1.4V6.6c-2.6 0-4.8-2-5.1-4.6z"/>
+              </svg>
+            </a>
+          )}
         </div>
       </div>
 
