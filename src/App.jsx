@@ -931,15 +931,30 @@ export default function App() {
           </div>
           <div style={{display:"flex",gap:10,alignItems:"center"}}>
             <button style={styles.navBtn} onClick={()=>setLang(l=>l==="en"?"ar":"en")}>{t.langBtn}</button>
-            <button ref={cartBtnRef}
-              style={{
-                ...styles.cartBtn,
-                transform:`scale(${(cartPulse?1.12:1) * Math.min(1+cart.reduce((s,i)=>s+i.qty,0)*0.025,1.22)})`,
-                transition: cartPulse ? "transform .18s cubic-bezier(.34,1.56,.64,1)" : "transform .35s cubic-bezier(.34,1.56,.64,1)",
-              }}
-              onClick={()=>{setPage("cart");window.scrollTo({top:0,behavior:"smooth"});}}>
-              🛍️ {cart.reduce((s,i)=>s+i.qty,0)}
-            </button>
+            <div style={{position:"relative"}}>
+              <button ref={cartBtnRef}
+                style={{
+                  ...styles.cartBtn,
+                  transform:`scale(${(cartPulse?1.12:1) * Math.min(1+cart.reduce((s,i)=>s+i.qty,0)*0.02,1.15)})`,
+                  transition: cartPulse ? "transform .18s cubic-bezier(.34,1.56,.64,1)" : "transform .35s cubic-bezier(.34,1.56,.64,1)",
+                }}
+                onClick={()=>{setPage("cart");window.scrollTo({top:0,behavior:"smooth"});}}>
+                🛍️
+              </button>
+              {cart.reduce((s,i)=>s+i.qty,0)>0 && (
+                <div style={{
+                  position:"absolute", top:-8, right:isRTL?undefined:-8, left:isRTL?-8:undefined,
+                  background:"#fff", color:"#1a1a1a", fontSize:".68rem", fontWeight:800,
+                  minWidth:20, height:20, borderRadius:6, padding:"0 5px",
+                  display:"flex", alignItems:"center", justifyContent:"center",
+                  boxShadow:"0 2px 8px rgba(0,0,0,.3), 0 0 0 2px #c4a56a",
+                  transform:cartPulse?"scale(1.3)":"scale(1)",
+                  transition: cartPulse ? "transform .18s cubic-bezier(.34,1.56,.64,1)" : "transform .3s cubic-bezier(.34,1.56,.64,1)",
+                }}>
+                  {cart.reduce((s,i)=>s+i.qty,0)}
+                </div>
+              )}
+            </div>
           </div>
         </div>
         <div style={styles.headerBottom}>
