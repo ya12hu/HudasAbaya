@@ -466,10 +466,10 @@ export default function App() {
           <div style={{position:"relative"}}>
             {inCartQty>0 && (
               <div style={{
-                position:"absolute", top:-9, left:"50%", transform:"translateX(-50%)",
-                background:"#1a1a1a", color:"#fff", fontSize:".62rem", fontWeight:800,
-                padding:"2px 7px", borderRadius:20, display:"flex", alignItems:"center", gap:3,
-                boxShadow:"0 2px 8px rgba(0,0,0,.35), 0 0 0 2px #c4a56a", zIndex:2, whiteSpace:"nowrap"
+                position:"absolute", top:-20, left:"50%", transform:"translateX(-50%)",
+                background:"none", color:"#1a1a1a", fontSize:".7rem", fontWeight:800,
+                padding:"0", display:"flex", alignItems:"center", gap:3,
+                zIndex:2, whiteSpace:"nowrap"
               }}>
                 <span>✓</span><span>{inCartQty}</span>
               </div>
