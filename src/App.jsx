@@ -229,6 +229,8 @@ export default function App() {
   const [couponInput, setCouponInput] = useState("");
   const [savedMsg, setSavedMsg] = useState({});
   const [addedMap, setAddedMap] = useState({});
+  const [confirmOrder, setConfirmOrder] = useState(null);
+  const [crossSell, setCrossSell] = useState(null);
   const [winWidth, setWinWidth] = useState(typeof window!=="undefined"?window.innerWidth:375);
   useEffect(()=>{
     const onResize=()=>setWinWidth(window.innerWidth);
