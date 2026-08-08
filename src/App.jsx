@@ -446,8 +446,9 @@ export default function App() {
           ))}
           <div style={styles.heroOverlay}></div>
           <div style={styles.heroContent}>
-            <img src="https://i.ibb.co/0g2zNT6/D8-F67706-FEEF-4-CB8-B919-00-B889-A36214.png" alt={settings.storeName}
-              style={{width:"min(280px,70vw)",height:"auto",margin:"0 auto 30px",display:"block",borderRadius:12,boxShadow:"0 25px 60px rgba(0,0,0,.6)"}} />
+            <div style={{fontFamily:"'Cormorant Garamond',serif", fontSize:"clamp(1.8rem,6vw,3.2rem)", fontWeight:700, letterSpacing:".05em", color:"#c4a56a", marginBottom:32, textShadow:"0 4px 20px rgba(0,0,0,.5)", whiteSpace:"nowrap"}}>
+              HUDA'S Abaya Boutique
+            </div>
             <button style={styles.shopBtn} onClick={()=>document.getElementById("shop-grid")?.scrollIntoView({behavior:"smooth"})}>{t.collection}</button>
           </div>
         </div>
