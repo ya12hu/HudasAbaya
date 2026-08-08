@@ -20,7 +20,7 @@ const T = {
     ppNotConf:"PayPal Not Configured", ppHint:"Go to Admin → Settings and enter your PayPal Client ID.",
     allCategories:"All", hijabMagnets:"Hijab Magnets", printedModal:"Printed Modal Hijab",
     noResults:"No products found", filterBy:"Filter by",
-    adminPanel:"Admin Panel", dashboard:"Dashboard", homepage:"Homepage", products:"Products", categories:"Categories", banners:"Banners", pricing:"Pricing & Discounts", shipping:"Shipping",
+    adminPanel:"Admin Panel", dashboard:"Dashboard", homepage:"Homepage", products:"Products", categories:"Categories", banners:"Banners", pricing:"Pricing & Discounts",
     orders:"Orders", customers:"Customers", analytics:"Analytics", marketing:"Marketing", content:"Content", media:"Media", seo:"SEO", settings:"Settings", language:"Language & Copy", sections:"Sections & Pages", access:"Admin Access", advanced:"Advanced Control", control:"Everything Control", navigation:"Navigation", checkoutSettings:"Checkout & Customer Experience", notifications:"Notifications & Emails", policies:"Policies & Legal", integrations:"Integrations & Tracking", localization:"Localization", logout:"Logout",
     productName:"Product Name", price:"Price ($)", discount:"Discount (%)",
     discountExpiry:"Discount Expiry", categoryDiscount:"Category Discount (%)",
@@ -37,6 +37,8 @@ const T = {
     pending:"Pending", shipped:"Shipped", delivered:"Delivered",
     exportCSV:"Export CSV", noOrders:"No orders yet", invoice:"Invoice", printInvoice:"Print / Save Invoice", shippingFee:"Shipping Fee", subtotalLabel:"Subtotal", taxLabel:"Tax",
     completeLook:"Complete the Look", completeLookSub:"You may also like this:",
+    addedToBagTitle:"Added to your bag", viewBag:"View Bag", miniCheckout:"Checkout", itemsInBag:"items in your bag",
+    bestSeller:"Bestseller", onlyLeft:"Only", leftLabel:"left", secureCheckout:"Secure checkout", easyDelivery:"Easy delivery", premiumQuality:"Premium quality",
     yesAdd:"Yes, add it", noThanks:"No thanks",
   },
   ar: {
@@ -57,7 +59,7 @@ const T = {
     ppNotConf:"PayPal غير مُفعّل", ppHint:"اذهبي إلى الإدارة ← الإعدادات وأدخلي Client ID الخاص بـ PayPal.",
     allCategories:"الكل", hijabMagnets:"مغناطيسات الحجاب", printedModal:"حجاب مودال مطبوع",
     noResults:"لا توجد منتجات", filterBy:"تصفية",
-    adminPanel:"لوحة التحكم", dashboard:"لوحة المعلومات", homepage:"الصفحة الرئيسية", products:"المنتجات", categories:"الفئات", banners:"البانرات", pricing:"التسعير والخصومات", shipping:"الشحن",
+    adminPanel:"لوحة التحكم", dashboard:"لوحة المعلومات", homepage:"الصفحة الرئيسية", products:"المنتجات", categories:"الفئات", banners:"البانرات", pricing:"التسعير والخصومات",
     orders:"الطلبات", customers:"العملاء", analytics:"التحليلات", marketing:"التسويق", content:"المحتوى", media:"الوسائط", seo:"SEO", settings:"الإعدادات", language:"اللغة والنصوص", sections:"الأقسام والصفحات", access:"صلاحيات الإدارة", advanced:"تحكم متقدم", control:"تحكم شامل", navigation:"التنقل والقوائم", checkoutSettings:"الدفع وتجربة العميل", notifications:"الإشعارات والبريد", policies:"السياسات والقانونيات", integrations:"التكاملات والتتبع", localization:"التوطين", logout:"خروج",
     productName:"اسم المنتج", price:"السعر ($)", discount:"الخصم (%)",
     discountExpiry:"انتهاء الخصم", categoryDiscount:"خصم الفئة (%)",
@@ -74,6 +76,8 @@ const T = {
     pending:"قيد المعالجة", shipped:"تم الشحن", delivered:"تم التسليم",
     exportCSV:"تصدير CSV", noOrders:"لا توجد طلبات بعد", invoice:"الفاتورة", printInvoice:"طباعة / حفظ الفاتورة", shippingFee:"رسوم الشحن", subtotalLabel:"المجموع الفرعي", taxLabel:"الضريبة",
     completeLook:"كمّلي الإطلالة", completeLookSub:"تريدين تضيفين هذا معه؟",
+    addedToBagTitle:"تمت الإضافة إلى السلة", viewBag:"عرض السلة", miniCheckout:"إتمام الطلب", itemsInBag:"قطع في سلتك",
+    bestSeller:"الأكثر مبيعاً", onlyLeft:"متبقي", leftLabel:"قطعة", secureCheckout:"دفع آمن", easyDelivery:"توصيل سهل", premiumQuality:"جودة فاخرة",
     yesAdd:"أي، ضيفيه", noThanks:"لا شكراً",
   }
 };
@@ -278,6 +282,7 @@ export default function App() {
   const t = useMemo(()=>({...T[lang], ...(settings?.translations?.[lang]||{})}),[lang,settings?.translations]);
   const [orders, setOrders] = useState(()=>LS.get("huda_orders",[]));
   const [cart, setCart] = useState([]);
+  const [miniCartOpen, setMiniCartOpen] = useState(false);
   const [wishlist, setWishlist] = useState(()=>LS.get("huda_wishlist",[]));
   const [page, setPage] = useState("shop"); // shop | product | cart | checkout | confirm | admin
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -345,6 +350,7 @@ export default function App() {
       return [...c,{id:prod.id,qty:1}];
     });
     setAddedMap(m=>({...m,[prod.id]:true}));
+    setMiniCartOpen(true);
     setTimeout(()=>setAddedMap(m=>({...m,[prod.id]:false})),1500);
     if(prod.category==="printedModal"){
       const magnetHasNone = !cart.some(c=>{
@@ -510,6 +516,10 @@ export default function App() {
     heroBgActive:{ opacity:.38, transform:"scale(1)" },
     heroOverlay:{ position:"absolute", inset:0, background:"linear-gradient(180deg,rgba(15,12,10,.55) 0%,rgba(15,12,10,.75) 60%,rgba(15,12,10,.95) 100%)" },
     heroContent:{ position:"relative", zIndex:2 },
+     editorialIntro:{padding:"64px 22px 40px",textAlign:"center",background:"#fff"},
+     eyebrow:{fontSize:".65rem",letterSpacing:".28em",color:"#b08d55",fontWeight:700,marginBottom:10},
+     trustStrip:{display:"grid",gridTemplateColumns:"repeat(3,1fr)",background:"#f7f3eb",borderTop:"1px solid #eee4d4",borderBottom:"1px solid #eee4d4"},
+     trustItem:{padding:"16px 10px",textAlign:"center",fontSize:".72rem",letterSpacing:".04em",color:"#51483d"},
     heroTitle:{ fontFamily:"'Cormorant Garamond',serif", fontSize:"clamp(2rem,5vw,3.5rem)", letterSpacing:".15em", color:"#c4a56a", marginBottom:8 },
     heroSub:{ fontSize:".75rem", letterSpacing:".2em", color:"#aaa", marginBottom:30 },
     shopBtn:{ background:"linear-gradient(135deg,#c4a56a,#d4b57a)", color:"#fff", border:"none", borderRadius:30, padding:"12px 32px", fontSize:"1rem", cursor:"pointer", letterSpacing:".1em" },
@@ -527,7 +537,8 @@ export default function App() {
     addBtn:{ width:"100%", background:"#1a1a1a", color:"#fff", border:"none", borderRadius:5, padding:"5px", cursor:"pointer", fontSize:".64rem", fontWeight:700, letterSpacing:".02em", marginTop:5 },
     addBtnAdded:{ background:"#2d7a2d" },
     badge:{ position:"absolute", top:8, left:8, background:"#c4a56a", color:"#fff", fontSize:".65rem", padding:"2px 8px", borderRadius:10, fontWeight:700 },
-    saleBadge:{ position:"absolute", top:8, right:8, background:"#e53935", color:"#fff", fontSize:".65rem", padding:"2px 8px", borderRadius:10, fontWeight:700 },
+    stockBadge:{ position:"absolute", left:8, background:"rgba(26,26,26,.88)", color:"#fff", fontSize:".62rem", padding:"3px 8px", borderRadius:10, fontWeight:700 },
+     saleBadge:{ position:"absolute", top:8, right:8, background:"#e53935", color:"#fff", fontSize:".65rem", padding:"2px 8px", borderRadius:10, fontWeight:700 },
     wishBtn:{ position:"absolute", top:8, right:8, background:"rgba(255,255,255,.9)", border:"none", borderRadius:50, width:30, height:30, cursor:"pointer", fontSize:".9rem", display:"flex", alignItems:"center", justifyContent:"center" },
     // Product detail
     detailWrap:{ maxWidth:900, margin:"0 auto", padding:20, display:"grid", gridTemplateColumns:"1fr 1fr", gap:30 },
@@ -582,6 +593,7 @@ export default function App() {
         <div style={{position:"relative"}} onClick={()=>{setSelectedProduct(p);setPage("product");window.scrollTo({top:0,behavior:"smooth"});}}>
           <img src={p.image} alt={getProdName(p)} style={styles.cardImg} loading="lazy" onError={onImgErr} />
           {p.newArrival && <span style={styles.badge}>{t.newArrival}</span>}
+          {p.stock>0 && p.stock<=5 && <span style={{...styles.stockBadge,top:p.newArrival?36:8}}>{t.onlyLeft} {p.stock} {t.leftLabel}</span>}
           {hasDisc && p.price>0 && <span style={styles.saleBadge}>{t.sale}</span>}
         </div>
         <button style={{...styles.wishBtn, right:isRTL?undefined:8, left:isRTL?8:undefined, top:hasDisc&&p.price>0?36:8}}
@@ -637,6 +649,14 @@ export default function App() {
             {settings.heroSubtitle && <div style={{color:"#fff",fontSize:".72rem",letterSpacing:".18em",marginBottom:18,textShadow:"0 2px 10px rgba(0,0,0,.5)"}}>{lang==="ar" ? (settings.heroSubtitleAr || settings.heroSubtitle) : settings.heroSubtitle}</div>}
             <button style={styles.shopBtn} onClick={()=>{ const link=settings.heroButtonLink||"#shop-grid"; if(link.startsWith("#")) document.getElementById(link.slice(1))?.scrollIntoView({behavior:"smooth"}); else window.location.href=link; }}>{lang==="ar" ? (settings.heroButtonTextAr || settings.heroButtonText) : (settings.heroButtonText || t.collection)}</button>
           </div>
+        </div>
+        <section style={styles.editorialIntro}>
+          <div style={styles.eyebrow}>HUDA’S ABAYA BOUTIQUE</div>
+          <h2>{lang==="ar"?"أناقة مصممة لتبقى":"Elegance, Designed to Last"}</h2>
+          <p>{lang==="ar"?"اكتشفي قطعاً مختارة بعناية تجمع بين الاحتشام والفخامة والسهولة اليومية.":"Discover carefully selected pieces that bring together modesty, elegance and effortless everyday style."}</p>
+        </section>
+        <div style={styles.trustStrip}>
+          {[t.premiumQuality,t.easyDelivery,t.secureCheckout].map((x,i)=><div key={x} style={styles.trustItem}><span>{["✦","◇","✓"][i]}</span>{x}</div>)}
         </div>
         {/* Filter Bar */}
         <div style={styles.filterBar}>
@@ -703,6 +723,36 @@ export default function App() {
           </div>
         )}
       </div>
+    );
+  }
+
+  function MiniCart(){
+    if(!miniCartOpen) return null;
+    const itemCount=cart.reduce((s,i)=>s+i.qty,0);
+    return (
+      <>
+        <div onClick={()=>setMiniCartOpen(false)} style={{position:"fixed",inset:0,background:"rgba(20,16,12,.28)",backdropFilter:"blur(2px)",zIndex:180}} />
+        <aside style={{position:"fixed",top:0,right:isRTL?"auto":0,left:isRTL?0:"auto",width:"min(420px,94vw)",height:"100dvh",background:"#fff",zIndex:190,boxShadow:"-18px 0 60px rgba(0,0,0,.18)",display:"flex",flexDirection:"column",animation:"huda-drawer .32s cubic-bezier(.22,1,.36,1)"}} dir={isRTL?"rtl":"ltr"}>
+          <div style={{padding:"22px 22px 16px",borderBottom:"1px solid #eee",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <div><div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1.55rem"}}>{t.addedToBagTitle}</div><div style={{fontSize:".75rem",color:"#888",marginTop:3}}>{itemCount} {t.itemsInBag}</div></div>
+            <button onClick={()=>setMiniCartOpen(false)} aria-label="Close" style={{border:0,background:"#f7f4ef",width:36,height:36,borderRadius:"50%",fontSize:"1.2rem",cursor:"pointer"}}>×</button>
+          </div>
+          <div style={{flex:1,overflowY:"auto",padding:18}}>
+            {cart.map(item=>{ const p=products.find(x=>x.id===item.id); if(!p)return null; const fp=getFinalPrice(p,item.qty); return (
+              <div key={item.id} style={{display:"flex",gap:12,padding:"0 0 16px",marginBottom:16,borderBottom:"1px solid #eee"}}>
+                <img src={p.image} alt={getProdName(p)} onError={onImgErr} style={{width:78,height:98,objectFit:"cover",borderRadius:8}} />
+                <div style={{flex:1}}><div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1rem",fontWeight:600}}>{getProdName(p)}</div><div style={{fontSize:".82rem",color:"#9c7d45",fontWeight:700,marginTop:4}}>${fp.toFixed(2)}</div><div style={{display:"flex",alignItems:"center",gap:8,marginTop:9}}><button style={styles.qtyBtn} onClick={()=>updateQty(item.id,item.qty-1)}>−</button><span>{item.qty}</span><button style={styles.qtyBtn} onClick={()=>updateQty(item.id,item.qty+1)}>+</button></div></div>
+              </div>
+            );})}
+            {cart.length===0 && <div style={{textAlign:"center",padding:"70px 20px",color:"#888"}}>{t.emptyBag}</div>}
+          </div>
+          {cart.length>0 && <div style={{padding:18,borderTop:"1px solid #eee",background:"#fff"}}>
+            <div style={{display:"flex",justifyContent:"space-between",fontSize:"1rem",fontWeight:700,marginBottom:14}}><span>{t.total}</span><span>${orderTotal.toFixed(2)}</span></div>
+            <button style={{...styles.checkoutBtn,marginTop:0}} onClick={()=>{setMiniCartOpen(false);setPage("cart");window.scrollTo({top:0,behavior:"smooth"})}}>{t.viewBag}</button>
+            <button style={{...styles.checkoutBtn,marginTop:8,background:"#fff",color:"#1a1a1a",border:"1px solid #1a1a1a"}} onClick={()=>{setMiniCartOpen(false);setPage("checkout");window.scrollTo({top:0,behavior:"smooth"})}}>{t.miniCheckout}</button>
+          </div>}
+        </aside>
+      </>
     );
   }
 
@@ -778,6 +828,7 @@ export default function App() {
         </div>
         {formError && <div style={{color:"#e53935",marginBottom:10,fontSize:".85rem"}}>{formError}</div>}
         <div style={{background:"#fff",borderRadius:12,padding:16,marginBottom:16,boxShadow:"0 1px 8px rgba(0,0,0,.06)"}}>
+          <div style={{fontSize:".72rem",letterSpacing:".12em",color:"#888",marginBottom:10}}>{lang==="ar"?"ملخص الطلب":"ORDER SUMMARY"}</div>
           <div style={{display:"flex",justifyContent:"space-between",fontWeight:700}}><span>{t.total}</span><span>${orderTotal.toFixed(2)}</span></div>
         </div>
         {settings.paypalClientId ? (
@@ -806,7 +857,7 @@ export default function App() {
         <div style={{fontSize:"3rem",marginBottom:16}}>✅</div>
         <h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"2rem",color:"#2d7a2d"}}>{t.thankYou}</h2>
         <p style={{color:"#666"}}>{t.orderConf}</p>
-        {o && <p style={{color:"#999",fontSize:".85rem"}}>Order ID: {o.id}</p>}
+        {o && <><p style={{color:"#999",fontSize:".85rem"}}>Order ID: {o.id}</p><div style={{margin:"18px auto",padding:"16px 20px",background:"#f7f3eb",borderRadius:12,maxWidth:280}}><div style={{fontSize:".68rem",letterSpacing:".12em",color:"#888"}}>{t.total}</div><strong style={{fontSize:"1.5rem"}}>${Number(o.total||0).toFixed(2)}</strong></div></>}
         {o && settings.invoice?.enabled!==false && <button style={{...styles.shopBtn,marginTop:12,background:"#fff",color:"#222",border:"1px solid #ddd"}} onClick={()=>printInvoice(o)}>{t.printInvoice}</button>}
         <button style={{...styles.shopBtn,marginTop:12}} onClick={()=>setPage("shop")}>{t.continueShopping}</button>
       </div>
@@ -1063,7 +1114,8 @@ export default function App() {
             55%{ transform:scale(.92); }
             100%{ transform:scale(1); }
           }
-          @keyframes huda-shine{
+          @keyframes huda-drawer{from{transform:translateX(100%);opacity:.7}to{transform:translateX(0);opacity:1}}
+           @keyframes huda-shine{
             0%{ background-position:150% 0; }
             55%{ background-position:150% 0; }
             100%{ background-position:-60% 0; }
@@ -1123,7 +1175,7 @@ export default function App() {
           </div>
         )}
         <div style={styles.headerBottom}>
-          {[["shop",t.store],["cart",t.shoppingBag],["admin",t.admin]].map(([p2,label])=>(
+          {[["shop",t.store],["cart",t.shoppingBag],...(settings.showAdminShortcut!==false?[["admin",t.admin]]:[])].map(([p2,label])=>(
             <button key={p2} style={{...styles.navBtn,...(page===p2||( p2==="shop"&&["shop","product"].includes(page))?styles.navBtnActive:{})}}
               onClick={()=>setPage(p2)}>{label}</button>
           ))}
@@ -1172,6 +1224,7 @@ export default function App() {
         {page==="confirm" && <ConfirmPage/>}
         {page==="admin" && <AdminPage/>}
       </div>
+      <MiniCart />
       {/* Fly-to-cart animation */}
       {flyItem && (
         <img src={flyItem.img} alt=""
