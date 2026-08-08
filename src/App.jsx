@@ -162,7 +162,7 @@ const DEFAULT_PRODUCTS = [
 ];
 
 const DEFAULT_SETTINGS = {
-  paypalClientId:"", storeName:"HUDA'S", storeTagline:"Abaya Boutique · Modest Fashion · Free US Shipping",
+  paypalClientId:"", storeName:"Huda's Abaya Boutique", storeTagline:"",
   whatsapp:"", snapchat:"hudas_abaya_boutique", instagram:"hudas_abaya_boutique", tiktok:"hudas.abaya",
   shippingPrice:0, freeShipOver:50, taxRate:0, adminPassword:"huda2024",
   couponCode:"", couponDiscount:0, couponActive:false,
