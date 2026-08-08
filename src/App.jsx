@@ -254,6 +254,33 @@ function calcPrice(product, settings, qty=1, coupon="") {
 function AdminPasswordInput({styles, placeholder, onSubmit}){
   const [val, setVal] = useState("");
   return (
+    <>
+      <style>{`
+        @keyframes hudaFlyToBag {
+          0% { opacity:1; transform:translate3d(0,0,0) scale(1) rotate(0deg); }
+          45% { opacity:.96; transform:translate3d(calc(var(--bag-dx) * .42),calc(var(--bag-dy) * .28 - 18px),0) scale(.72) rotate(-4deg); }
+          100% { opacity:.12; transform:translate3d(var(--bag-dx),var(--bag-dy),0) scale(.18) rotate(8deg); }
+        }
+        @keyframes hudaBagPulse {
+          0%{transform:scale(1)}
+          45%{transform:scale(1.16)}
+          100%{transform:scale(1)}
+        }
+      `}</style>
+      {flyingItem && (
+        <div aria-hidden="true" style={{
+          position:"fixed", left:0, top:0, width:flyingItem.size, height:flyingItem.size,
+          borderRadius:14, overflow:"hidden", pointerEvents:"none", zIndex:99999,
+          boxShadow:"0 12px 35px rgba(0,0,0,.22)", border:"2px solid rgba(255,255,255,.9)",
+          background:"#fff",
+          transform:`translate3d(${flyingItem.x-flyingItem.size/2}px,${flyingItem.y-flyingItem.size/2}px,0)`,
+          animation:"hudaFlyToBag .78s cubic-bezier(.2,.75,.2,1) forwards",
+          "--bag-dx":`${flyingItem.dx}px`, "--bag-dy":`${flyingItem.dy}px`
+        }}>
+          <img src={flyingItem.image} alt="" style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}} />
+        </div>
+      )}
+
     <input
       type="password"
       autoFocus
@@ -340,6 +367,28 @@ export default function App() {
   const orderTotal = cartTotal+calculatedShippingCost+tax;
 
   const [cartPulse, setCartPulse] = useState(false);
+  const [flyingItem, setFlyingItem] = useState(null);
+
+  function flyToBag(prod, sourceEl) {
+    const img = sourceEl?.querySelector?.("img") || sourceEl;
+    const bag = document.querySelector("[data-bag-target]");
+    if (!img || !bag) return;
+    const from = img.getBoundingClientRect();
+    const to = bag.getBoundingClientRect();
+    setFlyingItem({
+      id: Date.now(),
+      image: prod.image,
+      x: from.left + from.width/2,
+      y: from.top + from.height/2,
+      dx: (to.left + to.width/2) - (from.left + from.width/2),
+      dy: (to.top + to.height/2) - (from.top + from.height/2),
+      size: Math.min(110, Math.max(64, from.width * .34))
+    });
+    setCartPulse(false);
+    setTimeout(()=>setCartPulse(true),650);
+    setTimeout(()=>setFlyingItem(null),800);
+    setTimeout(()=>setCartPulse(false),1100);
+  }
 
   function addToCart(prod, evt=null, sourceEl=null) {
     setCart(c=>{
@@ -678,7 +727,7 @@ ${inv.includeShippingAddress!==false?`<div class="metaBox"><div class="metaLabel
               ) : <span style={{color:"#999"}}>Price TBD</span>}
             </div>
             <button style={{...styles.detailAddBtn,...(addedMap[p.id]?{background:"#2d7a2d"}:{})}}
-              onClick={()=>{ if(p.stock===0) return; addToCart(p); setPage("cart"); window.scrollTo({top:0,behavior:"smooth"}); }}>
+              onClick={()=>{ if(p.stock===0) return; addToCart(p,e,document.querySelector("[data-product-hero]") || e.currentTarget); setPage("cart"); window.scrollTo({top:0,behavior:"smooth"}); }}>
               {p.stock===0 ? t.outOfStock : t.addToCart}
             </button>
             <button style={{...styles.detailAddBtn,background:"none",color:"#1a1a1a",border:"1px solid #ddd",marginTop:8}}
@@ -752,7 +801,7 @@ ${inv.includeShippingAddress!==false?`<div class="metaBox"><div class="metaLabel
     function validate(){ return sf.name&&sf.email&&sf.addr1&&sf.city&&sf.state&&sf.zip; }
     return (
       <div style={styles.checkoutWrap}>
-        <button style={{...styles.navBtn,padding:"16px 0"}} onClick={()=>setPage("cart")}>← {t.back}</button>
+        <button style={{...styles.navBtn,padding:"16px 0"}} data-bag-target="true" onClick={()=>setPage("cart")} style={{...(styles.bagIcon||{}),...(cartPulse?{animation:"hudaBagPulse .42s ease"}:{})}}>← {t.back}</button>
         <h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"1.8rem",marginBottom:20}}>{t.shippingInfo}</h2>
         {[["name",t.fullName],["email",t.email],["phone",t.phone],["addr1",t.addr1],["addr2",t.addr2],["city",t.city]].map(([k,label])=>(
           <input key={k} style={styles.input} placeholder={label} value={sf[k]} onChange={e=>setSF(k,e.target.value)} />
