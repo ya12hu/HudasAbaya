@@ -264,7 +264,7 @@ export default function App() {
   const [cartPulse, setCartPulse] = useState(false);
   const cartBtnRef = useRef(null);
 
-  function addToCart(prod, evt=null) {
+  function addToCart(prod, evt=null, sourceEl=null) {
     setCart(c=>{
       const ex=c.find(x=>x.id===prod.id);
       if(ex) return c.map(x=>x.id===prod.id?{...x,qty:x.qty+1}:x);
@@ -277,9 +277,12 @@ export default function App() {
       if(magnets.length>0) setCrossSell(magnets[Math.floor(Math.random()*magnets.length)]);
     }
     // Fly-to-cart animation — origin is the actual product image the person clicked from
-    if(evt && cartBtnRef.current){
+    let imgEl = sourceEl || null;
+    if(!imgEl && evt){
       const cardEl = evt.currentTarget.closest("[data-card]") || evt.currentTarget;
-      const imgEl = cardEl.querySelector ? (cardEl.querySelector("img") || cardEl) : cardEl;
+      imgEl = (cardEl.tagName==="IMG") ? cardEl : (cardEl.querySelector ? cardEl.querySelector("img") : null) || cardEl;
+    }
+    if(imgEl && cartBtnRef.current){
       const startRect = imgEl.getBoundingClientRect();
       const endRect = cartBtnRef.current.getBoundingClientRect();
       const size = 52;
@@ -294,11 +297,11 @@ export default function App() {
       setTimeout(()=>{
         setFlyItem(f=>f&&f.id===flyId?null:f);
         setCartPulse(true);
-        setTimeout(()=>setCartPulse(false), 420);
-      }, 620);
+        setTimeout(()=>setCartPulse(false), 380);
+      }, 580);
     } else {
       setCartPulse(true);
-      setTimeout(()=>setCartPulse(false), 420);
+      setTimeout(()=>setCartPulse(false), 380);
     }
   }
 
@@ -506,6 +509,7 @@ export default function App() {
     );
   }
 
+  const detailImgRef = useRef(null);
   function ProductPage(){
     const p = selectedProduct;
     if(!p) return null;
@@ -516,7 +520,7 @@ export default function App() {
       <div>
         <button style={{...styles.navBtn, padding:"16px 20px"}} onClick={()=>setPage("shop")}>← {t.back}</button>
         <div style={{...styles.detailWrap, gridTemplateColumns:window.innerWidth<600?"1fr":"1fr 1fr"}}>
-          <img data-card src={p.image} alt={getProdName(p)} style={styles.detailImg} loading="eager" decoding="async" />
+          <img ref={detailImgRef} src={p.image} alt={getProdName(p)} style={styles.detailImg} loading="eager" decoding="async" />
           <div>
             <div style={styles.detailName}>{getProdName(p)}</div>
             <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16}}>
@@ -528,7 +532,7 @@ export default function App() {
               ) : <span style={{color:"#999"}}>Price TBD</span>}
             </div>
             <button style={{...styles.detailAddBtn,...(addedMap[p.id]?{background:"#2d7a2d"}:{})}}
-              onClick={(e)=>addToCart(p,e)}>
+              onClick={(e)=>addToCart(p,e,detailImgRef.current)}>
               {addedMap[p.id]?t.addedToCart:t.addToCart}
             </button>
             <button style={{...styles.detailAddBtn,background:"none",color:"#1a1a1a",border:"1px solid #ddd",marginTop:8}}
@@ -921,7 +925,13 @@ export default function App() {
           </div>
           <div style={{display:"flex",gap:10,alignItems:"center"}}>
             <button style={styles.navBtn} onClick={()=>setLang(l=>l==="en"?"ar":"en")}>{t.langBtn}</button>
-            <button ref={cartBtnRef} style={styles.cartBtn} onClick={()=>{setPage("cart");window.scrollTo({top:0,behavior:"smooth"});}}>
+            <button ref={cartBtnRef}
+              style={{
+                ...styles.cartBtn,
+                transform:`scale(${(cartPulse?1.4:1) * Math.min(1+cart.reduce((s,i)=>s+i.qty,0)*0.03,1.3)})`,
+                transition: cartPulse ? "transform .18s cubic-bezier(.34,1.56,.64,1)" : "transform .35s cubic-bezier(.34,1.56,.64,1)",
+              }}
+              onClick={()=>{setPage("cart");window.scrollTo({top:0,behavior:"smooth"});}}>
               🛍️ {cart.reduce((s,i)=>s+i.qty,0)}
             </button>
           </div>
